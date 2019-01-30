@@ -1,7 +1,5 @@
 import { join as joinPath, extname } from 'path';
-import { stat as statCb, Stats, PathLike } from 'fs';
 import { ensureDir } from 'fs-extra';
-import { constant } from 'lodash';
 import urlJoin from 'url-join';
 
 import { BuildConfiguration } from './lib';
@@ -42,6 +40,10 @@ export class RuntimeDistribution {
 
   get headerOnly() {
     return URL_REGISTRY.getPathsForConfig(this.config).headerOnly;
+  }
+
+  get abi() {
+    return URL_REGISTRY.getPathsForConfig(this.config).abi;
   }
 
   async checkDownloaded(): Promise<boolean> {

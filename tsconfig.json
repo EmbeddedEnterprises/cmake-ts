@@ -4,6 +4,7 @@
     "module": "commonjs",
     "lib": ["es2015", "dom"],
     "declaration": true,
+    "resolveJsonModule": true,
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "./build",

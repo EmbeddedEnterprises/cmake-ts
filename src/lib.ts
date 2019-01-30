@@ -4,12 +4,27 @@ export type BuildConfiguration = {
   runtime: string,
   runtimeVersion: string,
   toolchainFile: string | null,
+  cmakeOptions?: { name: string, value: string }[];
 };
 
 export type BuildOptions = {
+  // A list of configurations to build
   configurations: BuildConfiguration[],
-  packageDirectory: string
+  // directory of the package which is being built
+  packageDirectory: string,
+
+  // directory where the binaries will end
+  targetDirectory: string,
+  // which cmake instance to use
+  cmakeToUse: string,
+  // which cmake generator to use
+  generatorToUse: string,
+  // Debug or release build
+  buildType: string,
+  // global cmake options and defines
+  globalCMakeOptions?: { name: string, value: string }[];
 }
+
 export class CMakeWrapper {
   constructor(private options: BuildOptions) {}
 

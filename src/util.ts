@@ -2,6 +2,7 @@ import { PathLike, Stats, stat as statCb } from 'fs';
 import { exec, spawn } from 'child_process';
 import splitargs from 'splitargs';
 import which from 'which';
+import { constant } from 'lodash';
 
 export const STAT = (path: PathLike) => {
   return new Promise<Stats>(resolve => {
@@ -15,7 +16,7 @@ export const STAT = (path: PathLike) => {
       }
       resolve(stat);
     });
-  });
+  })
 };
 
 export const EXEC = (command: string): Promise<string> => {

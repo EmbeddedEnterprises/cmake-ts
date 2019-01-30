@@ -1,5 +1,6 @@
 import { BuildConfiguration } from './lib';
 import { RuntimeDistribution } from './runtimeDistribution';
+import { ArgumentBuilder } from './argumentBuilder';
 
 const config: BuildConfiguration = {
   arch: 'x64',
@@ -22,7 +23,7 @@ rtd.ensureDownloaded().then(() => {
 });
 
 const config2: BuildConfiguration ={
-  arch: 'x86_64',
+  arch: 'x64',
   os: 'linux',
   runtime: 'electron',
   runtimeVersion: '4.0.1',
@@ -40,3 +41,14 @@ rtd2.ensureDownloaded().then(() => {
 }, (err) => {
   console.log('failed to download', err);
 });
+
+const args = new ArgumentBuilder(config2, {
+  buildType: 'Debug',
+  cmakeToUse: '/usr/bin/cmake',
+  configurations: [config2],
+  generatorToUse: 'Ninja',
+  packageDirectory: '/home/martin/Documents/Entwicklung/coda/node-corelib',
+  targetDirectory: 'build',
+}, rtd2);
+
+args.buildCmakeCommandLine().then(x => console.log(x));

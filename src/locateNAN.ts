@@ -1,9 +1,9 @@
 import { STAT } from './util';
 import { join as joinPath, sep as pathSeparator, normalize as normalizePath } from 'path';
 
-export const locateNAN = async (projectRoot: string) => {
+export const locateNAN = async (projectRoot: string): Promise<string | null> => {
   const isNode = await isNodeProject(projectRoot);
-  if (!result) {
+  if (!isNode) {
     return null;
   }
   const nanPath = joinPath(projectRoot, 'node_modules', 'nan');
