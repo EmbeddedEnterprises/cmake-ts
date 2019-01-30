@@ -58,6 +58,6 @@ export const RUN = (command: string, silent: boolean = false): Promise<void> => 
   });
 };
 
-export const WHICH = (command: string): Promise<boolean> => {
-  return new Promise(resolve => which(command, (err, path) => resolve(!err && !!path)));
+export const WHICH = (command: string): Promise<string | null> => {
+  return new Promise(resolve => which(command, (err, path) => resolve((err || !path) ? null : path)));
 }

@@ -2,15 +2,18 @@
   "name": "cmake-ts",
   "version": "0.0.0",
   "description": "cmake-js rewrite in typescript to support advanced build configurations",
-  "main": "dist/lib.js",
-  "bin": "dist/main.js",
+  "main": "build/lib.js",
+  "bin": "build/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "tsc -w",
     "build": "rimraf dist && tsc"
   },
   "files": [
-    "build/**/*"
+    "build/**/*.js",
+    "build/**/*.js.map",
+    "build/**/*.d.ts",
+    "build/**/*.d.ts.map"
   ],
   "repository": {
     "type": "git",

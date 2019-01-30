@@ -19,6 +19,8 @@ export type BuildOptions = {
   cmakeToUse: string,
   // which cmake generator to use
   generatorToUse: string,
+  // cmake generator binary.
+  generatorBinary: string,
   // Debug or release build
   buildType: string,
   // global cmake options and defines

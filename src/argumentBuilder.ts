@@ -25,6 +25,10 @@ export class ArgumentBuilder {
     const retVal: [string, string][] = [];
     retVal.push(['CMAKE_BUILD_TYPE', this.options.buildType]);
 
+    if (this.config.toolchainFile) {
+      retVal.push(['CMAKE_TOOLCHAIN_FILE', resolve(this.config.toolchainFile)]);
+    }
+
     // Trust me, I'm an engineer?
     if (this.config.os === 'win32') {
       retVal.push(['CMAKE_RUNTIME_OUTPUT_DIRECTORY', this.workDir]);
