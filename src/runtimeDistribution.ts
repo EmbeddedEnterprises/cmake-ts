@@ -7,21 +7,8 @@ import urlJoin from 'url-join';
 import { BuildConfiguration } from './lib';
 import { URL_REGISTRY, HOME_DIRECTORY } from './urlRegistry';
 import { DOWNLOADER, DownloadOptions } from './download';
+import { STAT } from './util';
 
-const STAT = (path: PathLike) => {
-  return new Promise<Stats>(resolve => {
-    statCb(path, (err, stat) => {
-      if (err) {
-        resolve({
-          isFile: constant(false),
-          isDirectory: constant(false),
-        } as Stats);
-        return;
-      }
-      resolve(stat);
-    });
-  });
-};
 export type HashSum = { getPath: string, sum: string };
 const TEST_SUM = (sums: HashSum[], sum: string | null, fPath: string) => {
   let serverSum = sums.find(s => s.getPath === fPath);
