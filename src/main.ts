@@ -1,4 +1,4 @@
-#!/usr/bin/node
+#!/usr/bin/env node
 
 import { BuildOptions } from './lib';
 import { join, resolve } from 'path';
