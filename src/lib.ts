@@ -12,9 +12,12 @@ export type BuildOptions = {
   configurations: BuildConfiguration[],
   // directory of the package which is being built
   packageDirectory: string,
-
+  // name of the built node addon
+  projectName: string,
   // directory where the binaries will end
   targetDirectory: string,
+  // directory where intermediate files will end up
+  stagingDirectory: string,
   // which cmake instance to use
   cmakeToUse: string,
   // which cmake generator to use

@@ -1,8 +1,15 @@
-import { PathLike, Stats, stat as statCb } from 'fs';
+import { PathLike, Stats, stat as statCb, copyFile } from 'fs';
 import { exec, spawn } from 'child_process';
 import splitargs from 'splitargs';
 import which from 'which';
 import { constant } from 'lodash';
+import rimraf from 'rimraf';
+
+export const RMRF = (path: PathLike) => {
+  return new Promise<void>(resolve => {
+    rimraf(path, resolve);
+  });
+};
 
 export const STAT = (path: PathLike) => {
   return new Promise<Stats>(resolve => {
@@ -31,12 +38,15 @@ export const EXEC = (command: string): Promise<string> => {
   })
 };
 
-export const RUN = (command: string, silent: boolean = false): Promise<void> => {
+export const RUN = (command: string, cwd: string = process.cwd(), silent: boolean = false): Promise<void> => {
   return new Promise((resolve, reject) => {
     const args = splitargs(command);
     const name = args[0];
     args.splice(0, 1);
-    const child = spawn(name, args, { stdio: silent ? 'ignore': 'inherit' });
+    const child = spawn(name, args, {
+      stdio: silent ? 'ignore': 'inherit',
+      cwd: cwd,
+    });
     let ended = false;
     child.on('error', e => {
       if (!ended) {
@@ -61,3 +71,12 @@ export const RUN = (command: string, silent: boolean = false): Promise<void> => 
 export const WHICH = (command: string): Promise<string | null> => {
   return new Promise(resolve => which(command, (err, path) => resolve((err || !path) ? null : path)));
 }
+
+export const COPY = (source: PathLike, destination: PathLike): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    copyFile(source, destination, err => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+};

@@ -1,15 +1,16 @@
 import { BuildConfiguration, BuildOptions } from './lib';
 import { RuntimeDistribution } from './runtimeDistribution';
+import { cpus } from 'os';
 import { join, resolve } from 'path';
 import { URL_REGISTRY } from './urlRegistry';
 import { locateNAN } from './locateNAN';
 
 export class ArgumentBuilder {
-  private buildDirectory: string;
-  private workDir: string;
+  //private buildDirectory: string;
+  //private workDir: string;
   constructor (private config: BuildConfiguration, private options: BuildOptions, private rtd: RuntimeDistribution) {
-    this.workDir = resolve(join(options.packageDirectory, options.targetDirectory, config.os, config.arch, config.runtime, config.runtimeVersion));
-    this.buildDirectory = resolve(join(this.workDir, options.buildType));
+    //this.workDir = resolve(join(options.packageDirectory, options.targetDirectory, config.os, config.arch, config.runtime, config.runtimeVersion));
+    //this.buildDirectory = resolve(join(this.workDir, options.buildType));
   }
 
   async buildCmakeCommandLine(): Promise<string> {
@@ -18,6 +19,15 @@ export class ArgumentBuilder {
     baseCommand += " " + defines.map(d => `-D${d[0]}="${d[1]}"`).join(" ");
     baseCommand += ` -G"${this.options.generatorToUse}"`;
     return baseCommand;
+  }
+
+  async buildGeneratorCommandLine(): Promise<string> {
+    let cmdline = this.options.generatorBinary;
+    if (this.options.generatorToUse === 'Unix Makefiles') {
+      // setup parallel builds
+      cmdline += ` -j${cpus().length} -l${cpus().length}`;
+    }
+    return cmdline;
   }
 
   async buildDefines(): Promise<[string, string][]> {
@@ -31,13 +41,13 @@ export class ArgumentBuilder {
 
     // Trust me, I'm an engineer?
     if (this.config.os === 'win32') {
-      retVal.push(['CMAKE_RUNTIME_OUTPUT_DIRECTORY', this.workDir]);
+      //retVal.push(['CMAKE_RUNTIME_OUTPUT_DIRECTORY', this.workDir]);
       const libs = this.rtd.winLibs;
       if (libs && libs.length) {
         retVal.push(['CMAKE_JS_LIB', libs.join(';')]);
       }
     } else {
-      retVal.push(['CMAKE_LIBRARY_OUTPUT_DIRECTORY', this.buildDirectory]);
+      //retVal.push(['CMAKE_LIBRARY_OUTPUT_DIRECTORY', this.buildDirectory]);
     }
 
     // Search headers, modern node versions have those in /include/node
