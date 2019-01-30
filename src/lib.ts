@@ -1,9 +1,9 @@
 export type BuildConfiguration = {
-  os: 'windows' | 'linux' | 'darwin',
+  os: 'win32' | 'linux' | 'darwin',
   arch: string,
   runtime: string,
   runtimeVersion: string,
-  toolchainFile: string,
+  toolchainFile: string | null,
 };
 
 export type BuildOptions = {

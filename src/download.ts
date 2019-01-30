@@ -7,12 +7,12 @@ import { createGunzip } from 'zlib';
 import { extract as extractTar } from 'tar';
 import { Extract as extractZip } from 'unzipper';
 
-import { MemoryStream } from 'memory-stream';
+import MemoryStream from 'memory-stream';
 
 export type DownloadOptions = {
   path?: string,
   cwd?: string,
-  hashType?: string,
+  hashType?: string | null,
   hashSum?: string,
 }
 
@@ -97,3 +97,5 @@ export class Downloader {
     return !options.hashType || !options.hashSum || options.hashSum === sum;
   }
 }
+
+export const DOWNLOADER = new Downloader();
