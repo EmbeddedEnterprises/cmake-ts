@@ -54,9 +54,9 @@ import { ensureDir } from 'fs-extra';
     configs.projectName = 'addon';
   }
 
-  const cmake = "\"" + await WHICH('cmake') + "\"";
-  const ninja = "\"" + await WHICH('ninja') + "\"";
-  const make = "\"" + await WHICH('make') + "\"";
+  const cmake = await WHICH('cmake');
+  const ninja = await WHICH('ninja');
+  const make = await WHICH('make');
   const stagingExists = await STAT(configs.stagingDirectory);
 
   if (!configs.cmakeToUse) {

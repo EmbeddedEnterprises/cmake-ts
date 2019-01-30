@@ -14,7 +14,7 @@ export class ArgumentBuilder {
   }
 
   async buildCmakeCommandLine(): Promise<string> {
-    let baseCommand = this.options.cmakeToUse + ' "' + this.options.packageDirectory + '" --no-warn-unused-cli';
+    let baseCommand = `"${this.options.cmakeToUse}" "${this.options.packageDirectory}" --no-warn-unused-cli`;
     const defines = await this.buildDefines();
     baseCommand += " " + defines.map(d => `-D${d[0]}="${d[1]}"`).join(" ");
     baseCommand += ` -G"${this.options.generatorToUse}"`;
@@ -22,7 +22,7 @@ export class ArgumentBuilder {
   }
 
   async buildGeneratorCommandLine(): Promise<string> {
-    let cmdline = this.options.generatorBinary;
+    let cmdline = `"${this.options.generatorBinary}"`;
     if (this.options.generatorToUse === 'Unix Makefiles') {
       // setup parallel builds
       cmdline += ` -j${cpus().length} -l${cpus().length}`;
