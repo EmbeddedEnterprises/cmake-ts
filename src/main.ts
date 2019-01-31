@@ -173,4 +173,7 @@ import { ensureDir } from 'fs-extra';
 
     console.log('----------------- END CONFIG -----------------');
   }
-})().catch((err: any) => console.log("Generic error occured", err));
+})().catch((err: any) => {
+  console.log("Generic error occured", err);
+  process.exit(1);
+});
