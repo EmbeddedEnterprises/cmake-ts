@@ -26,6 +26,48 @@ export const STAT = (path: PathLike) => {
   })
 };
 
+export const GET_CMAKE_VS_GENERATOR = async (cmake: string, arch: string): Promise<string> =>{
+  const generators = await EXEC_CAPTURE(`"${cmake}" -G`);
+  const hasCR = generators.includes('\r\n');
+  const output = hasCR ? generators.split('\r\n') : generators.split('\n');
+  let found = false;
+  let useVSGen = "";
+
+  for (const line of output) {
+    if (!found && line.trim() === 'Generators') {
+      found = true;
+      continue;
+    }
+    const genParts = line.split('=');
+    if (genParts.length <= 1) {
+      // Some descriptions are multi-line
+      continue;
+    }
+    genParts[0] = genParts[0].trim();
+
+    if (genParts[0].match(/$Visual\s+Studio\s+\d+\s+\d+\s+\[arch\]^/) {
+      console.log('Found generator: ', genParts[0]);
+      // The first entry is usually the latest entry
+      useVSGen = genParts[0];
+      break;
+    }
+  }
+  if (arch === 'x64') {
+    useVSGen = useVSGen.replace('[arch]', 'win64').trim();
+  } else {
+    useVSGen = useVSGen.replace('[arch]', '').trim();
+  }
+  return useVSGen;
+}
+
+export const EXEC_CAPTURE = (command: string): Promise<string> => {
+  return new Promise(resolve => {
+    exec(command, (err, stdout, stderr) => {
+      resolve(stdout || stderr);
+    });
+  });
+};
+
 export const EXEC = (command: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     exec(command, (err, stdout, stderr) => {
@@ -35,7 +77,7 @@ export const EXEC = (command: string): Promise<string> => {
         resolve(stdout);
       }
     });
-  })
+  });
 };
 
 export const RUN = (command: string, cwd: string = process.cwd(), silent: boolean = false): Promise<void> => {

@@ -82,6 +82,4 @@ export class ArgumentBuilder {
     }
     return retVal;
   }
-
-
 }

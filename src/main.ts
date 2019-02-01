@@ -4,7 +4,7 @@ import { BuildOptions } from './lib';
 import { join, resolve } from 'path';
 import { RuntimeDistribution } from './runtimeDistribution';
 import { ArgumentBuilder } from './argumentBuilder';
-import { WHICH, STAT, RMRF, RUN, COPY } from './util';
+import { WHICH, STAT, RMRF, RUN, COPY, GET_CMAKE_VS_GENERATOR } from './util';
 import { ensureDir } from 'fs-extra';
 
 const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
@@ -78,8 +78,15 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
       console.log('ninja not found, checking make');
       if (!make) {
         console.log('make not found, using native');
-        configs.generatorToUse = 'native';
-        configs.generatorBinary = 'native';
+        if (process.platform === 'win32') {
+          // I'm on windows, so fixup the architecture mess.
+          const generator = await GET_CMAKE_VS_GENERATOR(configs.cmakeToUse, process.arch);
+          configs.generatorToUse = generator;
+          conigs.generatorBinary = 'native';
+        } else {
+          configs.generatorToUse = 'native';
+          configs.generatorBinary = 'native';
+        }
       } else {
         console.log('found make at', make, '(fallback)');
         configs.generatorToUse = 'Unix Makefiles';
