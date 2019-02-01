@@ -82,7 +82,7 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
           // I'm on windows, so fixup the architecture mess.
           const generator = await GET_CMAKE_VS_GENERATOR(configs.cmakeToUse, process.arch);
           configs.generatorToUse = generator;
-          conigs.generatorBinary = 'native';
+          configs.generatorBinary = 'native';
         } else {
           configs.generatorToUse = 'native';
           configs.generatorBinary = 'native';
