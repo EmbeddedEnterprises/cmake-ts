@@ -7,7 +7,10 @@ import { ArgumentBuilder } from './argumentBuilder';
 import { WHICH, STAT, RMRF, RUN, COPY } from './util';
 import { ensureDir } from 'fs-extra';
 
+const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
+
 (async (): Promise<void> => {
+
   const packageDir = process.cwd();
   let packJson = null;
   try {
@@ -57,6 +60,7 @@ import { ensureDir } from 'fs-extra';
   const cmake = await WHICH('cmake');
   const ninja = await WHICH('ninja');
   const make = await WHICH('make');
+
   const stagingExists = await STAT(configs.stagingDirectory);
 
   if (!configs.cmakeToUse) {
@@ -68,11 +72,14 @@ import { ensureDir } from 'fs-extra';
   }
 
   if (!configs.generatorToUse) {
+    // No generator specified
+    console.log('no generator specified, checking ninja');
     if (!ninja) {
-      console.log('no generator specified, ninja not found');
+      console.log('ninja not found, checking make');
       if (!make) {
-        console.error('no supported generator found (make, ninja)');
-        process.exit(1);
+        console.log('make not found, using native');
+        configs.generatorToUse = 'native';
+        configs.generatorBinary = 'native';
       } else {
         console.log('found make at', make, '(fallback)');
         configs.generatorToUse = 'Unix Makefiles';
@@ -104,12 +111,6 @@ import { ensureDir } from 'fs-extra';
     };
   }
 
-  const stats = await STAT(configs.generatorBinary);
-  if (!stats.isFile()) {
-    console.error('generator binary not found, try specifying \'generatorBinary\'');
-    process.exit(1);
-  }
-
   const command = process.argv;
   console.log('running in', packageDir, 'command', command);
 
@@ -135,6 +136,7 @@ import { ensureDir } from 'fs-extra';
     console.log('Custom options:', (config.cmakeOptions && config.cmakeOptions.length > 0) ? 'yes' : 'no');
     console.log('Staging area:', stagingDir);
     console.log('Target directory:', targetDir);
+    console.log('Build Type', configs.buildType);
     console.log('----------------------------------------------');
 
     // Download files
@@ -151,8 +153,12 @@ import { ensureDir } from 'fs-extra';
     const argBuilder = new ArgumentBuilder(config, configs, dist);
     process.stdout.write('> Building CMake command line... ');
     const cmdline = await argBuilder.buildCmakeCommandLine();
-    const buildcmdline = await argBuilder.buildGeneratorCommandLine();
+    const buildcmdline = await argBuilder.buildGeneratorCommandLine(stagingDir);
     console.log('[ DONE ]');
+    if (DEBUG_LOG) {
+      console.log('====> configure: ', cmdline);
+      console.log('====> build:     ', buildcmdline);
+    }
 
     // Invoke CMake
     process.stdout.write('> Invoking CMake... ');

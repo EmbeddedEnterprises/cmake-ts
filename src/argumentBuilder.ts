@@ -1,6 +1,5 @@
 import { BuildConfiguration, BuildOptions } from './lib';
 import { RuntimeDistribution } from './runtimeDistribution';
-import { cpus } from 'os';
 import { join, resolve } from 'path';
 import { URL_REGISTRY } from './urlRegistry';
 import { locateNAN } from './locateNAN';
@@ -21,13 +20,8 @@ export class ArgumentBuilder {
     return baseCommand;
   }
 
-  async buildGeneratorCommandLine(): Promise<string> {
-    let cmdline = `"${this.options.generatorBinary}"`;
-    if (this.options.generatorToUse === 'Unix Makefiles') {
-      // setup parallel builds
-      cmdline += ` -j${cpus().length} -l${cpus().length}`;
-    }
-    return cmdline;
+  async buildGeneratorCommandLine(stagingDir: string): Promise<string> {
+    return `"${this.options.cmakeToUse}" --build "${stagingDir}" --config "${this.options.buildType}"`;
   }
 
   async buildDefines(): Promise<[string, string][]> {
