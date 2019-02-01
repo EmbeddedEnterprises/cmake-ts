@@ -45,7 +45,7 @@ export const GET_CMAKE_VS_GENERATOR = async (cmake: string, arch: string): Promi
     }
     genParts[0] = genParts[0].trim();
 
-    if (genParts[0].match(/$Visual\s+Studio\s+\d+\s+\d+\s+\[arch\]^/)) {
+    if (genParts[0].match(/Visual\s+Studio\s+\d+\s+\d+\s+\[arch\]/)) {
       console.log('Found generator: ', genParts[0]);
       // The first entry is usually the latest entry
       useVSGen = genParts[0];
@@ -53,9 +53,12 @@ export const GET_CMAKE_VS_GENERATOR = async (cmake: string, arch: string): Promi
     }
   }
   if (arch === 'x64') {
-    useVSGen = useVSGen.replace('[arch]', 'win64').trim();
-  } else {
+    useVSGen = useVSGen.replace('[arch]', 'Win64').trim();
+  } else if (arch === 'x86') {
     useVSGen = useVSGen.replace('[arch]', '').trim();
+  } else {
+    console.error('Failed to find valid VS gen, using native. Good Luck.');
+    return 'native';
   }
   return useVSGen;
 }
