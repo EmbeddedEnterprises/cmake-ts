@@ -16,7 +16,9 @@ export class ArgumentBuilder {
     let baseCommand = `"${this.options.cmakeToUse}" "${this.options.packageDirectory}" --no-warn-unused-cli`;
     const defines = await this.buildDefines();
     baseCommand += " " + defines.map(d => `-D${d[0]}="${d[1]}"`).join(" ");
-    baseCommand += ` -G"${this.options.generatorToUse}"`;
+    if (this.options.generatorToUse !== 'native') {
+      baseCommand += ` -G"${this.options.generatorToUse}"`;
+    }
     return baseCommand;
   }
 
