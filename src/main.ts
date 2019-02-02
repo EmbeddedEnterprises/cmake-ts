@@ -27,8 +27,17 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
   }
 
   const nativeonly = process.argv.some(arg => arg === 'nativeonly');
-  console.log('Building only native package.')
+  const osonly = process.argv.some(arg => arg === 'osonly');
+  if (nativeonly && osonly) {
+    console.error(`'osonly' and 'nativeonly' have been specified. exiting.`);
+    process.exit(1);
+  }
+
   if (nativeonly) {
+    console.log('--------------------------------------------------');
+    console.log('WARNING: Building only for the current runtime.');
+    console.log('WARNING: DO NOT SHIP THE RESULTING PACKAGE');
+    console.log('--------------------------------------------------');
     configs.configurations = [{
       arch: process.arch,
       os: process.platform as any,
@@ -37,6 +46,17 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
       toolchainFile: null,
       cmakeOptions: [],
     }];
+  }
+  if (osonly) {
+    console.log('--------------------------------------------------');
+    console.log('WARNING: Building only for the current OS.');
+    console.log('WARNING: DO NOT SHIP THE RESULTING PACKAGE');
+    console.log('--------------------------------------------------');
+    configs.configurations = configs.configurations.filter(j => j.os === process.platform as any);
+    for (let config of configs.configurations) {
+      // A native build should be possible without toolchain file.
+      config.toolchainFile = null;
+    }
   }
 
   // Setup directory structure in configs
@@ -181,7 +201,14 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
     // Copy back the previously built binary
     process.stdout.write(`> Copying ${configs.projectName}.node to target directory... `);
     await ensureDir(targetDir);
-    await COPY(join(stagingDir, `${configs.projectName}.node`), join(targetDir, `${configs.projectName}.node`));
+    if (configs.generatorToUse.includes('Visual Studio')) {
+      if (DEBUG_LOG) {
+        console.log(`Applying copy fix for MSVC projects`);
+      }
+      await COPY(join(stagingDir, configs.buildType, `${configs.projectName}.node`), join(targetDir, `${configs.projectName}.node`));
+    } else {
+      await COPY(join(stagingDir, `${configs.projectName}.node`), join(targetDir, `${configs.projectName}.node`));
+    }
     console.log('[ DONE ]');
 
     console.log('----------------- END CONFIG -----------------');
