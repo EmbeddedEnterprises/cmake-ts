@@ -152,10 +152,22 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
 
   for (const config of configs.configurations) {
     const dist = new RuntimeDistribution(config);
+    console.log('---------------- BEGIN CONFIG ----------------');
+
+    // Download files
+    process.stdout.write('> Distribution File Download... ');
+    await dist.ensureDownloaded();
+    console.log('[ DONE ]');
+    process.stdout.write('> Determining ABI... ');
+    await dist.determineABI();
+    console.log('[ DONE ]');
+
+    process.stdout.write('> Building directories... ');
     const stagingDir = resolve(join(configs.stagingDirectory, config.os, config.arch, config.runtime, dist.abi + ''));
     const targetDir = resolve(join(configs.targetDirectory, config.os, config.arch, config.runtime, dist.abi + ''));
+    console.log('[ DONE ]');
 
-    console.log('---------------- BEGIN CONFIG ----------------');
+    console.log('--------------- CONFIG SUMMARY ---------------');
     console.log('OS/Arch:', config.os, config.arch);
     console.log('Runtime:', config.runtime, config.runtimeVersion);
     console.log('Target ABI:', dist.abi);
@@ -166,10 +178,6 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
     console.log('Build Type', configs.buildType);
     console.log('----------------------------------------------');
 
-    // Download files
-    process.stdout.write('> Distribution File Download... ');
-    await dist.ensureDownloaded();
-    console.log('[ DONE ]');
 
     // Create target directory
     process.stdout.write('> Setting up config specific staging directory... ');

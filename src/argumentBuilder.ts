@@ -37,13 +37,13 @@ export class ArgumentBuilder {
 
     // Trust me, I'm an engineer?
     if (this.config.os === 'win32') {
-      //retVal.push(['CMAKE_RUNTIME_OUTPUT_DIRECTORY', this.workDir]);
       const libs = this.rtd.winLibs;
       if (libs && libs.length) {
         retVal.push(['CMAKE_JS_LIB', libs.join(';')]);
       }
-    } else {
-      //retVal.push(['CMAKE_LIBRARY_OUTPUT_DIRECTORY', this.buildDirectory]);
+    } else if (this.config.os === 'darwin') {
+      // TODO:
+      // generate a -F and a -framework option
     }
 
     // Search headers, modern node versions have those in /include/node
@@ -70,6 +70,7 @@ export class ArgumentBuilder {
     retVal.push(
       ['NODE_RUNTIME', this.config.runtime],
       ['NODE_ARCH', this.config.arch],
+      ['NODE_PLATFORM', this.config.os],
       ['NODE_RUNTIMEVERSION', this.config.runtimeVersion],
       ['NODE_ABI_VERSION', this.rtd.abi + ''],
     );

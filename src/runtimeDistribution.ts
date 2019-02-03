@@ -1,11 +1,12 @@
 import { join as joinPath, extname } from 'path';
-import { ensureDir } from 'fs-extra';
+import { ensureDir, readFile } from 'fs-extra';
 import urlJoin from 'url-join';
-
+import { Deferred } from 'queueable';
 import { BuildConfiguration } from './lib';
 import { URL_REGISTRY, HOME_DIRECTORY } from './urlRegistry';
 import { DOWNLOADER, DownloadOptions } from './download';
 import { STAT } from './util';
+import { file as findFile } from 'find';
 
 export type HashSum = { getPath: string, sum: string };
 const TEST_SUM = (sums: HashSum[], sum: string | null, fPath: string) => {
@@ -17,6 +18,7 @@ const TEST_SUM = (sums: HashSum[], sum: string | null, fPath: string) => {
 }
 
 export class RuntimeDistribution {
+  private _abi: number | null = null;
   constructor(private config: BuildConfiguration) {}
 
   get internalPath() {
@@ -43,7 +45,7 @@ export class RuntimeDistribution {
   }
 
   get abi() {
-    return URL_REGISTRY.getPathsForConfig(this.config).abi;
+    return this._abi;
   }
 
   async checkDownloaded(): Promise<boolean> {
@@ -51,7 +53,7 @@ export class RuntimeDistribution {
     let libs = true;
     let stats = await STAT(this.internalPath);
     if (!stats.isDirectory()) {
-      return false;
+      headers = false;
     }
     if (this.headerOnly) {
       stats = await STAT(joinPath(this.internalPath, "include/node/node.h"));
@@ -70,6 +72,44 @@ export class RuntimeDistribution {
       }
     }
     return headers && libs;
+  }
+
+  async determineABI(): Promise<void> {
+    const ret = new Deferred<void>();
+    findFile("node_version.h", this.internalPath, (files: string[] | null) => {
+      if (!files) {
+        ret.reject(new Error("couldn't find node_version.h"));
+        return;
+      }
+      if (files.length !== 1) {
+        ret.reject(new Error("more than one node_version.h was found."));
+        return;
+      }
+      const fName = files[0];
+      readFile(fName, 'utf8', (err, contents) => {
+        if (err) {
+          ret.reject(err);
+          return;
+        }
+        const match = contents.match(/#define\s+NODE_MODULE_VERSION\s+(\d+)/);
+        if (!match) {
+          ret.reject(new Error('Failed to find NODE_MODULE_VERSION macro'));
+          return;
+        }
+        const version = parseInt(match[1]);
+        if (isNaN(version)) {
+          ret.reject(new Error('Invalid version specified by NODE_MODULE_VERSION macro'));
+          return;
+        }
+        this._abi = version;
+        ret.resolve();
+      });
+    }).error((err: any) => {
+      if (err) {
+        ret.reject(err);
+      }
+    });
+    return ret.promise;
   }
 
   async ensureDownloaded(): Promise<void> {

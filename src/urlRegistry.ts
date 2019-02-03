@@ -1,6 +1,5 @@
 import { BuildConfiguration } from './lib';
 import { lt, gte } from 'semver';
-import { getAbi } from 'node-abi';
 import os from 'os';
 
 const NODE_MIRROR = process.env.NVM_NODEJS_ORG_MIRROR || "https://nodejs.org/dist";
@@ -26,7 +25,6 @@ export class URLRegistry {
           }],
           tarPath: `${config.runtime}-v${config.runtimeVersion}.tar.gz`,
           headerOnly: false,
-          abi: getAbi(config.runtimeVersion, 'node') as number,
         };
       }
       case "electron": {
@@ -38,7 +36,6 @@ export class URLRegistry {
           }],
           tarPath: `node-v${config.runtimeVersion}.tar.gz`,
           headerOnly: gte(config.runtimeVersion, "4.0.0-alpha"),
-          abi: getAbi(config.runtimeVersion, config.runtime) as number,
         };
       }
       default: {
@@ -56,7 +53,6 @@ export class URLRegistry {
       }],
       tarPath: `${config.runtime}-v${config.runtimeVersion}.tar.gz`,
       headerOnly: false,
-      abi: getAbi(config.runtimeVersion, config.runtime) as number,
     };
   }
   private nodeModern(config: BuildConfiguration) {
@@ -68,7 +64,6 @@ export class URLRegistry {
       }],
       tarPath: `${config.runtime}-v${config.runtimeVersion}-headers.tar.gz`,
       headerOnly: true,
-      abi: getAbi(config.runtimeVersion, config.runtime) as number,
     };
   }
 }
