@@ -10,7 +10,7 @@ It is intended to prebuild addons for different versions of nodejs and electron 
 
 Configuration is done entirely via `package.json`, you can specify multiple build configurations under the `cmake-ts` key:
 
-```json
+```js
 "cmake-ts": {
   "configurations": [
     {
