@@ -76,7 +76,7 @@ export class RuntimeDistribution {
 
   async determineABI(): Promise<void> {
     const ret = new Deferred<void>();
-    findFile("node_version.h", this.internalPath, (files: string[] | null) => {
+    findFile("node_version.h", joinPath(this.internalPath, 'include'), (files: string[] | null) => {
       if (!files) {
         ret.reject(new Error("couldn't find node_version.h"));
         return;

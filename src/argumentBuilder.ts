@@ -42,8 +42,8 @@ export class ArgumentBuilder {
         retVal.push(['CMAKE_JS_LIB', libs.join(';')]);
       }
     } else if (this.config.os === 'darwin') {
-      // TODO:
-      // generate a -F and a -framework option
+      // Darwin can't link against node, so skip it.
+      retVal.push(['CMAKE_JS_CXX_FLAGS', `-undefined dynamic_lookup`]);
     }
 
     // Search headers, modern node versions have those in /include/node
