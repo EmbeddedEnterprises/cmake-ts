@@ -42,7 +42,7 @@ While it is desirable to perform a full build (all configurations) within a CI e
   - You run `cmake-ts nativeonly` on **NodeJS 11.7 on MacOS**, `cmake-ts` will **ignore** all specified configurations above and build the native addon for **NodeJS 11.7 on MacOS**
 - `osonly` -> Builds the native code for all configurations which match the current operating system. This is useful for those developing for example an electron addon and want to test their code in electron. In such a case, you would specify electron and nodejs runtimes for several platforms in your configuration and you can use `cmake-ts osonly` to build a local package you can install in your application.
   - *Example using the configuration above*
-  - You run `cmake-ts osonly` on **NodeJS 11.7 on Linux**, `cmake-ts` will **ignore** all configurations above where `os != linux` and build the native addon for **all** remaining configurations.
+  - You run `cmake-ts osonly` on **NodeJS 11.7 on Linux**, `cmake-ts` will **ignore** all configurations above where `os != linux` and build the native addon for **all** remaining configurations, in this case it will build for **NodeJS 10.3 on Linux**.
 - **HINT**: For both `osonly` and `nativeonly`, the specified CMake Toolchain files are ignored since I assume you got your toolchain set up correctly for your **own** operating system.
 
 ## Cross Compilation
