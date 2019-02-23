@@ -27,6 +27,14 @@ Configuration is done entirely via `package.json`, you can specify multiple buil
 }
 ```
 
+## Workflow
+
+While it is desirable to perform a full build (all configurations) within a CI environment, long build times hinder local package development. Therefore cmake-ts knows not only the `build` target but also two other targets:
+
+- `nativeonly` -> Builds the native code **only** for the runtime cmake-ts is running on. This is useful if you'd like to run some unit tests against the compiled code. When running `cmake-ts nativeonly`, cmake-ts will determine the runtime, ABI and platform from the nodejs environment, and build only the configuration required to run on this platform.
+- `osonly` -> Builds the native code for all configurations which match the current operating system. This is useful for those developing for example an electron addon and want to test their code in electron. In such a case, you would specify electron and nodejs runtimes for several platforms in your configuration and you can use `cmake-ts osonly` to build a local package you can install in your application.
+- **HINT**: For both `osonly` and `nativeonly`, the specified CMake Toolchain files are ignored since I assume you got your toolchain set up correctly for your **own** operating system.
+
 ## Cross Compilation
 
 This module supports cross-compilation from Linux to MacOS and Windows, givena correct toolchain setup. There is a docker container which has a cross-toolchain based on CLang 7 setup for Windows and MacOS which might be used in a CI.
