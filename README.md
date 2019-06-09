@@ -49,5 +49,4 @@ While it is desirable to perform a full build (all configurations) within a CI e
 
 This module supports cross-compilation from Linux to MacOS and Windows, givena correct toolchain setup. There is a docker container which has a cross-toolchain based on CLang 7 setup for Windows and MacOS which might be used in a CI.
 
-**NOTE**: Due to legal issues which I'm currently trying to solve, I can't provide the docker container here.
-You might want to checkout the [osxcross](https://github.com/tpoechtrager/osxcross) project or the LLVM windows toolchain file.
+[Docker Image](https://hub.docker.com/r/martin31821/crossdev)
