@@ -1,6 +1,6 @@
 {
   "name": "cmake-ts",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "cmake-js rewrite in typescript to support advanced build configurations",
   "main": "build/lib.js",
   "bin": "build/main.js",
