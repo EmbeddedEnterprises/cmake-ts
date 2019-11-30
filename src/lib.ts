@@ -28,6 +28,8 @@ export type BuildOptions = {
   buildType: string,
   // global cmake options and defines
   globalCMakeOptions?: { name: string, value: string }[];
+  // custom native node abstractions package name if you use a fork instead of official nan
+  customNANPackageName?: string;
 }
 
 export class CMakeWrapper {
