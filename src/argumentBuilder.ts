@@ -79,10 +79,14 @@ export class ArgumentBuilder {
     );
 
     if (this.options.globalCMakeOptions && this.options.globalCMakeOptions.length > 0) {
-      retVal.push(...this.options.globalCMakeOptions.map(j => ([j.name, j.value])) as [string, string][]);
+      this.options.globalCMakeOptions.forEach(j => {
+        retVal.push([j.name, j.value.replace(/\$ROOT\$/g, resolve(this.options.packageDirectory))]);
+      });
     }
     if (this.config.cmakeOptions && this.config.cmakeOptions.length > 0) {
-      retVal.push(...this.config.cmakeOptions.map(j => ([j.name, j.value])) as [string, string][]);
+      this.config.cmakeOptions.forEach(j => {
+        retVal.push([j.name, j.value.replace(/\$ROOT\$/g, resolve(this.options.packageDirectory))]);
+      });
     }
     return retVal;
   }
