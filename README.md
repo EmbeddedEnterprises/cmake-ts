@@ -30,6 +30,11 @@ Configuration is done entirely via `package.json`, you can specify multiple buil
   "targetDirectory": "build", // where to build your project
   "buildType": "Release", // Debug or Release build, most likely set it to Release
   "projectName": "addon" // The name of your CMake project.
+  "globalCMakeOptions": [{ //*Optionally*, you can specify global CMAKE flags here!
+      "name": "CMAKE_EXPORT_COMPILE_COMMANDS",
+      "value": "1"
+  }],
+  "customNANPackageName": "@myawesomenamespace/nan" //*Optionally*, you can specify a custom nan (native node abstractions) package name here
 }
 ```
 

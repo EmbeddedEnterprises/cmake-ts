@@ -1,14 +1,17 @@
 import { STAT } from './util';
 import { join as joinPath, sep as pathSeparator, normalize as normalizePath } from 'path';
 
-export const locateNAN = async (projectRoot: string): Promise<string | null> => {
+export const locateNAN = async (projectRoot: string, customNANPackageName?: string): Promise<string | null> => {
   const isNode = await isNodeProject(projectRoot);
   if (!isNode) {
     return null;
   }
-  const nanPath = joinPath(projectRoot, 'node_modules', 'nan');
-  const isNan = isNANModule(nanPath);
+  const nanPath = joinPath(projectRoot, 'node_modules', customNANPackageName || 'nan');
+  const isNan = await isNANModule(nanPath);
   if (isNan) {
+    if(!!customNANPackageName) {
+      console.log('Located custom nan package "' + customNANPackageName + '" at path ' + nanPath + '!');
+    }
     return nanPath;
   }
   return locateNAN(goUp(projectRoot));

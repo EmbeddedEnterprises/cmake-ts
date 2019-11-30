@@ -60,7 +60,10 @@ export class ArgumentBuilder {
     }
 
     // Search NAN if installed and required
-    const nan = await locateNAN(this.options.packageDirectory);
+    const nan = await locateNAN(this.options.packageDirectory, this.options.customNANPackageName);
+    if(!!this.options.customNANPackageName && !nan) {
+      console.log('WARNING: customNANPackageName was specified, but module "' + this.options.customNANPackageName + '" could not be found!');
+    }
     if (nan) {
       includes.push(nan);
     }
