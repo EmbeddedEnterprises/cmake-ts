@@ -4,8 +4,9 @@ import { BuildOptions } from './lib';
 import { join, resolve } from 'path';
 import { RuntimeDistribution } from './runtimeDistribution';
 import { ArgumentBuilder } from './argumentBuilder';
-import { WHICH, STAT, RUN, GET_CMAKE_VS_GENERATOR } from './util';
+import { STAT, RUN, GET_CMAKE_VS_GENERATOR } from './util';
 import { ensureDir, remove, copy } from 'fs-extra';
+import which from 'which';
 
 const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
 
@@ -77,9 +78,9 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
     configs.projectName = 'addon';
   }
 
-  const cmake = await WHICH('cmake');
-  const ninja = await WHICH('ninja');
-  const make = await WHICH('make');
+  const cmake = await which('cmake');
+  const ninja = await which('ninja');
+  const make = await which('make');
 
   const stagingExists = await STAT(configs.stagingDirectory);
 

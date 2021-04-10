@@ -1,7 +1,6 @@
 import { PathLike, Stats, stat as statCb } from 'fs';
 import { exec, spawn } from 'child_process';
 import splitargs from 'splitargs';
-import which from 'which';
 import { constant } from 'lodash';
 
 export const STAT = (path: PathLike) => {
@@ -105,7 +104,3 @@ export const RUN = (command: string, cwd: string = process.cwd(), silent: boolea
     });
   });
 };
-
-export const WHICH = (command: string): Promise<string | null> => {
-  return new Promise(resolve => which(command, (err, path) => resolve((err || !path) ? null : path)));
-}
