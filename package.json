@@ -9,7 +9,8 @@
     "devdeps": "npm-check -ds",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "tsc -w",
-    "build": "shx rm -rf build && tsc"
+    "build": "shx rm -rf build && tsc",
+    "prepare": "npm run build"
   },
   "files": [
     "build/**/*.js",
