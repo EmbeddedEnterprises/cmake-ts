@@ -55,7 +55,7 @@
     "find": "^0.3.0",
     "fs-extra": "^9.1.0",
     "lodash": "^4.17.11",
-    "memory-stream": "0.0.3",
+    "memory-stream": "1.0.0",
     "npmlog": "^4.1.2",
     "queueable": "^4.1.4",
     "request": "^2.88.2",
