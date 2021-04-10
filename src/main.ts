@@ -4,8 +4,8 @@ import { BuildOptions } from './lib';
 import { join, resolve } from 'path';
 import { RuntimeDistribution } from './runtimeDistribution';
 import { ArgumentBuilder } from './argumentBuilder';
-import { WHICH, STAT, RUN, COPY, GET_CMAKE_VS_GENERATOR } from './util';
-import { ensureDir, remove } from 'fs-extra';
+import { WHICH, STAT, RUN, GET_CMAKE_VS_GENERATOR } from './util';
+import { ensureDir, remove, copy } from 'fs-extra';
 
 const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
 
@@ -213,9 +213,9 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
       if (DEBUG_LOG) {
         console.log(`Applying copy fix for MSVC projects`);
       }
-      await COPY(join(stagingDir, configs.buildType, `${configs.projectName}.node`), join(targetDir, `${configs.projectName}.node`));
+      await copy(join(stagingDir, configs.buildType, `${configs.projectName}.node`), join(targetDir, `${configs.projectName}.node`));
     } else {
-      await COPY(join(stagingDir, `${configs.projectName}.node`), join(targetDir, `${configs.projectName}.node`));
+      await copy(join(stagingDir, `${configs.projectName}.node`), join(targetDir, `${configs.projectName}.node`));
     }
     console.log('[ DONE ]');
 
