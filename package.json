@@ -50,11 +50,11 @@
     "typescript": "^4.2.4"
   },
   "dependencies": {
-    "@types/lodash": "^4.14.120",
+    "@types/lodash": "^4.14.168",
     "@types/unzipper": "^0.10.3",
     "find": "^0.3.0",
     "fs-extra": "^9.1.0",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.21",
     "memory-stream": "1.0.0",
     "npmlog": "^4.1.2",
     "queueable": "^4.1.4",
