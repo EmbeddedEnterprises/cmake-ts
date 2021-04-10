@@ -51,7 +51,7 @@
   },
   "dependencies": {
     "@types/lodash": "^4.14.120",
-    "@types/unzipper": "^0.9.1",
+    "@types/unzipper": "^0.10.3",
     "find": "^0.3.0",
     "fs-extra": "^9.1.0",
     "lodash": "^4.17.11",
@@ -62,7 +62,7 @@
     "semver": "^7.3.5",
     "splitargs": "0.0.7",
     "tar": "^6.1.0",
-    "unzipper": "^0.9.10",
+    "unzipper": "^0.10.11",
     "url-join": "^4.0.0",
     "which": "^2.0.2",
     "zlib": "^1.0.5"
