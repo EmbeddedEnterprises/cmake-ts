@@ -60,7 +60,7 @@
     "queueable": "^4.1.4",
     "request": "^2.88.2",
     "semver": "^7.3.5",
-    "splitargs": "0.0.7",
+    "splitargs2": "^0.1.3",
     "tar": "^6.1.0",
     "unzipper": "^0.10.11",
     "url-join": "^4.0.1",

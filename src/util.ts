@@ -1,6 +1,6 @@
 import { PathLike, Stats, stat as statCb } from 'fs';
 import { exec, spawn } from 'child_process';
-import splitargs from 'splitargs';
+import splitargs from 'splitargs2';
 import { constant } from 'lodash';
 
 export const STAT = (path: PathLike) => {
