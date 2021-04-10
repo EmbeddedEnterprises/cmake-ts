@@ -38,7 +38,6 @@
   },
   "homepage": "https://github.com/EmbeddedEnterprises/cmake-ts#readme",
   "devDependencies": {
-    "@types/find": "^0.2.1",
     "@types/fs-extra": "^9.0.10",
     "@types/npmlog": "^4.1.2",
     "@types/request": "^2.48.5",
@@ -53,7 +52,7 @@
   "dependencies": {
     "@types/lodash": "^4.14.168",
     "@types/unzipper": "^0.10.3",
-    "find": "^0.3.0",
+    "fast-glob": "^3.2.5",
     "fs-extra": "^9.1.0",
     "lodash": "^4.17.21",
     "memory-stream": "1.0.0",
