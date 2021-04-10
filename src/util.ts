@@ -3,13 +3,6 @@ import { exec, spawn } from 'child_process';
 import splitargs from 'splitargs';
 import which from 'which';
 import { constant } from 'lodash';
-import rimraf from 'rimraf';
-
-export const RMRF = (path: PathLike) => {
-  return new Promise<void>(resolve => {
-    rimraf(path, resolve);
-  });
-};
 
 export const STAT = (path: PathLike) => {
   return new Promise<Stats>(resolve => {

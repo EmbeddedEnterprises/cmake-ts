@@ -4,8 +4,8 @@ import { BuildOptions } from './lib';
 import { join, resolve } from 'path';
 import { RuntimeDistribution } from './runtimeDistribution';
 import { ArgumentBuilder } from './argumentBuilder';
-import { WHICH, STAT, RMRF, RUN, COPY, GET_CMAKE_VS_GENERATOR } from './util';
-import { ensureDir } from 'fs-extra';
+import { WHICH, STAT, RUN, COPY, GET_CMAKE_VS_GENERATOR } from './util';
+import { ensureDir, remove } from 'fs-extra';
 
 const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
 
@@ -143,7 +143,7 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
 
   process.stdout.write('> Setting up staging directory... ');
   if (stagingExists) {
-    await RMRF(configs.stagingDirectory);
+    await remove(configs.stagingDirectory);
     process.stdout.write('[ CLEARED ]');
   }
   await ensureDir(configs.stagingDirectory);
