@@ -92,24 +92,25 @@ export class RuntimeDistribution {
       return;
     }
     const fName = files[0];
-    readFile(fName, 'utf8', (err, contents) => {
-      if (err) {
-        ret.reject(err);
-        return;
-      }
-      const match = contents.match(/#define\s+NODE_MODULE_VERSION\s+(\d+)/);
-      if (!match) {
-        ret.reject(new Error('Failed to find NODE_MODULE_VERSION macro'));
-        return;
-      }
-      const version = parseInt(match[1]);
-      if (isNaN(version)) {
-        ret.reject(new Error('Invalid version specified by NODE_MODULE_VERSION macro'));
-        return;
-      }
-      this._abi = version;
-      ret.resolve();
-    });
+    let contents: string;
+    try {
+      contents = await readFile(fName, 'utf8');
+    } catch(err) {
+      ret.reject(err);
+      return;
+    }
+    const match = contents.match(/#define\s+NODE_MODULE_VERSION\s+(\d+)/);
+    if (!match) {
+      ret.reject(new Error('Failed to find NODE_MODULE_VERSION macro'));
+      return;
+    }
+    const version = parseInt(match[1]);
+    if (isNaN(version)) {
+      ret.reject(new Error('Invalid version specified by NODE_MODULE_VERSION macro'));
+      return;
+    }
+    this._abi = version;
+    ret.resolve();
     return ret.promise;
   }
 
