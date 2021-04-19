@@ -84,7 +84,7 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
 
   const stagingExists = await STAT(configs.stagingDirectory);
 
-  console.log('running in', configs.packageDirectory, 'command', /* command */ argv);
+  console.log('running in', configs.packageDirectory, 'command', argv);
 
   process.stdout.write('> Setting up staging directory... ');
   if (stagingExists) {
