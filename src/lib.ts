@@ -37,7 +37,9 @@ export function defaultBuildConfiguration(config: BuildConfiguration): BuildConf
     config.toolchainFile = null;
   }
 
-  // TODO move the code related to cmakeOptions
+  if (config.cmakeOptions === undefined) {
+    config.cmakeOptions = [];
+  }
 
   return config as BuildConfigurationDefaulted;
 }
