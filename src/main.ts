@@ -239,6 +239,10 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
       if (DEBUG_LOG) {
         console.log(`Applying copy fix for MSVC projects`);
       }
+      if (configs.buildType === undefined) {
+        console.warn("`buildType` was missing. Considering 'Release'");
+        configs.buildType = "Release";
+      }
       await copy(join(stagingDir, configs.buildType, `${configs.projectName}.node`), join(targetDir, `${configs.projectName}.node`));
     } else {
       await copy(join(stagingDir, `${configs.projectName}.node`), join(targetDir, `${configs.projectName}.node`));
