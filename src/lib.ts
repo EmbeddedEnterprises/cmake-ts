@@ -7,7 +7,7 @@ export type BuildConfiguration = {
   cmakeOptions?: { name: string, value: string }[];
 };
 
-export type BuildOptions = {
+export type BuildOptionsDefaulted = {
   // A list of configurations to build
   configurations: BuildConfiguration[],
   // directory of the package which is being built
@@ -31,6 +31,8 @@ export type BuildOptions = {
   // custom native node abstractions package name if you use a fork instead of official nan
   customNANPackageName?: string;
 }
+
+export type BuildOptions = Partial<BuildOptionsDefaulted>;
 
 export class CMakeWrapper {
   constructor(private options: BuildOptions) {}
