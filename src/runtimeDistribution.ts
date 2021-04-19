@@ -6,7 +6,7 @@ import { BuildConfiguration } from './lib';
 import { URL_REGISTRY, HOME_DIRECTORY } from './urlRegistry';
 import { DOWNLOADER, DownloadOptions } from './download';
 import { STAT } from './util';
-import { file as findFile } from 'find';
+import glob from 'fast-glob'
 
 export type HashSum = { getPath: string, sum: string };
 const TEST_SUM = (sums: HashSum[], sum: string | null, fPath: string) => {
@@ -76,39 +76,41 @@ export class RuntimeDistribution {
 
   async determineABI(): Promise<void> {
     const ret = new Deferred<void>();
-    findFile("node_version.h", joinPath(this.internalPath, 'include'), (files: string[] | null) => {
-      if (!files) {
-        ret.reject(new Error("couldn't find node_version.h"));
-        return;
-      }
-      if (files.length !== 1) {
-        ret.reject(new Error("more than one node_version.h was found."));
-        return;
-      }
-      const fName = files[0];
-      readFile(fName, 'utf8', (err, contents) => {
-        if (err) {
-          ret.reject(err);
-          return;
-        }
-        const match = contents.match(/#define\s+NODE_MODULE_VERSION\s+(\d+)/);
-        if (!match) {
-          ret.reject(new Error('Failed to find NODE_MODULE_VERSION macro'));
-          return;
-        }
-        const version = parseInt(match[1]);
-        if (isNaN(version)) {
-          ret.reject(new Error('Invalid version specified by NODE_MODULE_VERSION macro'));
-          return;
-        }
-        this._abi = version;
-        ret.resolve();
-      });
-    }).error((err: any) => {
-      if (err) {
-        ret.reject(err);
-      }
+    const files = await glob("*/node_version.h", {
+      cwd: joinPath(this.internalPath, "include"),
+      absolute: true,
+      onlyFiles: true,
+      braceExpansion: false,
     });
+    const filesNum = files.length;
+    if (filesNum === 0) {
+      ret.reject(new Error("couldn't find node_version.h"));
+      return;
+    }
+    if (filesNum !== 1) {
+      ret.reject(new Error("more than one node_version.h was found."));
+      return;
+    }
+    const fName = files[0];
+    let contents: string;
+    try {
+      contents = await readFile(fName, 'utf8');
+    } catch(err) {
+      ret.reject(err);
+      return;
+    }
+    const match = contents.match(/#define\s+NODE_MODULE_VERSION\s+(\d+)/);
+    if (!match) {
+      ret.reject(new Error('Failed to find NODE_MODULE_VERSION macro'));
+      return;
+    }
+    const version = parseInt(match[1]);
+    if (isNaN(version)) {
+      ret.reject(new Error('Invalid version specified by NODE_MODULE_VERSION macro'));
+      return;
+    }
+    this._abi = version;
+    ret.resolve();
     return ret.promise;
   }
 

@@ -4,8 +4,9 @@ import { BuildOptions } from './lib';
 import { join, resolve } from 'path';
 import { RuntimeDistribution } from './runtimeDistribution';
 import { ArgumentBuilder } from './argumentBuilder';
-import { WHICH, STAT, RMRF, RUN, COPY, GET_CMAKE_VS_GENERATOR } from './util';
-import { ensureDir } from 'fs-extra';
+import { STAT, RUN, GET_CMAKE_VS_GENERATOR } from './util';
+import { ensureDir, remove, copy } from 'fs-extra';
+import which from 'which';
 
 const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
 
@@ -77,9 +78,9 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
     configs.projectName = 'addon';
   }
 
-  const cmake = await WHICH('cmake');
-  const ninja = await WHICH('ninja');
-  const make = await WHICH('make');
+  const cmake = await which('cmake');
+  const ninja = await which('ninja');
+  const make = await which('make');
 
   const stagingExists = await STAT(configs.stagingDirectory);
 
@@ -143,7 +144,7 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
 
   process.stdout.write('> Setting up staging directory... ');
   if (stagingExists) {
-    await RMRF(configs.stagingDirectory);
+    await remove(configs.stagingDirectory);
     process.stdout.write('[ CLEARED ]');
   }
   await ensureDir(configs.stagingDirectory);
@@ -213,9 +214,9 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
       if (DEBUG_LOG) {
         console.log(`Applying copy fix for MSVC projects`);
       }
-      await COPY(join(stagingDir, configs.buildType, `${configs.projectName}.node`), join(targetDir, `${configs.projectName}.node`));
+      await copy(join(stagingDir, configs.buildType, `${configs.projectName}.node`), join(targetDir, `${configs.projectName}.node`));
     } else {
-      await COPY(join(stagingDir, `${configs.projectName}.node`), join(targetDir, `${configs.projectName}.node`));
+      await copy(join(stagingDir, `${configs.projectName}.node`), join(targetDir, `${configs.projectName}.node`));
     }
     console.log('[ DONE ]');
 

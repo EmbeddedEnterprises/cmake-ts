@@ -1,5 +1,6 @@
 import { BuildConfiguration } from './lib';
-import { lt, gte } from 'semver';
+import gte from 'semver/functions/gte';
+import lt from 'semver/functions/lt';
 import os from 'os';
 
 const NODE_MIRROR = process.env.NVM_NODEJS_ORG_MIRROR || "https://nodejs.org/dist";
