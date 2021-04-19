@@ -85,14 +85,7 @@ export async function defaultBuildOptions(configs: BuildOptions, nativeonly: boo
       WARNING: Building only for the current runtime.
       WARNING: DO NOT SHIP THE RESULTING PACKAGE
      --------------------------------------------------`);
-    configs.configurations = [{
-      arch: process.arch,
-      os: process.platform as any,
-      runtime: 'node',
-      runtimeVersion: process.versions.node,
-      toolchainFile: null,
-      cmakeOptions: [],
-    }];
+    configs.configurations = [defaultBuildConfiguration({})];
   }
   if (osonly) {
     console.log(
