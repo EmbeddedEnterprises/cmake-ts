@@ -28,10 +28,19 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
     process.exit(1);
   }
 
-  const nativeonly = argv.some(arg => arg === 'nativeonly');
-  const osonly = argv.some(arg => arg === 'osonly');
+  // check if `nativeonly` or `osonly` option is specified
+  let nativeonly = false;
+  let osonly = false;
+  for (const arg of argv) {
+    if (arg === 'nativeonly') {
+      nativeonly = true;
+    } else if (arg === 'osonly') {
+      osonly = true;
+    }
+  }
+
   if (nativeonly && osonly) {
-    console.error(`'osonly' and 'nativeonly' have been specified. exiting.`);
+    console.error(`'osonly' and 'nativeonly' have been specified together. exiting.`);
     process.exit(1);
   }
 
