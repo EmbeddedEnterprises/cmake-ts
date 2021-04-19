@@ -1,6 +1,6 @@
 export type BuildConfigurationDefaulted = {
-  os: 'win32' | 'linux' | 'darwin',
-  arch: string,
+  os: typeof process.platform,
+  arch: typeof process.arch,
   runtime: string,
   runtimeVersion: string,
   toolchainFile: string | null,
@@ -8,6 +8,36 @@ export type BuildConfigurationDefaulted = {
 };
 
 export type BuildConfiguration = Partial<BuildConfigurationDefaulted>;
+
+export function defaultBuildConfiguration(config: BuildConfiguration): BuildConfigurationDefaulted {
+  if (config.os === undefined) {
+    config.os = process.platform;
+    console.warn(`'os' was missing in the 'configurations'. Considering the current operating system ${config.os}`);
+  }
+
+  if (config.arch === undefined) {
+    config.arch = process.arch;
+    console.warn(`'arch' was missing in the 'configurations'. Considering the current architecture ${config.arch}`);
+  }
+
+  if (config.runtime === undefined) {
+    config.runtime = "node";
+    console.warn("`runtime` was missing in the `configurations`. Considering `node`");
+  }
+
+  if (config.runtimeVersion === undefined) {
+    // TODO use the current `runtimeVersion`
+    throw new Error("`runtimeVersion` is missing in the `configurations`.");
+  }
+
+  if (config.toolchainFile === undefined) {
+    config.toolchainFile = null;
+  }
+
+  // TODO move the code related to cmakeOptions
+
+  return config as BuildConfigurationDefaulted;
+}
 
 export type BuildOptionsDefaulted = {
   // A list of configurations to build

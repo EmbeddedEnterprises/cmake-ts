@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { BuildOptions } from './lib';
+import { BuildOptions, defaultBuildConfiguration } from './lib';
 import { join, resolve } from 'path';
 import { RuntimeDistribution } from './runtimeDistribution';
 import { ArgumentBuilder } from './argumentBuilder';
@@ -176,7 +176,9 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
     process.exit(1);
   }
 
-  for (const config of configs.configurations) {
+  for (const configGiven of configs.configurations) {
+    const config = defaultBuildConfiguration(configGiven);
+
     const dist = new RuntimeDistribution(config);
     console.log('---------------- BEGIN CONFIG ----------------');
 
