@@ -12,6 +12,7 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
 
 (async (): Promise<void> => {
 
+  const argv = process.argv;
   const packageDir = process.cwd();
   let packJson: {'cmake-ts': BuildOptions | undefined} & Record<string, any>;
   try {
@@ -27,8 +28,8 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
     process.exit(1);
   }
 
-  const nativeonly = process.argv.some(arg => arg === 'nativeonly');
-  const osonly = process.argv.some(arg => arg === 'osonly');
+  const nativeonly = argv.some(arg => arg === 'nativeonly');
+  const osonly = argv.some(arg => arg === 'osonly');
   if (nativeonly && osonly) {
     console.error(`'osonly' and 'nativeonly' have been specified. exiting.`);
     process.exit(1);
@@ -147,8 +148,7 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
     };
   }
 
-  const command = process.argv;
-  console.log('running in', packageDir, 'command', command);
+  console.log('running in', packageDir, 'command', /* command */ argv);
 
   process.stdout.write('> Setting up staging directory... ');
   if (stagingExists) {
