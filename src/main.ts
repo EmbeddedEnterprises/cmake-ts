@@ -26,48 +26,13 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
     console.error('Package.json does not have cmake-ts key defined!');
     process.exit(1);
   }
-  const configs = await defaultBuildOptions(configsGiven);
 
   // check if `nativeonly` or `osonly` option is specified
   const nativeonly = argv.includes('nativeonly');
   const osonly = argv.includes('osonly');
 
-  if (nativeonly && osonly) {
-    console.error(`'osonly' and 'nativeonly' have been specified together. exiting.`);
-    process.exit(1);
-  }
-
-  if (nativeonly) {
-    console.log(
-    `--------------------------------------------------
-      WARNING: Building only for the current runtime.
-      WARNING: DO NOT SHIP THE RESULTING PACKAGE
-     --------------------------------------------------`);
-    configs.configurations = [{
-      arch: process.arch,
-      os: process.platform as any,
-      runtime: 'node',
-      runtimeVersion: process.versions.node,
-      toolchainFile: null,
-      cmakeOptions: [],
-    }];
-  }
-  if (osonly) {
-    console.log(
-    `--------------------------------------------------
-      WARNING: Building only for the current OS.
-      WARNING: DO NOT SHIP THE RESULTING PACKAGE
-     --------------------------------------------------`);
-    if (configs.configurations === undefined) {
-      console.error('No `configurations` entry was found in the package.json');
-      process.exit(1);
-    }
-    configs.configurations = configs.configurations.filter(j => j.os === process.platform as any);
-    for (let config of configs.configurations) {
-      // A native build should be possible without toolchain file.
-      config.toolchainFile = null;
-    }
-  }
+  // set the missing options to their default value
+  const configs = await defaultBuildOptions(configsGiven, nativeonly, osonly);
 
   // Setup directory structure in configs
   // Target directory
