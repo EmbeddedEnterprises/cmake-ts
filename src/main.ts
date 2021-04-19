@@ -13,7 +13,7 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
 (async (): Promise<void> => {
 
   const packageDir = process.cwd();
-  let packJson = null;
+  let packJson: {'cmake-ts': BuildOptions | undefined} & Record<string, any>;
   try {
     packJson = require(resolve(join(packageDir, 'package.json')));
   } catch (err) {
@@ -21,7 +21,7 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
     process.exit(1);
   }
 
-  const configs = packJson['cmake-ts'] as BuildOptions;
+  const configs = packJson['cmake-ts'];
   if (!configs) {
     console.error('Package.json does not have cmake-ts key defined!');
     process.exit(1);
