@@ -80,25 +80,29 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
     configs.projectName = 'addon';
   }
 
-  const cmake = await which('cmake');
-  const ninja = await which('ninja');
-  const make = await which('make');
 
   const stagingExists = await STAT(configs.stagingDirectory);
 
   if (!configs.cmakeToUse) {
+    const cmake = await which('cmake');
     if (!cmake) {
       console.error('cmake binary not found, try to specify \'cmakeToUse\'');
       process.exit(1);
     }
-    configs.cmakeToUse = cmake as string;
+    configs.cmakeToUse = cmake;
   }
 
+  const ninjaP = which('ninja');
+  const makeP = which('make');
+  let ninja: string | undefined;
+  let make: string | undefined;
   if (!configs.generatorToUse) {
     // No generator specified
     console.log('no generator specified, checking ninja');
+    ninja = await ninjaP;
     if (!ninja) {
       console.log('ninja not found, checking make');
+      make = await makeP;
       if (!make) {
         console.log('make not found, using native');
         if (process.platform === 'win32') {
@@ -113,28 +117,30 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
       } else {
         console.log('found make at', make, '(fallback)');
         configs.generatorToUse = 'Unix Makefiles';
-        configs.generatorBinary = make as string;
+        configs.generatorBinary = make;
       }
     } else {
       console.log('found ninja at', ninja);
       configs.generatorToUse = 'Ninja';
-      configs.generatorBinary = ninja as string;
+      configs.generatorBinary = ninja;
     }
   }
 
   if (!configs.generatorBinary) {
     if (configs.generatorToUse === 'Ninja') {
+      ninja = await ninjaP;
       if (!ninja) {
         console.error('Ninja was specified as generator but no ninja binary could be found. Specify it via \'generatorBinary\'');
         process.exit(1);
       }
-      configs.generatorBinary = ninja as string;
+      configs.generatorBinary = ninja;
     } else if (configs.generatorToUse === 'Unix Makefiles') {
+      make = await makeP;
       if (!make) {
         console.error('Unix Makefiles was specified as generator but no make binary could be found. Specify it via \'generatorBinary\'');
         process.exit(1);
       }
-      configs.generatorBinary = make as string;
+      configs.generatorBinary = make;
     } else {
       console.error('Unsupported generator ' + configs.generatorToUse);
       process.exit(1);
