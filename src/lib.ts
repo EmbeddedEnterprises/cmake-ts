@@ -1,4 +1,4 @@
-export type BuildConfiguration = {
+export type BuildConfigurationDefaulted = {
   os: 'win32' | 'linux' | 'darwin',
   arch: string,
   runtime: string,
@@ -6,6 +6,8 @@ export type BuildConfiguration = {
   toolchainFile: string | null,
   cmakeOptions?: { name: string, value: string }[];
 };
+
+export type BuildConfiguration = Partial<BuildConfigurationDefaulted>;
 
 export type BuildOptionsDefaulted = {
   // A list of configurations to build
