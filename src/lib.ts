@@ -74,11 +74,11 @@ export type BuildOptions = Partial<BuildOptionsDefaulted>;
 export async function defaultBuildOptions(configs: BuildOptions, nativeonly: boolean, osonly: boolean): Promise<BuildOptionsDefaulted> {
 
   // Handle missing configs.configurations
+  // TODO handle without nativeonly and osonly
   if (nativeonly && osonly) {
     console.error(`'osonly' and 'nativeonly' have been specified together. exiting.`);
     process.exit(1);
   }
-
   if (nativeonly) {
     console.log(
     `--------------------------------------------------
@@ -130,12 +130,12 @@ export async function defaultBuildOptions(configs: BuildOptions, nativeonly: boo
     configs.cmakeToUse = cmake;
   }
 
+  // handle missing generator
   const ninjaP = which('ninja');
   const makeP = which('make');
   let ninja: string | undefined;
   let make: string | undefined;
   if (configs.generatorToUse === undefined) {
-    // No generator specified
     console.log('no generator specified, checking ninja');
     ninja = await ninjaP;
     if (!ninja) {
@@ -164,6 +164,7 @@ export async function defaultBuildOptions(configs: BuildOptions, nativeonly: boo
     }
   }
 
+  // handle missing generatorBinary
   if (configs.generatorBinary === undefined) {
     if (configs.generatorToUse === 'Ninja') {
       ninja = await ninjaP;
