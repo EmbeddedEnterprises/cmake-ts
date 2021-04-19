@@ -35,10 +35,11 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
   }
 
   if (nativeonly) {
-    console.log('--------------------------------------------------');
-    console.log('WARNING: Building only for the current runtime.');
-    console.log('WARNING: DO NOT SHIP THE RESULTING PACKAGE');
-    console.log('--------------------------------------------------');
+    console.log(
+    `--------------------------------------------------
+      WARNING: Building only for the current runtime.
+      WARNING: DO NOT SHIP THE RESULTING PACKAGE
+     --------------------------------------------------`);
     configs.configurations = [{
       arch: process.arch,
       os: process.platform as any,
@@ -49,10 +50,11 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
     }];
   }
   if (osonly) {
-    console.log('--------------------------------------------------');
-    console.log('WARNING: Building only for the current OS.');
-    console.log('WARNING: DO NOT SHIP THE RESULTING PACKAGE');
-    console.log('--------------------------------------------------');
+    console.log(
+    `--------------------------------------------------
+      WARNING: Building only for the current OS.
+      WARNING: DO NOT SHIP THE RESULTING PACKAGE
+     --------------------------------------------------`);
     configs.configurations = configs.configurations.filter(j => j.os === process.platform as any);
     for (let config of configs.configurations) {
       // A native build should be possible without toolchain file.
