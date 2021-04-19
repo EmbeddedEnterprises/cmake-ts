@@ -65,6 +65,10 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
       WARNING: Building only for the current OS.
       WARNING: DO NOT SHIP THE RESULTING PACKAGE
      --------------------------------------------------`);
+    if (configs.configurations === undefined) {
+      console.error('No `configurations` entry was found in the package.json');
+      process.exit(1);
+    }
     configs.configurations = configs.configurations.filter(j => j.os === process.platform as any);
     for (let config of configs.configurations) {
       // A native build should be possible without toolchain file.
@@ -167,6 +171,10 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
   await ensureDir(configs.stagingDirectory);
   console.log('[ DONE ]');
 
+  if (configs.configurations === undefined) {
+    console.error('No `configurations` entry was found in the package.json');
+    process.exit(1);
+  }
 
   for (const config of configs.configurations) {
     const dist = new RuntimeDistribution(config);
