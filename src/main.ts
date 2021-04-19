@@ -94,11 +94,6 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
   await ensureDir(configs.stagingDirectory);
   console.log('[ DONE ]');
 
-  if (configs.configurations === undefined) {
-    console.error('No `configurations` entry was found in the package.json');
-    process.exit(1);
-  }
-
   for (const configGiven of configs.configurations) {
     const config = defaultBuildConfiguration(configGiven);
 
