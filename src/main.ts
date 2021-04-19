@@ -1,32 +1,32 @@
 #!/usr/bin/env node
 
-import { BuildOptions, defaultBuildConfiguration } from './lib';
+import { BuildOptions, defaultBuildOptions, defaultBuildConfiguration } from './lib';
 import { join, resolve } from 'path';
 import { RuntimeDistribution } from './runtimeDistribution';
 import { ArgumentBuilder } from './argumentBuilder';
-import { STAT, RUN, GET_CMAKE_VS_GENERATOR } from './util';
+import { STAT, RUN } from './util';
 import { ensureDir, remove, copy } from 'fs-extra';
-import which from 'which';
 
 const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
 
 (async (): Promise<void> => {
 
   const argv = process.argv;
-  const packageDir = process.cwd();
   let packJson: {'cmake-ts': BuildOptions | undefined} & Record<string, any>;
   try {
-    packJson = require(resolve(join(packageDir, 'package.json')));
+    // TODO getting the path from the CLI
+    packJson = require(resolve(join(process.cwd(), 'package.json')));
   } catch (err) {
     console.error('Failed to load package.json, maybe your cwd is wrong:', err);
     process.exit(1);
   }
 
-  const configs = packJson['cmake-ts'];
-  if (!configs) {
+  const configsGiven = packJson['cmake-ts'];
+  if (configsGiven === undefined) {
     console.error('Package.json does not have cmake-ts key defined!');
     process.exit(1);
   }
+  const configs = await defaultBuildOptions(configsGiven);
 
   // check if `nativeonly` or `osonly` option is specified
   let nativeonly = false;
@@ -77,91 +77,14 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
   }
 
   // Setup directory structure in configs
-  configs.packageDirectory = packageDir;
   // Target directory
-  if (!configs.targetDirectory) {
-    configs.targetDirectory = 'build';
-  }
   configs.targetDirectory = resolve(join(configs.packageDirectory, configs.targetDirectory));
-
   // Staging directory
-  if (!configs.stagingDirectory) {
-    configs.stagingDirectory = 'staging';
-  }
   configs.stagingDirectory = resolve(join(configs.packageDirectory, configs.stagingDirectory));
-
-  if (!configs.projectName) {
-    configs.projectName = 'addon';
-  }
-
 
   const stagingExists = await STAT(configs.stagingDirectory);
 
-  if (!configs.cmakeToUse) {
-    const cmake = await which('cmake');
-    if (!cmake) {
-      console.error('cmake binary not found, try to specify \'cmakeToUse\'');
-      process.exit(1);
-    }
-    configs.cmakeToUse = cmake;
-  }
-
-  const ninjaP = which('ninja');
-  const makeP = which('make');
-  let ninja: string | undefined;
-  let make: string | undefined;
-  if (!configs.generatorToUse) {
-    // No generator specified
-    console.log('no generator specified, checking ninja');
-    ninja = await ninjaP;
-    if (!ninja) {
-      console.log('ninja not found, checking make');
-      make = await makeP;
-      if (!make) {
-        console.log('make not found, using native');
-        if (process.platform === 'win32') {
-          // I'm on windows, so fixup the architecture mess.
-          const generator = await GET_CMAKE_VS_GENERATOR(configs.cmakeToUse, process.arch);
-          configs.generatorToUse = generator;
-          configs.generatorBinary = 'native';
-        } else {
-          configs.generatorToUse = 'native';
-          configs.generatorBinary = 'native';
-        }
-      } else {
-        console.log('found make at', make, '(fallback)');
-        configs.generatorToUse = 'Unix Makefiles';
-        configs.generatorBinary = make;
-      }
-    } else {
-      console.log('found ninja at', ninja);
-      configs.generatorToUse = 'Ninja';
-      configs.generatorBinary = ninja;
-    }
-  }
-
-  if (!configs.generatorBinary) {
-    if (configs.generatorToUse === 'Ninja') {
-      ninja = await ninjaP;
-      if (!ninja) {
-        console.error('Ninja was specified as generator but no ninja binary could be found. Specify it via \'generatorBinary\'');
-        process.exit(1);
-      }
-      configs.generatorBinary = ninja;
-    } else if (configs.generatorToUse === 'Unix Makefiles') {
-      make = await makeP;
-      if (!make) {
-        console.error('Unix Makefiles was specified as generator but no make binary could be found. Specify it via \'generatorBinary\'');
-        process.exit(1);
-      }
-      configs.generatorBinary = make;
-    } else {
-      console.error('Unsupported generator ' + configs.generatorToUse);
-      process.exit(1);
-    };
-  }
-
-  console.log('running in', packageDir, 'command', /* command */ argv);
+  console.log('running in', configs.packageDirectory, 'command', /* command */ argv);
 
   process.stdout.write('> Setting up staging directory... ');
   if (stagingExists) {
@@ -240,10 +163,6 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
     if (configs.generatorToUse.includes('Visual Studio')) {
       if (DEBUG_LOG) {
         console.log(`Applying copy fix for MSVC projects`);
-      }
-      if (configs.buildType === undefined) {
-        console.warn("`buildType` was missing. Considering 'Release'");
-        configs.buildType = "Release";
       }
       await copy(join(stagingDir, configs.buildType, `${configs.projectName}.node`), join(targetDir, `${configs.projectName}.node`));
     } else {
