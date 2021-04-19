@@ -29,15 +29,8 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
   const configs = await defaultBuildOptions(configsGiven);
 
   // check if `nativeonly` or `osonly` option is specified
-  let nativeonly = false;
-  let osonly = false;
-  for (const arg of argv) {
-    if (arg === 'nativeonly') {
-      nativeonly = true;
-    } else if (arg === 'osonly') {
-      osonly = true;
-    }
-  }
+  const nativeonly = argv.includes('nativeonly');
+  const osonly = argv.includes('osonly');
 
   if (nativeonly && osonly) {
     console.error(`'osonly' and 'nativeonly' have been specified together. exiting.`);
