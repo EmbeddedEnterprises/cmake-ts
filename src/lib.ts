@@ -29,8 +29,8 @@ export function defaultBuildConfiguration(config: BuildConfiguration): BuildConf
   }
 
   if (config.runtimeVersion === undefined) {
-    // TODO use the current `runtimeVersion`
-    throw new Error("`runtimeVersion` is missing in the `configurations`.");
+    config.runtimeVersion = process.versions.node;
+    console.warn(`'runtimeVersion' was missing in the 'configurations'. Considering the current runtimeVersion ${config.runtimeVersion}`);
   }
 
   if (config.toolchainFile === undefined) {
