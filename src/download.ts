@@ -18,7 +18,7 @@ export type DownloadOptions = {
   hashSum?: string,
 }
 
-type AnyStream = ReturnType<typeof createGunzip> | ReturnType<typeof createWriteStream> | ReturnType<typeof extractZip> // | MemoryStream
+type AnyStream = ReturnType<typeof createGunzip> | ReturnType<typeof createWriteStream> | ReturnType<typeof extractZip> | MemoryStream
 
 export function downloadToStream(url: string, stream: AnyStream, hashType: string | null | undefined): Promise<string | null> {
   return new Promise((resolve, reject) => {
