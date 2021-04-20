@@ -169,17 +169,20 @@ export class RuntimeDistribution {
       return;
     }
     const paths = URL_REGISTRY.getPathsForConfig(this.config);
-    for (const path of paths.winLibs) {
-      const fPath = path.dir ? urlJoin(path.dir, path.name) : path.name;
-      const libUrl = urlJoin(this.externalPath, fPath);
-      await ensureDir(joinPath(this.internalPath, path.dir));
-      const sum = await DOWNLOADER.downloadFile(libUrl, {
-        path: joinPath(this.internalPath, fPath),
-        hashType: sums ? "sha256" : null,
-      });
-      if (sums && !TEST_SUM(sums, sum, fPath)) {
-        throw new Error("Checksum mismatch");
-      }
+    // download libs in parallel
+    await Promise.all(paths.winLibs.map(path => this.downloadLib(path, sums)));
+  }
+
+  private async downloadLib(path: {dir: string, name: string}, sums: HashSum[] | null) {
+    const fPath = path.dir ? urlJoin(path.dir, path.name) : path.name;
+    const libUrl = urlJoin(this.externalPath, fPath);
+    await ensureDir(joinPath(this.internalPath, path.dir));
+    const sum = await DOWNLOADER.downloadFile(libUrl, {
+      path: joinPath(this.internalPath, fPath),
+      hashType: sums ? "sha256" : null,
+    });
+    if (sums && !TEST_SUM(sums, sum, fPath)) {
+      throw new Error("Checksum mismatch");
     }
   }
 }
