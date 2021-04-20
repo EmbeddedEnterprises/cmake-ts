@@ -18,7 +18,7 @@ export type DownloadOptions = {
 
 // Legacy-To-Useable-Adapter
 export class Downloader {
-  public async downloadToStream(url: string, stream: any, hashType: string | null | undefined): Promise<string | null> {
+  public downloadToStream(url: string, stream: any, hashType: string | null | undefined): Promise<string | null> {
     return new Promise((resolve, reject) => {
       const shasum = hashType ? crypto.createHash(hashType) : null;
       let length = 0, done = 0, lastPercent = 0;
