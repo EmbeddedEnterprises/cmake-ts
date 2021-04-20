@@ -97,7 +97,7 @@ export async function defaultBuildOptions(configs: BuildOptions, nativeonly: boo
       console.error('No `configurations` entry was found in the package.json');
       process.exit(1);
     }
-    configs.configurations = configs.configurations.filter(j => j.os === process.platform as any);
+    configs.configurations = configs.configurations.filter(j => j.os === process.platform);
     for (const config of configs.configurations) {
       // A native build should be possible without toolchain file.
       config.toolchainFile = null;
