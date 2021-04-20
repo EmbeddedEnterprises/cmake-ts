@@ -200,12 +200,12 @@ export async function defaultBuildOptions(configs: BuildOptions, nativeonly: boo
 }
 
 
-export class CMakeWrapper {
-  // TODO the code uses a side effect of TypeScript constructors in defining the class props
-  /* eslint-disable-next-line no-useless-constructor */   /* eslint-disable-next-line no-empty-function */
-  constructor(private options: BuildOptions) {}
-
-  async runAllConfigs(): Promise<void> {
-    console.log(this.options);
-  }
-}
+// export class CMakeWrapper {
+//   // TODO the code uses a side effect of TypeScript constructors in defining the class props
+//   /* eslint-disable-next-line no-useless-constructor */   /* eslint-disable-next-line no-empty-function */
+//   constructor(private options: BuildOptions) {}
+//
+//   async runAllConfigs(): Promise<void> {
+//     console.log(this.options);
+//   }
+// }
