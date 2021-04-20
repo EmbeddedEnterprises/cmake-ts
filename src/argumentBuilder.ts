@@ -1,4 +1,4 @@
-import { BuildConfiguration, BuildOptions } from './lib';
+import { BuildConfigurationDefaulted, BuildOptionsDefaulted } from './lib';
 import { RuntimeDistribution } from './runtimeDistribution';
 import { join, resolve } from 'path';
 import { URL_REGISTRY } from './urlRegistry';
@@ -7,7 +7,7 @@ import { locateNAN } from './locateNAN';
 export class ArgumentBuilder {
   //private buildDirectory: string;
   //private workDir: string;
-  constructor (private config: BuildConfiguration, private options: BuildOptions, private rtd: RuntimeDistribution) {
+  constructor (private config: BuildConfigurationDefaulted, private options: BuildOptionsDefaulted, private rtd: RuntimeDistribution) {
     //this.workDir = resolve(join(options.packageDirectory, options.targetDirectory, config.os, config.arch, config.runtime, config.runtimeVersion));
     //this.buildDirectory = resolve(join(this.workDir, options.buildType));
   }

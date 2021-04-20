@@ -1,4 +1,4 @@
-import { BuildConfiguration } from './lib';
+import { BuildConfigurationDefaulted } from './lib';
 import gte from 'semver/functions/gte';
 import lt from 'semver/functions/lt';
 import os from 'os';
@@ -12,7 +12,7 @@ export const HOME_DIRECTORY = process.env[(os.platform() === "win32") ? "USERPRO
 export class URLRegistry {
   constructor() { }
 
-  public getPathsForConfig(config: BuildConfiguration) {
+  public getPathsForConfig(config: BuildConfigurationDefaulted) {
     switch (config.runtime) {
       case "node": {
         return (lt(config.runtimeVersion, "4.0.0") ? this.nodePrehistoric : this.nodeModern)(config);
@@ -45,7 +45,7 @@ export class URLRegistry {
     }
   }
 
-  private nodePrehistoric(config: BuildConfiguration) {
+  private nodePrehistoric(config: BuildConfigurationDefaulted) {
     return {
       externalPath: `${NODE_MIRROR}/v${config.runtimeVersion}/`,
       winLibs: [{
@@ -56,7 +56,7 @@ export class URLRegistry {
       headerOnly: false,
     };
   }
-  private nodeModern(config: BuildConfiguration) {
+  private nodeModern(config: BuildConfigurationDefaulted) {
     return {
       externalPath: `${NODE_MIRROR}/v${config.runtimeVersion}/`,
       winLibs: [{

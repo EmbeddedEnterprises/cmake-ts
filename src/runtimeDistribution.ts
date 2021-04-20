@@ -2,7 +2,7 @@ import { join as joinPath, extname } from 'path';
 import { ensureDir, readFile } from 'fs-extra';
 import urlJoin from 'url-join';
 import { Deferred } from 'queueable';
-import { BuildConfiguration } from './lib';
+import { BuildConfigurationDefaulted } from './lib';
 import { URL_REGISTRY, HOME_DIRECTORY } from './urlRegistry';
 import { DOWNLOADER, DownloadOptions } from './download';
 import { STAT } from './util';
@@ -19,7 +19,7 @@ const TEST_SUM = (sums: HashSum[], sum: string | null, fPath: string) => {
 
 export class RuntimeDistribution {
   private _abi: number | null = null;
-  constructor(private config: BuildConfiguration) {}
+  constructor(private config: BuildConfigurationDefaulted) {}
 
   get internalPath() {
     return joinPath(
