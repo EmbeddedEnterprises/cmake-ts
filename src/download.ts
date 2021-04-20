@@ -18,7 +18,9 @@ export type DownloadOptions = {
   hashSum?: string,
 }
 
-export function downloadToStream(url: string, stream: any, hashType: string | null | undefined): Promise<string | null> {
+type AnyStream = ReturnType<typeof createGunzip> | ReturnType<typeof createWriteStream> | ReturnType<typeof extractZip> // | MemoryStream
+
+export function downloadToStream(url: string, stream: AnyStream, hashType: string | null | undefined): Promise<string | null> {
   return new Promise((resolve, reject) => {
     const shasum = hashType ? crypto.createHash(hashType) : null;
     let length = 0, done = 0, lastPercent = 0;
@@ -43,7 +45,7 @@ export function downloadToStream(url: string, stream: any, hashType: string | nu
         }
       }
     }).pipe(stream);
-    stream.once('error', (err: any) => reject(err));
+    stream.once('error', (err) => reject(err));
     stream.once('finish', () => resolve(shasum ? shasum.digest('hex') : null));
   });
 }
