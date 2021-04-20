@@ -107,7 +107,7 @@ export class RuntimeDistribution {
       ret.reject(new Error('Failed to find NODE_MODULE_VERSION macro'));
       return;
     }
-    const version = parseInt(match[1]);
+    const version = parseInt(match[1], 10);
     if (isNaN(version)) {
       ret.reject(new Error('Invalid version specified by NODE_MODULE_VERSION macro'));
       return;

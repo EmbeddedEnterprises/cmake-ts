@@ -26,7 +26,7 @@ export class Downloader {
       get(url).on('error', err => {
         reject(err);
       }).on('response', data => {
-        length = parseInt(data.headers['content-length'] || '0');
+        length = parseInt(data.headers['content-length'] || '0', 10);
         if (!isNumber(length)) {
           length = 0;
         }
