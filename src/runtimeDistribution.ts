@@ -68,9 +68,9 @@ export class RuntimeDistribution {
       }
     }
     if (this.config.os === 'win32') {
-      for (const lib of this.winLibs) {
-        stats = await stat(lib);
-        libs = libs && stats.isFile();
+      const libStats = await Promise.all(this.winLibs.map(lib => stat(lib)));
+      for (const libStat of libStats) {
+        libs = libs && libStat.isFile();
       }
     }
     return headers && libs;
