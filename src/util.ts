@@ -37,7 +37,7 @@ export const GET_CMAKE_VS_GENERATOR = async (cmake: string, arch: string): Promi
     }
     genParts[0] = genParts[0].trim();
 
-    if (genParts[0].match(/Visual\s+Studio\s+\d+\s+\d+\s+\[arch\]/)) {
+    if (genParts[0].match(/Visual\s+Studio\s+\d+\s+\d+\s+\[arch]/)) {
       console.log('Found generator: ', genParts[0]);
       // The first entry is usually the latest entry
       useVSGen = genParts[0];
@@ -67,7 +67,7 @@ export const EXEC = (command: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     exec(command, (err, stdout, stderr) => {
       if (err) {
-        reject(new Error(err.message + '\n' + (stdout || stderr)));
+        reject(new Error(`${err.message  }\n${  stdout || stderr}`));
       } else {
         resolve(stdout);
       }
@@ -82,7 +82,7 @@ export const RUN = (command: string, cwd: string = process.cwd(), silent: boolea
     args.splice(0, 1);
     const child = spawn(name, args, {
       stdio: silent ? 'ignore': 'inherit',
-      cwd: cwd,
+      cwd,
     });
     let ended = false;
     child.on('error', e => {

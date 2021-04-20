@@ -98,7 +98,7 @@ export async function defaultBuildOptions(configs: BuildOptions, nativeonly: boo
       process.exit(1);
     }
     configs.configurations = configs.configurations.filter(j => j.os === process.platform as any);
-    for (let config of configs.configurations) {
+    for (const config of configs.configurations) {
       // A native build should be possible without toolchain file.
       config.toolchainFile = null;
     }
@@ -181,7 +181,7 @@ export async function defaultBuildOptions(configs: BuildOptions, nativeonly: boo
       }
       configs.generatorBinary = make;
     } else {
-      console.error('Unsupported generator ' + configs.generatorToUse);
+      console.error(`Unsupported generator ${  configs.generatorToUse}`);
       process.exit(1);
     };
   }

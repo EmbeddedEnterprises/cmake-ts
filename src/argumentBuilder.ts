@@ -15,7 +15,7 @@ export class ArgumentBuilder {
   async buildCmakeCommandLine(): Promise<string> {
     let baseCommand = `"${this.options.cmakeToUse}" "${this.options.packageDirectory}" --no-warn-unused-cli`;
     const defines = await this.buildDefines();
-    baseCommand += " " + defines.map(d => `-D${d[0]}="${d[1]}"`).join(" ");
+    baseCommand += ` ${  defines.map(d => `-D${d[0]}="${d[1]}"`).join(" ")}`;
     if (this.options.generatorToUse !== 'native') {
       baseCommand += ` -G"${this.options.generatorToUse}"`;
     }
@@ -61,8 +61,8 @@ export class ArgumentBuilder {
 
     // Search NAN if installed and required
     const nan = await locateNAN(this.options.packageDirectory, this.options.customNANPackageName);
-    if(!!this.options.customNANPackageName && !nan) {
-      console.log('WARNING: customNANPackageName was specified, but module "' + this.options.customNANPackageName + '" could not be found!');
+    if(Boolean(this.options.customNANPackageName) && !nan) {
+      console.log(`WARNING: customNANPackageName was specified, but module "${  this.options.customNANPackageName  }" could not be found!`);
     }
     if (nan) {
       includes.push(nan);
@@ -75,7 +75,7 @@ export class ArgumentBuilder {
       ['NODE_ARCH', this.config.arch],
       ['NODE_PLATFORM', this.config.os],
       ['NODE_RUNTIMEVERSION', this.config.runtimeVersion],
-      ['NODE_ABI_VERSION', this.rtd.abi + ''],
+      ['NODE_ABI_VERSION', `${this.rtd.abi  }`],
     );
 
     if (this.options.globalCMakeOptions && this.options.globalCMakeOptions.length > 0) {

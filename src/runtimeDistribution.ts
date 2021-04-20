@@ -10,7 +10,7 @@ import glob from 'fast-glob'
 
 export type HashSum = { getPath: string, sum: string };
 const TEST_SUM = (sums: HashSum[], sum: string | null, fPath: string) => {
-  let serverSum = sums.find(s => s.getPath === fPath);
+  const serverSum = sums.find(s => s.getPath === fPath);
   if (serverSum && serverSum.sum === sum) {
     return true;
   }
@@ -66,7 +66,7 @@ export class RuntimeDistribution {
       }
     }
     if (this.config.os === 'win32') {
-      for (let lib of this.winLibs) {
+      for (const lib of this.winLibs) {
         stats = await STAT(lib);
         libs = libs && stats.isFile();
       }
