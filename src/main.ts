@@ -91,7 +91,7 @@ const DEBUG_LOG = Boolean(process.env.CMAKETSDEBUG);
     const argBuilder = new ArgumentBuilder(config, configs, dist);
     process.stdout.write('> Building CMake command line... ');
     const cmdline = await argBuilder.buildCmakeCommandLine();
-    const buildcmdline = await argBuilder.buildGeneratorCommandLine(stagingDir);
+    const buildcmdline = argBuilder.buildGeneratorCommandLine(stagingDir);
     console.log('[ DONE ]');
     if (DEBUG_LOG) {
       console.log('====> configure: ', cmdline);

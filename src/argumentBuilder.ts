@@ -25,7 +25,7 @@ export class ArgumentBuilder {
     return baseCommand;
   }
 
-  async buildGeneratorCommandLine(stagingDir: string): Promise<string> {
+  buildGeneratorCommandLine(stagingDir: string): string {
     return `"${this.options.cmakeToUse}" --build "${stagingDir}" --config "${this.options.buildType}"`;
   }
 
