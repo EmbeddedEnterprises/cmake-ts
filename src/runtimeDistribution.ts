@@ -4,7 +4,7 @@ import urlJoin from 'url-join';
 import { Deferred } from 'queueable';
 import { BuildConfigurationDefaulted } from './lib';
 import { URL_REGISTRY, HOME_DIRECTORY } from './urlRegistry';
-import { DOWNLOADER, DownloadOptions } from './download';
+import * as DOWNLOADER from './download';
 import { STAT } from './util';
 import glob from 'fast-glob'
 
@@ -158,7 +158,7 @@ export class RuntimeDistribution {
         const ext = extname(p);
         return ext && ext.toLowerCase() === '.h';
       },
-    } as DownloadOptions);
+    } as DOWNLOADER.DownloadOptions);
     if (sums && !TEST_SUM(sums, sum, tarLocalPath)) {
       throw new Error("Checksum mismatch");
     }
