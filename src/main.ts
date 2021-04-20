@@ -52,6 +52,8 @@ const DEBUG_LOG = Boolean(process.env.CMAKETSDEBUG);
   console.log('[ DONE ]');
 
   for (const configGiven of configs.configurations) {
+    /* eslint-disable no-await-in-loop */ // TODO we may be able to make some of these functions parallel
+
     const config = defaultBuildConfiguration(configGiven);
 
     const dist = new RuntimeDistribution(config);
