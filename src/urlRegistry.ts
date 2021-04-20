@@ -10,8 +10,6 @@ const ELECTRON_MIRROR = process.env.ELECTRON_MIRROR || "https://atom.io/download
 export const HOME_DIRECTORY = process.env[(os.platform() === "win32") ? "USERPROFILE" : "HOME"] as string;
 
 export class URLRegistry {
-  constructor() { }
-
   public getPathsForConfig(config: BuildConfigurationDefaulted) {
     switch (config.runtime) {
       case "node": {

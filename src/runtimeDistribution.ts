@@ -19,6 +19,9 @@ const TEST_SUM = (sums: HashSum[], sum: string | null, fPath: string) => {
 
 export class RuntimeDistribution {
   private _abi: number | null = null;
+
+  // TODO the code uses a side effect of TypeScript constructors in defining the class props
+  /* eslint-disable-next-line no-useless-constructor */   /* eslint-disable-next-line no-empty-function */
   constructor(private config: BuildConfigurationDefaulted) {}
 
   get internalPath() {
