@@ -1,5 +1,5 @@
-import { STAT } from './util';
 import { join as joinPath, sep as pathSeparator, normalize as normalizePath } from 'path';
+import { stat } from 'fs-extra';
 
 export const locateNAN = async (projectRoot: string, customNANPackageName?: string): Promise<string | null> => {
   const isNode = await isNodeProject(projectRoot);
@@ -20,12 +20,12 @@ export const locateNAN = async (projectRoot: string, customNANPackageName?: stri
 const isNodeProject = async (dir: string) => {
   const pjson = joinPath(dir, 'package.json');
   const node_modules = joinPath(dir, 'node_modules');
-  return (await STAT(pjson)).isFile() || (await STAT(node_modules)).isDirectory();
+  return (await stat(pjson)).isFile() || (await stat(node_modules)).isDirectory();
 };
 
 const isNANModule = async (dir: string) => {
   const header = joinPath(dir, "nan.h");
-  return (await STAT(header)).isFile();
+  return (await stat(header)).isFile();
 };
 
 const goUp = (dir: string) => {

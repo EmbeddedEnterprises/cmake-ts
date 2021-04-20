@@ -3,8 +3,8 @@ import { BuildOptions, defaultBuildOptions, defaultBuildConfiguration } from './
 import { join, resolve } from 'path';
 import { RuntimeDistribution } from './runtimeDistribution';
 import { ArgumentBuilder } from './argumentBuilder';
-import { STAT, RUN } from './util';
-import { ensureDir, remove, copy } from 'fs-extra';
+import { RUN } from './util';
+import { ensureDir, remove, copy, stat } from 'fs-extra';
 
 const DEBUG_LOG = Boolean(process.env.CMAKETSDEBUG);
 
@@ -39,7 +39,7 @@ const DEBUG_LOG = Boolean(process.env.CMAKETSDEBUG);
   // Staging directory
   configs.stagingDirectory = resolve(join(configs.packageDirectory, configs.stagingDirectory));
 
-  const stagingExists = await STAT(configs.stagingDirectory);
+  const stagingExists = await stat(configs.stagingDirectory);
 
   console.log('running in', configs.packageDirectory, 'command', argv);
 

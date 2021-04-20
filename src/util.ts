@@ -1,22 +1,5 @@
-import { PathLike, Stats, stat as statCb } from 'fs';
 import { exec, spawn } from 'child_process';
 import splitargs from 'splitargs2';
-import { constant } from 'lodash';
-
-export const STAT = (path: PathLike) => {
-  return new Promise<Stats>(resolve => {
-    statCb(path, (err, stat) => {
-      if (err) {
-        resolve({
-          isFile: constant(false),
-          isDirectory: constant(false),
-        } as Stats);
-        return;
-      }
-      resolve(stat);
-    });
-  })
-};
 
 export const GET_CMAKE_VS_GENERATOR = async (cmake: string, arch: string): Promise<string> =>{
   const generators = await EXEC_CAPTURE(`"${cmake}" -G`);

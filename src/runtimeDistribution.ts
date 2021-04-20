@@ -1,11 +1,10 @@
 import { join as joinPath, extname } from 'path';
-import { ensureDir, readFile } from 'fs-extra';
+import { ensureDir, readFile, stat } from 'fs-extra';
 import urlJoin from 'url-join';
 import { Deferred } from 'queueable';
 import { BuildConfigurationDefaulted } from './lib';
 import * as URL_REGISTRY from './urlRegistry';
 import * as DOWNLOADER from './download';
-import { STAT } from './util';
 import glob from 'fast-glob'
 
 export type HashSum = { getPath: string, sum: string };
@@ -54,23 +53,23 @@ export class RuntimeDistribution {
   async checkDownloaded(): Promise<boolean> {
     let headers = false;
     let libs = true;
-    let stats = await STAT(this.internalPath);
+    let stats = await stat(this.internalPath);
     if (!stats.isDirectory()) {
       headers = false;
     }
     if (this.headerOnly) {
-      stats = await STAT(joinPath(this.internalPath, "include/node/node.h"));
+      stats = await stat(joinPath(this.internalPath, "include/node/node.h"));
       headers = stats.isFile();
     } else {
-      stats = await STAT(joinPath(this.internalPath, "src/node.h"));
+      stats = await stat(joinPath(this.internalPath, "src/node.h"));
       if (stats.isFile()) {
-        stats = await STAT(joinPath(this.internalPath, "deps/v8/include/v8.h"));
+        stats = await stat(joinPath(this.internalPath, "deps/v8/include/v8.h"));
         headers = stats.isFile();
       }
     }
     if (this.config.os === 'win32') {
       for (const lib of this.winLibs) {
-        stats = await STAT(lib);
+        stats = await stat(lib);
         libs = libs && stats.isFile();
       }
     }
