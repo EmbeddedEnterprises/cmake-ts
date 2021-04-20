@@ -11,7 +11,7 @@ const DEBUG_LOG = Boolean(process.env.CMAKETSDEBUG);
 (async (): Promise<void> => {
 
   const argv = process.argv;
-  let packJson: {'cmake-ts': BuildOptions | undefined} & Record<string, any>;
+  let packJson: {'cmake-ts': BuildOptions | undefined} & Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   try {
     // TODO getting the path from the CLI
     packJson = require(resolve(join(process.cwd(), 'package.json')));
@@ -126,7 +126,7 @@ const DEBUG_LOG = Boolean(process.env.CMAKETSDEBUG);
 
     console.log('----------------- END CONFIG -----------------');
   }
-})().catch((err: any) => {
+})().catch((err: Error) => {
   console.log("Generic error occured", err);
   process.exit(1);
 });
