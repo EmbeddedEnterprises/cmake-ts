@@ -3,7 +3,7 @@ import { ensureDir, readFile } from 'fs-extra';
 import urlJoin from 'url-join';
 import { Deferred } from 'queueable';
 import { BuildConfigurationDefaulted } from './lib';
-import { URL_REGISTRY, HOME_DIRECTORY } from './urlRegistry';
+import * as URL_REGISTRY from './urlRegistry';
 import * as DOWNLOADER from './download';
 import { STAT } from './util';
 import glob from 'fast-glob'
@@ -26,7 +26,7 @@ export class RuntimeDistribution {
 
   get internalPath() {
     return joinPath(
-      HOME_DIRECTORY,
+      URL_REGISTRY.HOME_DIRECTORY,
       '.cmake-ts',
       this.config.runtime,
       this.config.os,

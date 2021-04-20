@@ -9,62 +9,59 @@ const ELECTRON_MIRROR = process.env.ELECTRON_MIRROR || "https://atom.io/download
 
 export const HOME_DIRECTORY = process.env[(os.platform() === "win32") ? "USERPROFILE" : "HOME"] as string;
 
-export class URLRegistry {
-  public getPathsForConfig(config: BuildConfigurationDefaulted) {
-    switch (config.runtime) {
-      case "node": {
-        return (lt(config.runtimeVersion, "4.0.0") ? this.nodePrehistoric : this.nodeModern)(config);
-      }
-      case "iojs": {
-        return {
-          externalPath: `${IOJS_MIRROR}/v${config.runtimeVersion}/`,
-          winLibs: [{
-            dir: config.arch === 'x64' ? 'win-x64' : 'win-x86',
-            name: `${config.runtime}.lib`,
-          }],
-          tarPath: `${config.runtime}-v${config.runtimeVersion}.tar.gz`,
-          headerOnly: false,
-        };
-      }
-      case "electron": {
-        return {
-          externalPath: `${ELECTRON_MIRROR}/v${config.runtimeVersion}/`,
-          winLibs: [{
-            dir: config.arch === 'x64' ? 'x64' : '',
-            name: 'node.lib',
-          }],
-          tarPath: `node-v${config.runtimeVersion}.tar.gz`,
-          headerOnly: gte(config.runtimeVersion, "4.0.0-alpha"),
-        };
-      }
-      default: {
-        throw new Error(`Unsupported runtime ${config.runtime}`);
-      }
+export function getPathsForConfig(config: BuildConfigurationDefaulted) {
+  switch (config.runtime) {
+    case "node": {
+      return (lt(config.runtimeVersion, "4.0.0") ? nodePrehistoric : nodeModern)(config);
     }
-  }
-
-  private nodePrehistoric(config: BuildConfigurationDefaulted) {
-    return {
-      externalPath: `${NODE_MIRROR}/v${config.runtimeVersion}/`,
-      winLibs: [{
-        dir: config.arch === 'x64' ? 'x64' : '',
-        name: `${config.runtime}.lib`,
-      }],
-      tarPath: `${config.runtime}-v${config.runtimeVersion}.tar.gz`,
-      headerOnly: false,
-    };
-  }
-  private nodeModern(config: BuildConfigurationDefaulted) {
-    return {
-      externalPath: `${NODE_MIRROR}/v${config.runtimeVersion}/`,
-      winLibs: [{
-        dir: config.arch === 'x64' ? 'win-x64' : 'win-x86',
-        name: `${config.runtime}.lib`,
-      }],
-      tarPath: `${config.runtime}-v${config.runtimeVersion}-headers.tar.gz`,
-      headerOnly: true,
-    };
+    case "iojs": {
+      return {
+        externalPath: `${IOJS_MIRROR}/v${config.runtimeVersion}/`,
+        winLibs: [{
+          dir: config.arch === 'x64' ? 'win-x64' : 'win-x86',
+          name: `${config.runtime}.lib`,
+        }],
+        tarPath: `${config.runtime}-v${config.runtimeVersion}.tar.gz`,
+        headerOnly: false,
+      };
+    }
+    case "electron": {
+      return {
+        externalPath: `${ELECTRON_MIRROR}/v${config.runtimeVersion}/`,
+        winLibs: [{
+          dir: config.arch === 'x64' ? 'x64' : '',
+          name: 'node.lib',
+        }],
+        tarPath: `node-v${config.runtimeVersion}.tar.gz`,
+        headerOnly: gte(config.runtimeVersion, "4.0.0-alpha"),
+      };
+    }
+    default: {
+      throw new Error(`Unsupported runtime ${config.runtime}`);
+    }
   }
 }
 
-export const URL_REGISTRY = new URLRegistry();
+function nodePrehistoric(config: BuildConfigurationDefaulted) {
+  return {
+    externalPath: `${NODE_MIRROR}/v${config.runtimeVersion}/`,
+    winLibs: [{
+      dir: config.arch === 'x64' ? 'x64' : '',
+      name: `${config.runtime}.lib`,
+    }],
+    tarPath: `${config.runtime}-v${config.runtimeVersion}.tar.gz`,
+    headerOnly: false,
+  };
+}
+
+function nodeModern(config: BuildConfigurationDefaulted) {
+  return {
+    externalPath: `${NODE_MIRROR}/v${config.runtimeVersion}/`,
+    winLibs: [{
+      dir: config.arch === 'x64' ? 'win-x64' : 'win-x86',
+      name: `${config.runtime}.lib`,
+    }],
+    tarPath: `${config.runtime}-v${config.runtimeVersion}-headers.tar.gz`,
+    headerOnly: true,
+  };
+}

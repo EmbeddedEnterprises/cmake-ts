@@ -1,7 +1,7 @@
 import { BuildConfigurationDefaulted, BuildOptionsDefaulted } from './lib';
 import { RuntimeDistribution } from './runtimeDistribution';
 import { join, resolve } from 'path';
-import { URL_REGISTRY } from './urlRegistry';
+import * as URL_REGISTRY from './urlRegistry';
 import { locateNAN } from './locateNAN';
 
 export class ArgumentBuilder {
