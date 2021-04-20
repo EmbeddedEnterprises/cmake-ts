@@ -121,6 +121,8 @@ export async function defaultBuildOptions(configs: BuildOptions, nativeonly: boo
     configs.stagingDirectory = 'staging';
   }
 
+  /* eslint-disable require-atomic-updates */
+
   if (configs.cmakeToUse === undefined) {
     const cmake = await which('cmake');
     if (!cmake) {
