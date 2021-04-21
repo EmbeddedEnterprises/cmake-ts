@@ -183,7 +183,7 @@ export async function defaultBuildOptions(configs: BuildOptions, nativeonly: boo
       }
       configs.generatorBinary = make;
     } else {
-      console.error(`Unsupported generator ${  configs.generatorToUse}`);
+      console.error(`Unsupported generator ${configs.generatorToUse}`);
       process.exit(1);
     };
   }

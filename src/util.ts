@@ -51,7 +51,7 @@ export const EXEC = (command: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     exec(command, (err, stdout, stderr) => {
       if (err) {
-        reject(new Error(`${err.message  }\n${  stdout || stderr}`));
+        reject(new Error(`${err.message}\n${stdout || stderr}`));
       } else {
         resolve(stdout);
       }

@@ -68,8 +68,8 @@ const DEBUG_LOG = Boolean(process.env.CMAKETSDEBUG);
     console.log('[ DONE ]');
 
     process.stdout.write('> Building directories... ');
-    const stagingDir = resolve(join(configs.stagingDirectory, config.os, config.arch, config.runtime, `${dist.abi  }`));
-    const targetDir = resolve(join(configs.targetDirectory, config.os, config.arch, config.runtime, `${dist.abi  }`));
+    const stagingDir = resolve(join(configs.stagingDirectory, config.os, config.arch, config.runtime, `${dist.abi}`));
+    const targetDir = resolve(join(configs.targetDirectory, config.os, config.arch, config.runtime, `${dist.abi}`));
     console.log('[ DONE ]');
 
     console.log('--------------- CONFIG SUMMARY ---------------');

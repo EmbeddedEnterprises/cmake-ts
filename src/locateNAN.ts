@@ -10,7 +10,7 @@ export const locateNAN = async (projectRoot: string, customNANPackageName?: stri
   const isNan = await isNANModule(nanPath);
   if (isNan) {
     if(customNANPackageName) {
-      console.log(`Located custom nan package "${  customNANPackageName  }" at path ${  nanPath  }!`);
+      console.log(`Located custom nan package "${customNANPackageName}" at path ${nanPath}!`);
     }
     return nanPath;
   }
