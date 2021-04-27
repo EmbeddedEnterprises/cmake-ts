@@ -1,12 +1,15 @@
 import { BuildConfigurationDefaulted, BuildOptionsDefaulted } from './lib';
 import { RuntimeDistribution } from './runtimeDistribution';
 import { join, resolve } from 'path';
-import { URL_REGISTRY } from './urlRegistry';
+import * as URL_REGISTRY from './urlRegistry';
 import { locateNAN } from './locateNAN';
 
 export class ArgumentBuilder {
   //private buildDirectory: string;
   //private workDir: string;
+
+  // TODO the code uses a side effect of TypeScript constructors in defining the class props
+  /* eslint-disable-next-line no-useless-constructor */
   constructor (private config: BuildConfigurationDefaulted, private options: BuildOptionsDefaulted, private rtd: RuntimeDistribution) {
     //this.workDir = resolve(join(options.packageDirectory, options.targetDirectory, config.os, config.arch, config.runtime, config.runtimeVersion));
     //this.buildDirectory = resolve(join(this.workDir, options.buildType));
@@ -15,14 +18,14 @@ export class ArgumentBuilder {
   async buildCmakeCommandLine(): Promise<string> {
     let baseCommand = `"${this.options.cmakeToUse}" "${this.options.packageDirectory}" --no-warn-unused-cli`;
     const defines = await this.buildDefines();
-    baseCommand += " " + defines.map(d => `-D${d[0]}="${d[1]}"`).join(" ");
+    baseCommand += ` ${ defines.map(d => `-D${d[0]}="${d[1]}"`).join(" ")}`;
     if (this.options.generatorToUse !== 'native') {
       baseCommand += ` -G"${this.options.generatorToUse}"`;
     }
     return baseCommand;
   }
 
-  async buildGeneratorCommandLine(stagingDir: string): Promise<string> {
+  buildGeneratorCommandLine(stagingDir: string): string {
     return `"${this.options.cmakeToUse}" --build "${stagingDir}" --config "${this.options.buildType}"`;
   }
 
@@ -61,8 +64,8 @@ export class ArgumentBuilder {
 
     // Search NAN if installed and required
     const nan = await locateNAN(this.options.packageDirectory, this.options.customNANPackageName);
-    if(!!this.options.customNANPackageName && !nan) {
-      console.log('WARNING: customNANPackageName was specified, but module "' + this.options.customNANPackageName + '" could not be found!');
+    if(Boolean(this.options.customNANPackageName) && !nan) {
+      console.log(`WARNING: customNANPackageName was specified, but module "${this.options.customNANPackageName}" could not be found!`);
     }
     if (nan) {
       includes.push(nan);
@@ -75,7 +78,7 @@ export class ArgumentBuilder {
       ['NODE_ARCH', this.config.arch],
       ['NODE_PLATFORM', this.config.os],
       ['NODE_RUNTIMEVERSION', this.config.runtimeVersion],
-      ['NODE_ABI_VERSION', this.rtd.abi + ''],
+      ['NODE_ABI_VERSION', `${this.rtd.abi}`],
     );
 
     if (this.options.globalCMakeOptions && this.options.globalCMakeOptions.length > 0) {

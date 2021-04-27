@@ -97,8 +97,8 @@ export async function defaultBuildOptions(configs: BuildOptions, nativeonly: boo
       console.error('No `configurations` entry was found in the package.json');
       process.exit(1);
     }
-    configs.configurations = configs.configurations.filter(j => j.os === process.platform as any);
-    for (let config of configs.configurations) {
+    configs.configurations = configs.configurations.filter(j => j.os === process.platform);
+    for (const config of configs.configurations) {
       // A native build should be possible without toolchain file.
       config.toolchainFile = null;
     }
@@ -120,6 +120,8 @@ export async function defaultBuildOptions(configs: BuildOptions, nativeonly: boo
   if (configs.stagingDirectory === undefined) {
     configs.stagingDirectory = 'staging';
   }
+
+  /* eslint-disable require-atomic-updates */
 
   if (configs.cmakeToUse === undefined) {
     const cmake = await which('cmake');
@@ -181,7 +183,7 @@ export async function defaultBuildOptions(configs: BuildOptions, nativeonly: boo
       }
       configs.generatorBinary = make;
     } else {
-      console.error('Unsupported generator ' + configs.generatorToUse);
+      console.error(`Unsupported generator ${configs.generatorToUse}`);
       process.exit(1);
     };
   }
@@ -195,13 +197,4 @@ export async function defaultBuildOptions(configs: BuildOptions, nativeonly: boo
   // TODO move the code related to customNANPackageName
 
   return configs as BuildOptionsDefaulted;
-}
-
-
-export class CMakeWrapper {
-  constructor(private options: BuildOptions) {}
-
-  async runAllConfigs(): Promise<void> {
-    console.log(this.options);
-  }
 }

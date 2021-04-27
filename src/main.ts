@@ -1,18 +1,17 @@
-#!/usr/bin/env node
 
 import { BuildOptions, defaultBuildOptions, defaultBuildConfiguration } from './lib';
 import { join, resolve } from 'path';
 import { RuntimeDistribution } from './runtimeDistribution';
 import { ArgumentBuilder } from './argumentBuilder';
-import { STAT, RUN } from './util';
-import { ensureDir, remove, copy } from 'fs-extra';
+import { RUN } from './util';
+import { ensureDir, remove, copy, stat } from 'fs-extra';
 
-const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
+const DEBUG_LOG = Boolean(process.env.CMAKETSDEBUG);
 
 (async (): Promise<void> => {
 
   const argv = process.argv;
-  let packJson: {'cmake-ts': BuildOptions | undefined} & Record<string, any>;
+  let packJson: {'cmake-ts': BuildOptions | undefined} & Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   try {
     // TODO getting the path from the CLI
     packJson = require(resolve(join(process.cwd(), 'package.json')));
@@ -40,7 +39,7 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
   // Staging directory
   configs.stagingDirectory = resolve(join(configs.packageDirectory, configs.stagingDirectory));
 
-  const stagingExists = await STAT(configs.stagingDirectory);
+  const stagingExists = await stat(configs.stagingDirectory);
 
   console.log('running in', configs.packageDirectory, 'command', argv);
 
@@ -53,6 +52,8 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
   console.log('[ DONE ]');
 
   for (const configGiven of configs.configurations) {
+    /* eslint-disable no-await-in-loop */ // TODO we may be able to make some of these functions parallel
+
     const config = defaultBuildConfiguration(configGiven);
 
     const dist = new RuntimeDistribution(config);
@@ -67,8 +68,8 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
     console.log('[ DONE ]');
 
     process.stdout.write('> Building directories... ');
-    const stagingDir = resolve(join(configs.stagingDirectory, config.os, config.arch, config.runtime, dist.abi + ''));
-    const targetDir = resolve(join(configs.targetDirectory, config.os, config.arch, config.runtime, dist.abi + ''));
+    const stagingDir = resolve(join(configs.stagingDirectory, config.os, config.arch, config.runtime, `${dist.abi}`));
+    const targetDir = resolve(join(configs.targetDirectory, config.os, config.arch, config.runtime, `${dist.abi}`));
     console.log('[ DONE ]');
 
     console.log('--------------- CONFIG SUMMARY ---------------');
@@ -92,7 +93,7 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
     const argBuilder = new ArgumentBuilder(config, configs, dist);
     process.stdout.write('> Building CMake command line... ');
     const cmdline = await argBuilder.buildCmakeCommandLine();
-    const buildcmdline = await argBuilder.buildGeneratorCommandLine(stagingDir);
+    const buildcmdline = argBuilder.buildGeneratorCommandLine(stagingDir);
     console.log('[ DONE ]');
     if (DEBUG_LOG) {
       console.log('====> configure: ', cmdline);
@@ -125,7 +126,7 @@ const DEBUG_LOG = !!process.env.CMAKETSDEBUG;
 
     console.log('----------------- END CONFIG -----------------');
   }
-})().catch((err: any) => {
+})().catch((err: Error) => {
   console.log("Generic error occured", err);
   process.exit(1);
 });
