@@ -16,7 +16,7 @@ export function requireInclude(resolvedPath: string) {
         return requireResult.include;
       }
     }
-  } catch(e) {
+  } catch {
     // continue
   }
   return resolvedPath;
@@ -35,10 +35,10 @@ export async function resolvePackage(projectRoot: string, packageName: string) {
 }
 
 function resolveAsync(name: string, basedir: string) {
-  return new Promise<string | undefined>((promiseResolve, promiseReject) => {
+  return new Promise<string | undefined>((promiseResolve) => {
     resolve(name, { basedir }, (err, res) => {
       if (err) {
-        return promiseReject(err);
+        throw err;
       }
       return promiseResolve(res);
     })
