@@ -31,7 +31,7 @@ async function searchPackage(projectRoot: string, packageName: string): Promise<
     return null;
   }
   const nanPath = joinPath(projectRoot, 'node_modules', packageName);
-  const isNan = await isNANModule(nanPath);
+  const isNan = await dirHasFile(nanPath, `${packageName}.h`);
   if (isNan) {
     console.log(`Found package "${packageName}" at path ${nanPath}!`);
     return nanPath;
@@ -45,9 +45,9 @@ async function isNodeProject(dir: string) {
   return (await stat(pjson)).isFile() || (await stat(node_modules)).isDirectory();
 };
 
-async function isNANModule(dir: string) {
-  const header = joinPath(dir, "nan.h");
-  return (await stat(header)).isFile();
+async function dirHasFile(dir: string, fileName: string) {
+  const filePath = joinPath(dir, fileName);
+  return (await stat(filePath)).isFile();
 };
 
 function goUp(dir: string) {
