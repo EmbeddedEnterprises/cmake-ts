@@ -1,13 +1,13 @@
 import { join as joinPath, sep as pathSeparator, normalize as normalizePath } from 'path';
 import { stat } from 'fs-extra';
 
-export function locatePackage(projectRoot: string, customNANPackageName?: string): string | Promise<string | null> {
-  const packageName = customNANPackageName || 'nan';
-  // first resolve nan
+export function locatePackage(projectRoot: string, packageName: string): string | Promise<string | null> {
+  // first resolve
   const resolvedPath = resolvePackage(packageName);
   if (resolvedPath) {
     return resolvedPath;
   }
+  // if not found then search
   return searchPackage(projectRoot, packageName);
 }
 
