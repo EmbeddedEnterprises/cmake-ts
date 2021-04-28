@@ -66,7 +66,7 @@ export type BuildOptionsDefaulted = {
   // global cmake options and defines
   globalCMakeOptions?: { name: string, value: string }[];
   // custom native node abstractions package name if you use a fork instead of official nan
-  customNANPackageName?: string;
+  nodeAPI?: string;
 }
 
 export type BuildOptions = Partial<BuildOptionsDefaulted>;
@@ -194,7 +194,7 @@ export async function defaultBuildOptions(configs: BuildOptions, nativeonly: boo
   }
 
   // TODO move the code related to globalCMakeOptions
-  // TODO move the code related to customNANPackageName
+  // TODO move the code related to nodeAPI
 
   return configs as BuildOptionsDefaulted;
 }
