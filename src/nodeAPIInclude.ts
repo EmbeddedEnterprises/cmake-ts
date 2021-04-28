@@ -1,5 +1,6 @@
 import { join as joinPath, sep as pathSeparator, normalize as normalizePath } from 'path';
 import { stat, pathExists } from 'fs-extra';
+import resolve from 'resolve';
 
 export async function getNodeApiInclude(projectRoot: string, nodeAPI: string): Promise<string | null> {
   // first check if the given nodeAPI is a include path
@@ -7,7 +8,7 @@ export async function getNodeApiInclude(projectRoot: string, nodeAPI: string): P
     return nodeAPI;
   }
   // then resolve
-  const resolvedPath = resolvePackage(nodeAPI);
+  const resolvedPath = await resolvePackage(projectRoot, nodeAPI);
   if (typeof resolvedPath === "string") {
     return requireInclude(resolvedPath);
   }
@@ -32,11 +33,9 @@ function requireInclude(resolvedPath: string) {
   return resolvedPath;
 }
 
-// TODO use resolve package (?)
-function resolvePackage(packageName: string) {
+async function resolvePackage(projectRoot: string, packageName: string) {
   try {
-    /* eslint-disable-next-line @typescript-eslint/no-var-requires */
-    const resolvedPath = require.resolve(packageName);
+    const resolvedPath = await resolveAsync(packageName, projectRoot)
     if (resolvedPath !== undefined) {
       return resolvedPath;
     }
@@ -44,6 +43,17 @@ function resolvePackage(packageName: string) {
     // continue
   }
   return null;
+}
+
+function resolveAsync(name: string, basedir: string) {
+  return new Promise<string | undefined>((promiseResolve, promiseReject) => {
+    resolve(name, { basedir }, (err, res) => {
+      if (err) {
+        return promiseReject(err);
+      }
+      return promiseResolve(res);
+    })
+  })
 }
 
 async function searchPackage(projectRoot: string, packageName: string): Promise<string | null> {
