@@ -8,7 +8,7 @@ export function locatePackage(projectRoot: string, customNANPackageName?: string
   if (resolvedPath) {
     return resolvedPath;
   }
-  return searchPackage(projectRoot, packageName, customNANPackageName);
+  return searchPackage(projectRoot, packageName);
 }
 
 // TODO use resolve package
@@ -25,7 +25,7 @@ function resolvePackage(packageName: string) {
   return null;
 }
 
-async function searchPackage(projectRoot: string, packageName: string, customNANPackageName?: string): Promise<string | null> {
+async function searchPackage(projectRoot: string, packageName: string): Promise<string | null> {
   const isNode = await isNodeProject(projectRoot);
   if (!isNode) {
     return null;
@@ -33,12 +33,10 @@ async function searchPackage(projectRoot: string, packageName: string, customNAN
   const nanPath = joinPath(projectRoot, 'node_modules', packageName);
   const isNan = await isNANModule(nanPath);
   if (isNan) {
-    if(customNANPackageName) {
-      console.log(`Located custom nan package "${customNANPackageName}" at path ${nanPath}!`);
-    }
+    console.log(`Found package "${packageName}" at path ${nanPath}!`);
     return nanPath;
   }
-  return searchPackage(goUp(projectRoot), packageName, customNANPackageName);
+  return searchPackage(goUp(projectRoot), packageName);
 }
 
 async function isNodeProject(dir: string) {
