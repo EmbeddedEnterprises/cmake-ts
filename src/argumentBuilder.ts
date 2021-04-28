@@ -2,7 +2,7 @@ import { BuildConfigurationDefaulted, BuildOptionsDefaulted } from './lib';
 import { RuntimeDistribution } from './runtimeDistribution';
 import { join, resolve } from 'path';
 import * as URL_REGISTRY from './urlRegistry';
-import { locateNAN } from './locateNAN';
+import { locatePackage } from './locatePackage';
 
 export class ArgumentBuilder {
   //private buildDirectory: string;
@@ -63,7 +63,7 @@ export class ArgumentBuilder {
     }
 
     // Search NAN if installed and required
-    const nan = await locateNAN(this.options.packageDirectory, this.options.customNANPackageName);
+    const nan = await locatePackage(this.options.packageDirectory, this.options.customNANPackageName);
     if(Boolean(this.options.customNANPackageName) && !nan) {
       console.log(`WARNING: customNANPackageName was specified, but module "${this.options.customNANPackageName}" could not be found!`);
     }

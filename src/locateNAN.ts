@@ -1,12 +1,36 @@
 import { join as joinPath, sep as pathSeparator, normalize as normalizePath } from 'path';
 import { stat } from 'fs-extra';
 
-export async function locateNAN(projectRoot: string, customNANPackageName?: string): Promise<string | null> {
+export function locatePackage(projectRoot: string, customNANPackageName?: string): string | Promise<string | null> {
+  const packageName = customNANPackageName || 'nan';
+  // first resolve nan
+  const resolvedPath = resolvePackage(packageName);
+  if (resolvedPath) {
+    return resolvedPath;
+  }
+  return searchPackage(projectRoot, packageName, customNANPackageName);
+}
+
+// TODO use resolve package
+function resolvePackage(packageName: string) {
+  try {
+    /* eslint-disable-next-line @typescript-eslint/no-var-requires */
+    const resolvedPath = require.resolve(packageName);
+    if (resolvedPath !== undefined) {
+      return resolvedPath;
+    }
+  } catch {
+    // continue
+  }
+  return null;
+}
+
+async function searchPackage(projectRoot: string, packageName: string, customNANPackageName?: string): Promise<string | null> {
   const isNode = await isNodeProject(projectRoot);
   if (!isNode) {
     return null;
   }
-  const nanPath = joinPath(projectRoot, 'node_modules', customNANPackageName || 'nan');
+  const nanPath = joinPath(projectRoot, 'node_modules', packageName);
   const isNan = await isNANModule(nanPath);
   if (isNan) {
     if(customNANPackageName) {
@@ -14,7 +38,7 @@ export async function locateNAN(projectRoot: string, customNANPackageName?: stri
     }
     return nanPath;
   }
-  return locateNAN(goUp(projectRoot));
+  return searchPackage(goUp(projectRoot), packageName, customNANPackageName);
 }
 
 async function isNodeProject(dir: string) {
