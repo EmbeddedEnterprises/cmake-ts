@@ -1,7 +1,7 @@
 import { join as joinPath, sep as pathSeparator, normalize as normalizePath } from 'path';
 import { stat } from 'fs-extra';
 
-export const locateNAN = async (projectRoot: string, customNANPackageName?: string): Promise<string | null> => {
+export async function locateNAN(projectRoot: string, customNANPackageName?: string): Promise<string | null> {
   const isNode = await isNodeProject(projectRoot);
   if (!isNode) {
     return null;
@@ -17,18 +17,18 @@ export const locateNAN = async (projectRoot: string, customNANPackageName?: stri
   return locateNAN(goUp(projectRoot));
 }
 
-const isNodeProject = async (dir: string) => {
+async function isNodeProject(dir: string) {
   const pjson = joinPath(dir, 'package.json');
   const node_modules = joinPath(dir, 'node_modules');
   return (await stat(pjson)).isFile() || (await stat(node_modules)).isDirectory();
 };
 
-const isNANModule = async (dir: string) => {
+async function isNANModule(dir: string) {
   const header = joinPath(dir, "nan.h");
   return (await stat(header)).isFile();
 };
 
-const goUp = (dir: string) => {
+function goUp(dir: string) {
   const items = dir.split(pathSeparator);
   const scope = items[items.length - 2];
   if (scope && scope.charAt(0) === '@') {
