@@ -23,9 +23,14 @@ function requireInclude(resolvedPath: string) {
     if (typeof requireResult === "string") {
       // for NAN
       return requireResult;
-    } else if (typeof requireResult?.include_dir === "string") {
-      // for NAPI
-      return requireResult.include_dir;
+    } else if (typeof requireResult === "object") {
+      if (typeof requireResult.include_dir === "string") {
+        // for NAPI
+        return requireResult.include_dir;
+      } else if (typeof requireResult.include === "string") {
+        // for old NAPI
+        return requireResult.include;
+      }
     }
   } catch(e) {
     // continue
