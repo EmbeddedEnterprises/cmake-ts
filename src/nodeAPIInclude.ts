@@ -1,17 +1,38 @@
 import { join as joinPath, sep as pathSeparator, normalize as normalizePath } from 'path';
-import { stat } from 'fs-extra';
+import { stat, pathExists } from 'fs-extra';
 
-export function locatePackage(projectRoot: string, packageName: string): string | Promise<string | null> {
-  // first resolve
-  const resolvedPath = resolvePackage(packageName);
-  if (resolvedPath) {
-    return resolvedPath;
+export async function getNodeApiInclude(projectRoot: string, nodeAPI: string): Promise<string | null> {
+  // first check if the given nodeAPI is a include path
+  if (await pathExists(nodeAPI)) {
+    return nodeAPI;
+  }
+  // then resolve
+  const resolvedPath = resolvePackage(nodeAPI);
+  if (typeof resolvedPath === "string") {
+    return requireInclude(resolvedPath);
   }
   // if not found then search
-  return searchPackage(projectRoot, packageName);
+  return searchPackage(projectRoot, nodeAPI);
 }
 
-// TODO use resolve package
+function requireInclude(resolvedPath: string) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const requireResult = require(resolvedPath);
+    if (typeof requireResult === "string") {
+      // for NAN
+      return requireResult;
+    } else if (typeof requireResult?.include_dir === "string") {
+      // for NAPI
+      return requireResult.include_dir;
+    }
+  } catch(e) {
+    // continue
+  }
+  return resolvedPath;
+}
+
+// TODO use resolve package (?)
 function resolvePackage(packageName: string) {
   try {
     /* eslint-disable-next-line @typescript-eslint/no-var-requires */
@@ -30,11 +51,11 @@ async function searchPackage(projectRoot: string, packageName: string): Promise<
   if (!isNode) {
     return null;
   }
-  const nanPath = joinPath(projectRoot, 'node_modules', packageName);
-  const isNan = await dirHasFile(nanPath, `${packageName}.h`);
-  if (isNan) {
-    console.log(`Found package "${packageName}" at path ${nanPath}!`);
-    return nanPath;
+  const packagePath = joinPath(projectRoot, 'node_modules', packageName);
+  const hasHeader = await dirHasFile(packagePath, packageName === "node-addon-api" ? "napi.h" : `${packageName}.h`);
+  if (hasHeader) {
+    console.log(`Found package "${packageName}" at path ${packagePath}!`);
+    return packagePath;
   }
   return searchPackage(goUp(projectRoot), packageName);
 }
