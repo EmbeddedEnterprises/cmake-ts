@@ -1,5 +1,6 @@
 import { exec, spawn } from 'child_process';
 import splitargs from 'splitargs2';
+import { stat as rawStat, Stats } from 'fs-extra';
 
 export const GET_CMAKE_VS_GENERATOR = async (cmake: string, arch: string): Promise<string> =>{
   const generators = await EXEC_CAPTURE(`"${cmake}" -G`);
@@ -88,3 +89,15 @@ export const RUN = (command: string, cwd: string = process.cwd(), silent: boolea
     });
   });
 };
+
+/** Exception safe version of stat */
+export async function stat(...args: Parameters<typeof rawStat>) {
+  let stats: Stats
+  try {
+    stats = await rawStat(...args)
+  } catch {
+    // Returns an empty Stats which gives false/undefined for the methods.
+    stats = new Stats()
+  }
+  return stats
+}
