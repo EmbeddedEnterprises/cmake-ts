@@ -1,5 +1,6 @@
 import { join as joinPath, extname } from 'path';
-import { ensureDir, readFile, stat } from 'fs-extra';
+import { ensureDir, readFile } from 'fs-extra';
+import { stat } from './util';
 import urlJoin from 'url-join';
 import { Deferred } from 'queueable';
 import { BuildConfigurationDefaulted } from './lib';

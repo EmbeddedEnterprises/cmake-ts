@@ -1,5 +1,5 @@
 import { join as joinPath, sep as pathSeparator, normalize as normalizePath } from 'path';
-import { stat } from 'fs-extra';
+import { stat } from '../util';
 
 export async function searchPackage(projectRoot: string, packageName: string): Promise<string | null> {
   const isNode = await isNodeProject(projectRoot);
