@@ -2,8 +2,13 @@ import resolve from "resolve";
 
 export function requireInclude(resolvedPath: string) {
   try {
+    let consoleOutput: string | null = null;
+    const origConsole = console.log;
+    console.log = (msg: string) => { consoleOutput = msg };
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const requireResult = require(resolvedPath);
+    console.log = origConsole;
+
     if (typeof requireResult === "string") {
       // for NAN
       return requireResult;
@@ -14,6 +19,9 @@ export function requireInclude(resolvedPath: string) {
       } else if (typeof requireResult.include === "string") {
         // for old NAPI
         return requireResult.include;
+      } else if (consoleOutput !== null) {
+        // for recent NAN packages. Will open a PR with NAN.
+        return consoleOutput;
       }
     }
   } catch {
