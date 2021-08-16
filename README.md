@@ -12,6 +12,7 @@ Configuration is done entirely via `package.json`. You can specify multiple buil
 
 ```js
 "cmake-ts": {
+  "nodeAPI": "node-addon-api" // Specify the node API package such as `node-addon-api`, `nan`, or the path to a directory that has the nodeAPI header. By default `nan` is considered.
   "configurations": [
     {
       "os": "win32", // win32, linux and darwin are supported
@@ -39,8 +40,7 @@ Configuration is done entirely via `package.json`. You can specify multiple buil
   }, {
       "name": "CMAKE_EXPORT_COMPILE_COMMANDS",
       "value": "1"
-  }],
-  "customNANPackageName": "@myawesomenamespace/nan" //*Optionally*, you can specify a custom NAN (native node abstractions) package name here
+  }]
 }
 ```
 

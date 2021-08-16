@@ -2,7 +2,7 @@ import { BuildConfigurationDefaulted, BuildOptionsDefaulted } from './lib';
 import { RuntimeDistribution } from './runtimeDistribution';
 import { join, resolve } from 'path';
 import * as URL_REGISTRY from './urlRegistry';
-import { locateNAN } from './locateNAN';
+import { getNodeApiInclude } from './nodeAPIInclude';
 
 export class ArgumentBuilder {
   //private buildDirectory: string;
@@ -62,13 +62,13 @@ export class ArgumentBuilder {
       );
     }
 
-    // Search NAN if installed and required
-    const nan = await locateNAN(this.options.packageDirectory, this.options.customNANPackageName);
-    if(Boolean(this.options.customNANPackageName) && !nan) {
-      console.log(`WARNING: customNANPackageName was specified, but module "${this.options.customNANPackageName}" could not be found!`);
+    // Search nodeAPI if installed and required
+    const nodeApiInclude = await getNodeApiInclude(this.options.packageDirectory, this.options.nodeAPI ?? "nan");
+    if(Boolean(this.options.nodeAPI) && !nodeApiInclude) {
+      console.log(`WARNING: nodeAPI was specified, but module "${this.options.nodeAPI}" could not be found!`);
     }
-    if (nan) {
-      includes.push(nan);
+    if (nodeApiInclude) {
+      includes.push(nodeApiInclude);
     }
     // Pass includes to cmake
     retVal.push(['CMAKE_JS_INC', includes.join(';')]);

@@ -1,5 +1,6 @@
 import { join as joinPath, extname } from 'path';
-import { ensureDir, readFile, stat } from 'fs-extra';
+import { ensureDir, readFile } from 'fs-extra';
+import { stat } from './util';
 import urlJoin from 'url-join';
 import { Deferred } from 'queueable';
 import { BuildConfigurationDefaulted } from './lib';
@@ -69,9 +70,8 @@ export class RuntimeDistribution {
     }
     if (this.config.os === 'win32') {
       const libStats = await Promise.all(this.winLibs.map(lib => stat(lib)));
-      for (const libStat of libStats) {
-        libs = libs && libStat.isFile();
-      }
+      const libsAreFile = libStats.every(libStat => libStat.isFile())
+      libs = libsAreFile
     }
     return headers && libs;
   }
