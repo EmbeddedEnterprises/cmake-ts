@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 
 import { BuildOptions, defaultBuildOptions, defaultBuildConfiguration } from './lib';
 import { join, resolve } from 'path';
