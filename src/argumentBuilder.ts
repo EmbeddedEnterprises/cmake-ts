@@ -22,6 +22,7 @@ export class ArgumentBuilder {
     if (this.options.generatorToUse !== 'native') {
       baseCommand += ` -G"${this.options.generatorToUse}"`;
     }
+    console.log(baseCommand)
     return baseCommand;
   }
 
@@ -80,6 +81,9 @@ export class ArgumentBuilder {
       ['NODE_RUNTIMEVERSION', this.config.runtimeVersion],
       ['NODE_ABI_VERSION', `${this.rtd.abi}`],
     );
+
+    // push additional overrides
+    retVal.push(['CMAKE_JS_DEFINES', this.config.additionalDefines.join(';')]);
 
     if (this.options.globalCMakeOptions && this.options.globalCMakeOptions.length > 0) {
       this.options.globalCMakeOptions.forEach(j => {

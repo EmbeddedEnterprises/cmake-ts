@@ -1,11 +1,14 @@
 #!/usr/bin/env node
 
+/* eslint-disable node/shebang */
+
 import { BuildOptions, defaultBuildOptions, defaultBuildConfiguration } from './lib';
 import { join, resolve } from 'path';
 import { RuntimeDistribution } from './runtimeDistribution';
 import { ArgumentBuilder } from './argumentBuilder';
 import { RUN } from './util';
 import { ensureDir, remove, copy, pathExists } from 'fs-extra';
+import { applyOverrides } from './override';
 
 const DEBUG_LOG = Boolean(process.env.CMAKETSDEBUG);
 
@@ -53,7 +56,8 @@ const DEBUG_LOG = Boolean(process.env.CMAKETSDEBUG);
   console.log('[ DONE ]');
 
   for (const configGiven of configs.configurations) {
-    /* eslint-disable no-await-in-loop */ // TODO we may be able to make some of these functions parallel
+    /* eslint-disable no-await-in-loop */
+    // TODO we may be able to make some of these functions parallel
 
     const config = defaultBuildConfiguration(configGiven);
 
@@ -72,6 +76,10 @@ const DEBUG_LOG = Boolean(process.env.CMAKETSDEBUG);
     const stagingDir = resolve(join(configs.stagingDirectory, config.os, config.arch, config.runtime, `${dist.abi}`));
     const targetDir = resolve(join(configs.targetDirectory, config.os, config.arch, config.runtime, `${dist.abi}`));
     console.log('[ DONE ]');
+
+    process.stdout.write('> Applying overrides... ');
+    const appliedOverrides = applyOverrides(config);
+    console.log(`[ DONE, ${appliedOverrides} applied ]`);
 
     console.log('--------------- CONFIG SUMMARY ---------------');
     console.log('OS/Arch:', config.os, config.arch);
