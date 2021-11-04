@@ -1,6 +1,8 @@
 import which from 'which';
 import { GET_CMAKE_VS_GENERATOR } from './util';
 
+export type ArrayOrSingle<T> = T | T[];
+
 export type BuildConfigurationDefaulted = {
   os: typeof process.platform,
   arch: typeof process.arch,
@@ -8,6 +10,9 @@ export type BuildConfigurationDefaulted = {
   runtimeVersion: string,
   toolchainFile: string | null,
   cmakeOptions?: { name: string, value: string }[];
+
+  // list of additional definitions to fixup node quirks for some specific versions
+  additionalDefines: string[];
 };
 
 export type BuildConfiguration = Partial<BuildConfigurationDefaulted>;
@@ -41,6 +46,8 @@ export function defaultBuildConfiguration(config: BuildConfiguration): BuildConf
     config.cmakeOptions = [];
   }
 
+  config.additionalDefines = [];
+
   return config as BuildConfigurationDefaulted;
 }
 
@@ -67,6 +74,16 @@ export type BuildOptionsDefaulted = {
   globalCMakeOptions?: { name: string, value: string }[];
   // custom native node abstractions package name if you use a fork instead of official nan
   nodeAPI?: string;
+}
+
+export type OverrideConfig = {
+  match: {
+    os?: ArrayOrSingle<typeof process.platform>;
+    arch?: ArrayOrSingle<typeof process.arch>;
+    runtime?: ArrayOrSingle<string>;
+    runtimeVersion?: ArrayOrSingle<string>;
+  };
+  addDefines: ArrayOrSingle<string>;
 }
 
 export type BuildOptions = Partial<BuildOptionsDefaulted>;
@@ -192,6 +209,8 @@ export async function defaultBuildOptions(configs: BuildOptions, nativeonly: boo
     configs.buildType = "Release";
     console.warn("`buildType` was missing. Considering 'Release'");
   }
+
+  configs.configurations?.forEach(v => { v.additionalDefines = [] });
 
   // TODO move the code related to globalCMakeOptions
   // TODO move the code related to nodeAPI
