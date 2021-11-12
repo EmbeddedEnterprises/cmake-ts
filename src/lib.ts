@@ -88,6 +88,14 @@ export type OverrideConfig = {
 
 export type BuildOptions = Partial<BuildOptionsDefaulted>;
 
+async function whichWrapped(cmd: string): Promise<string | null> {
+  try {
+    return await which(cmd);
+  } catch (err) {
+    return null;
+  }
+}
+
 export async function defaultBuildOptions(configs: BuildOptions, nativeonly: boolean, osonly: boolean): Promise<BuildOptionsDefaulted> {
 
   // Handle missing configs.configurations
@@ -141,7 +149,7 @@ export async function defaultBuildOptions(configs: BuildOptions, nativeonly: boo
   /* eslint-disable require-atomic-updates */
 
   if (configs.cmakeToUse === undefined) {
-    const cmake = await which('cmake');
+    const cmake = await whichWrapped('cmake');
     if (!cmake) {
       console.error('cmake binary not found, try to specify \'cmakeToUse\'');
       process.exit(1);
@@ -150,10 +158,10 @@ export async function defaultBuildOptions(configs: BuildOptions, nativeonly: boo
   }
 
   // handle missing generator
-  const ninjaP = which('ninja');
-  const makeP = which('make');
-  let ninja: string | undefined;
-  let make: string | undefined;
+  const ninjaP = whichWrapped('ninja');
+  const makeP = whichWrapped('make');
+  let ninja: string | null;
+  let make: string | null;
   if (configs.generatorToUse === undefined) {
     console.log('no generator specified, checking ninja');
     ninja = await ninjaP;
