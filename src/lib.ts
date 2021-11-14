@@ -6,6 +6,7 @@ export type ArrayOrSingle<T> = T | T[];
 
 export type BuildConfigurationDefaulted = {
   name: string,
+  dev: boolean,
   os: typeof process.platform,
   arch: typeof process.arch,
   runtime: string,
@@ -22,6 +23,9 @@ export type BuildConfiguration = Partial<BuildConfigurationDefaulted>;
 export function defaultBuildConfiguration(config: BuildConfiguration): BuildConfigurationDefaulted {
   if (config.name === undefined) {
     config.name = '' //Empty name should be fine (TM)
+  }
+  if (config.dev === undefined) {
+    config.dev = false
   }
   if (config.os === undefined) {
     config.os = process.platform;
@@ -129,6 +133,24 @@ export async function defaultBuildOptions(configs: BuildOptions, buildmode: Buil
       // A native build should be possible without toolchain file.
       config.toolchainFile = null;
     }
+  }
+  if (buildmode.type === 'dev-os-only') {
+    console.log(
+      `--------------------------------------------------
+        WARNING: Building dev-os-only package
+        WARNING: DO NOT SHIP THE RESULTING PACKAGE
+       --------------------------------------------------`);
+    if (configs.configurations === undefined) {
+      console.error('No `configurations` entry was found in the package.json');
+      process.exit(1);
+    }
+    const candidateConfig = configs.configurations.find(j => j.os === process.platform && j.dev)
+    if (candidateConfig === undefined) {
+      console.error(`No matching entry with \`dev == true\` and \`os == ${process.platform}\` in \`configurations\``);
+      process.exit(1);
+    }
+    configs.configurations = [candidateConfig]
+    //todo toolchain file?
   }
 
 
