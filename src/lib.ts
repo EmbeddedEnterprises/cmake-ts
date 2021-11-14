@@ -129,6 +129,10 @@ export async function defaultBuildOptions(configs: BuildOptions, buildmode: Buil
       process.exit(1);
     }
     configs.configurations = configs.configurations.filter(j => j.os === process.platform);
+    if(configs.configurations.length === 0) {
+      console.error(`No configuration left to build!`);
+      process.exit(1);
+    }
     for (const config of configs.configurations) {
       // A native build should be possible without toolchain file.
       config.toolchainFile = null;
@@ -151,6 +155,18 @@ export async function defaultBuildOptions(configs: BuildOptions, buildmode: Buil
     }
     configs.configurations = [candidateConfig]
     //todo toolchain file?
+  }
+  if(buildmode.type == 'named-configs') {
+    if (configs.configurations === undefined) {
+      console.error('No `configurations` entry was found in the package.json');
+      process.exit(1);
+    }
+    //unnamed configs are always filtered out
+    configs.configurations = configs.configurations.filter(j => (!!j.name) ? buildmode.configsToBuild.includes(j.name) : false)
+    if(configs.configurations.length === 0) {
+      console.error(`No configuration left to build!`);
+      process.exit(1);
+    }
   }
 
 
