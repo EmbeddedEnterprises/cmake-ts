@@ -20,22 +20,22 @@ export type BuildConfiguration = Partial<BuildConfigurationDefaulted>;
 export function defaultBuildConfiguration(config: BuildConfiguration): BuildConfigurationDefaulted {
   if (config.os === undefined) {
     config.os = process.platform;
-    console.warn(`'os' was missing in the 'configurations'. Considering the current operating system ${config.os}`);
+    console.warn(`'os' was missing in the 'configurations'. Defaulting to the current operating system ${config.os}`);
   }
 
   if (config.arch === undefined) {
     config.arch = process.arch;
-    console.warn(`'arch' was missing in the 'configurations'. Considering the current architecture ${config.arch}`);
+    console.warn(`'arch' was missing in the 'configurations'. Defaulting to the current architecture ${config.arch}`);
   }
 
   if (config.runtime === undefined) {
     config.runtime = "node";
-    console.warn("`runtime` was missing in the `configurations`. Considering `node`");
+    console.warn("`runtime` was missing in the `configurations`. Defaulting to `node`");
   }
 
   if (config.runtimeVersion === undefined) {
     config.runtimeVersion = process.versions.node;
-    console.warn(`'runtimeVersion' was missing in the 'configurations'. Considering the current runtimeVersion ${config.runtimeVersion}`);
+    console.warn(`'runtimeVersion' was missing in the 'configurations'. Defaulting to the current runtimeVersion ${config.runtimeVersion}`);
   }
 
   if (config.toolchainFile === undefined) {
