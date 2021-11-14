@@ -1,5 +1,6 @@
 import which from 'which';
 import { GET_CMAKE_VS_GENERATOR } from './util';
+import { BuildMode } from './buildMode'
 
 export type ArrayOrSingle<T> = T | T[];
 
@@ -76,7 +77,7 @@ export type BuildOptionsDefaulted = {
   buildType: string,
   // global cmake options and defines
   globalCMakeOptions?: { name: string, value: string }[];
-  // custom native node abstractions package name if you use a fork instead of official nan
+  // node abstraction API to use (e.g. nan or node-addon-api)
   nodeAPI?: string;
 }
 
@@ -100,23 +101,20 @@ async function whichWrapped(cmd: string): Promise<string | null> {
   }
 }
 
-export async function defaultBuildOptions(configs: BuildOptions, nativeonly: boolean, osonly: boolean): Promise<BuildOptionsDefaulted> {
+export async function defaultBuildOptions(configs: BuildOptions, buildmode: BuildMode): Promise<BuildOptionsDefaulted> {
 
   // Handle missing configs.configurations
   // TODO handle without nativeonly and osonly
-  if (nativeonly && osonly) {
-    console.error(`'osonly' and 'nativeonly' have been specified together. exiting.`);
-    process.exit(1);
-  }
-  if (nativeonly) {
+  if (buildmode.type === 'nativeonly') {
     console.log(
     `--------------------------------------------------
       WARNING: Building only for the current runtime.
       WARNING: DO NOT SHIP THE RESULTING PACKAGE
      --------------------------------------------------`);
+     //Yeah this pretty ugly, but whatever
     configs.configurations = [defaultBuildConfiguration({})];
   }
-  if (osonly) {
+  if (buildmode.type === 'osonly') {
     console.log(
     `--------------------------------------------------
       WARNING: Building only for the current OS.

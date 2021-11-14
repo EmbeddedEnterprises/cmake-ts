@@ -9,12 +9,13 @@ import { ArgumentBuilder } from './argumentBuilder';
 import { RUN } from './util';
 import { ensureDir, remove, copy, pathExists } from 'fs-extra';
 import { applyOverrides } from './override';
+import { determineBuildMode } from './buildMode'
 
 const DEBUG_LOG = Boolean(process.env.CMAKETSDEBUG);
 
 (async (): Promise<void> => {
 
-  const argv = process.argv;
+  const argv = process.argv.slice(2); //Yeah, we don't need advanced command line handling yet
   let packJson: {'cmake-ts': BuildOptions | undefined} & Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   try {
     // TODO getting the path from the CLI
@@ -31,11 +32,10 @@ const DEBUG_LOG = Boolean(process.env.CMAKETSDEBUG);
   }
 
   // check if `nativeonly` or `osonly` option is specified
-  const nativeonly = argv.includes('nativeonly');
-  const osonly = argv.includes('osonly');
+  const buildMode = await determineBuildMode(argv);
 
   // set the missing options to their default value
-  const configs = await defaultBuildOptions(configsGiven, nativeonly, osonly);
+  const configs = await defaultBuildOptions(configsGiven, buildMode);
 
   // Setup directory structure in configs
   // Target directory
