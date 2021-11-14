@@ -64,7 +64,10 @@ export class ArgumentBuilder {
     }
 
     // Search nodeAPI if installed and required
-    const nodeApiInclude = await getNodeApiInclude(this.options.packageDirectory, this.options.nodeAPI ?? "nan");
+    if(this.options.nodeAPI?.includes('nan')) {
+      console.log(`WARNING: specified nodeAPI ${this.options.nodeAPI} seems to be nan - The usage of nan is discouraged due to subtle and hard-to-fix ABI issues! Consider using node-addon-api / N-API instead!`)
+    }
+    const nodeApiInclude = await getNodeApiInclude(this.options.packageDirectory, this.options.nodeAPI ?? "node-addon-api");
     if(Boolean(this.options.nodeAPI) && !nodeApiInclude) {
       console.log(`WARNING: nodeAPI was specified, but module "${this.options.nodeAPI}" could not be found!`);
     }
