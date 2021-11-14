@@ -86,7 +86,7 @@ const DEBUG_LOG = Boolean(process.env.CMAKETSDEBUG);
     console.log('Runtime:', config.runtime, config.runtimeVersion);
     console.log('Target ABI:', dist.abi);
     console.log('Toolchain File:', config.toolchainFile);
-    console.log('Custom options:', (config.CMakeOptions && config.CMakeOptions.length > 0) ? 'yes' : 'no');
+    console.log('Custom CMake options:', (config.CMakeOptions && config.CMakeOptions.length > 0) ? 'yes' : 'no');
     console.log('Staging area:', stagingDir);
     console.log('Target directory:', targetDir);
     console.log('Build Type', configs.buildType);
