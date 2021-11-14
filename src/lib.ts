@@ -4,6 +4,7 @@ import { GET_CMAKE_VS_GENERATOR } from './util';
 export type ArrayOrSingle<T> = T | T[];
 
 export type BuildConfigurationDefaulted = {
+  name: string,
   os: typeof process.platform,
   arch: typeof process.arch,
   runtime: string,
@@ -18,6 +19,9 @@ export type BuildConfigurationDefaulted = {
 export type BuildConfiguration = Partial<BuildConfigurationDefaulted>;
 
 export function defaultBuildConfiguration(config: BuildConfiguration): BuildConfigurationDefaulted {
+  if (config.name === undefined) {
+    config.name = '' //Empty name should be fine (TM)
+  }
   if (config.os === undefined) {
     config.os = process.platform;
     console.warn(`'os' was missing in the 'configurations'. Defaulting to the current operating system ${config.os}`);
@@ -46,7 +50,7 @@ export function defaultBuildConfiguration(config: BuildConfiguration): BuildConf
     config.CMakeOptions = [];
   }
 
-  config.additionalDefines = [];
+  config.additionalDefines = []; //internal variable, not supposed to be set by the user
 
   return config as BuildConfigurationDefaulted;
 }

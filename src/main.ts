@@ -82,6 +82,7 @@ const DEBUG_LOG = Boolean(process.env.CMAKETSDEBUG);
     console.log(`[ DONE, ${appliedOverrides} applied ]`);
 
     console.log('--------------- CONFIG SUMMARY ---------------');
+    console.log('Name: ', config.name ? config.name : "N/A");
     console.log('OS/Arch:', config.os, config.arch);
     console.log('Runtime:', config.runtime, config.runtimeVersion);
     console.log('Target ABI:', dist.abi);
