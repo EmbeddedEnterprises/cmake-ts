@@ -19,7 +19,13 @@ Configuration is done entirely via `package.json`. You can specify multiple buil
       "arch": "x64", // x64, x86 should work
       "runtime": "electron", // node or electron
       "runtimeVersion": "4.0.1", // Version of the runtime which it is built
-      "toolchainFile": "/windows.cmake" // CMake Toolchain file to use for crosscompiling
+      "toolchainFile": "/windows.cmake" // CMake Toolchain file to use for crosscompiling,
+      "CMakeOptions": [ //Same syntax as for the globalCMakeOptions
+        {
+          "name": "MY_CMAKE_OPTION",
+          "value": "my_value",
+        }
+      ]
     }, // more build configurations...
     {
       "os": "linux", // win32, linux and darwin are supported
