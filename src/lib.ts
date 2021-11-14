@@ -9,7 +9,7 @@ export type BuildConfigurationDefaulted = {
   runtime: string,
   runtimeVersion: string,
   toolchainFile: string | null,
-  cmakeOptions?: { name: string, value: string }[];
+  CMakeOptions?: { name: string, value: string }[];
 
   // list of additional definitions to fixup node quirks for some specific versions
   additionalDefines: string[];
@@ -42,8 +42,8 @@ export function defaultBuildConfiguration(config: BuildConfiguration): BuildConf
     config.toolchainFile = null;
   }
 
-  if (config.cmakeOptions === undefined) {
-    config.cmakeOptions = [];
+  if (config.CMakeOptions === undefined) {
+    config.CMakeOptions = [];
   }
 
   config.additionalDefines = [];

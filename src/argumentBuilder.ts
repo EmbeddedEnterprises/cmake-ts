@@ -93,8 +93,8 @@ export class ArgumentBuilder {
         retVal.push([j.name, j.value.replace(/\$ROOT\$/g, resolve(this.options.packageDirectory))]);
       });
     }
-    if (this.config.cmakeOptions && this.config.cmakeOptions.length > 0) {
-      this.config.cmakeOptions.forEach(j => {
+    if (this.config.CMakeOptions && this.config.CMakeOptions.length > 0) {
+      this.config.CMakeOptions.forEach(j => {
         retVal.push([j.name, j.value.replace(/\$ROOT\$/g, resolve(this.options.packageDirectory))]);
       });
     }
