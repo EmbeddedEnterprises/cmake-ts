@@ -34,6 +34,6 @@ export async function determineBuildMode(argv: string[]): Promise<BuildMode> {
     }
 
     //Yeah whatever, we don't have any proper error handling anyway at the moment
-    console.error(`Unknown command line option ${argv[0]} - Valid are 'nativeonly', 'osonly' and omitted`);
+    console.error(`Unknown command line option ${argv[0]} - Valid are none/omitted, 'nativeonly', 'osonly', 'dev-os-only' and 'named-configs'`);
     process.exit(1);
 }

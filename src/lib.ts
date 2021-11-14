@@ -13,6 +13,7 @@ export type BuildConfigurationDefaulted = {
   runtimeVersion: string,
   toolchainFile: string | null,
   CMakeOptions?: { name: string, value: string }[];
+  addonSubdirectory: string,
 
   // list of additional definitions to fixup node quirks for some specific versions
   additionalDefines: string[];
@@ -53,6 +54,9 @@ export function defaultBuildConfiguration(config: BuildConfiguration): BuildConf
 
   if (config.CMakeOptions === undefined) {
     config.CMakeOptions = [];
+  }
+  if (config.addonSubdirectory === undefined) {
+    config.addonSubdirectory == ''
   }
 
   config.additionalDefines = []; //internal variable, not supposed to be set by the user
