@@ -56,10 +56,8 @@ export async function downloadToString(url: string): Promise<string> {
   return result.toString()
 }
 
-export async function downloadFile(url: string, options: string | DownloadOptions): Promise<string| null> {
-  if (isString(options)) {
-    options = { path: options };
-  }
+export async function downloadFile(url: string, opts: string | DownloadOptions): Promise<string| null> {
+  const options = isString(opts) ? { path: opts } : opts;
 
   const result = createWriteStream(options.path as string);
   const sum = await downloadToStream(url, result, options.hashType);
@@ -69,10 +67,9 @@ export async function downloadFile(url: string, options: string | DownloadOption
   return sum;
 }
 
-export async function downloadTgz(url: string, options: string | DownloadOptions): Promise<string | null> {
-  if (isString(options)) {
-    options = { cwd: options };
-  }
+export async function downloadTgz(url: string, opts: string | DownloadOptions): Promise<string | null> {
+  const options = isString(opts) ? { path: opts } : opts;
+
   const gunzip = createGunzip();
   const extractor = extractTar(options);
   gunzip.pipe(extractor);
@@ -83,10 +80,9 @@ export async function downloadTgz(url: string, options: string | DownloadOptions
   return sum;
 }
 
-export async function downloadZip(url: string, options: string | DownloadOptions): Promise<string | null> {
-  if (isString(options)) {
-    options = { path: options };
-  }
+export async function downloadZip(url: string, opts: string | DownloadOptions): Promise<string | null> {
+  const options = isString(opts) ? { path: opts } : opts;
+
   const extractor = extractZip({ path: options.path as string });
   const sum = await downloadToStream(url, extractor, options.hashType);
   if (!checkHashSum(sum, options)) {

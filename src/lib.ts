@@ -1,15 +1,19 @@
 import which from 'which';
 import { GET_CMAKE_VS_GENERATOR } from './util';
+import { BuildMode } from './buildMode'
 
 export type ArrayOrSingle<T> = T | T[];
 
 export type BuildConfigurationDefaulted = {
+  name: string,
+  dev: boolean,
   os: typeof process.platform,
   arch: typeof process.arch,
   runtime: string,
   runtimeVersion: string,
   toolchainFile: string | null,
-  cmakeOptions?: { name: string, value: string }[];
+  CMakeOptions?: { name: string, value: string }[];
+  addonSubdirectory: string,
 
   // list of additional definitions to fixup node quirks for some specific versions
   additionalDefines: string[];
@@ -18,35 +22,49 @@ export type BuildConfigurationDefaulted = {
 export type BuildConfiguration = Partial<BuildConfigurationDefaulted>;
 
 export function defaultBuildConfiguration(config: BuildConfiguration): BuildConfigurationDefaulted {
+  if (config.name === undefined) {
+    config.name = '' //Empty name should be fine (TM)
+  }
+  if (config.dev === undefined) {
+    config.dev = false
+  }
   if (config.os === undefined) {
     config.os = process.platform;
-    console.warn(`'os' was missing in the 'configurations'. Considering the current operating system ${config.os}`);
+    console.warn(`'os' was missing in the 'configurations'. Defaulting to the current operating system ${config.os}`);
   }
 
   if (config.arch === undefined) {
     config.arch = process.arch;
-    console.warn(`'arch' was missing in the 'configurations'. Considering the current architecture ${config.arch}`);
+    console.warn(`'arch' was missing in the 'configurations'. Defaulting to the current architecture ${config.arch}`);
   }
 
   if (config.runtime === undefined) {
     config.runtime = "node";
-    console.warn("`runtime` was missing in the `configurations`. Considering `node`");
+    console.warn("`runtime` was missing in the `configurations`. Defaulting to `node`");
   }
 
   if (config.runtimeVersion === undefined) {
     config.runtimeVersion = process.versions.node;
-    console.warn(`'runtimeVersion' was missing in the 'configurations'. Considering the current runtimeVersion ${config.runtimeVersion}`);
+    console.warn(`'runtimeVersion' was missing in the 'configurations'. Defaulting to the current runtimeVersion ${config.runtimeVersion}`);
   }
 
   if (config.toolchainFile === undefined) {
     config.toolchainFile = null;
   }
 
-  if (config.cmakeOptions === undefined) {
-    config.cmakeOptions = [];
+  if (config.CMakeOptions === undefined) {
+    config.CMakeOptions = [];
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if ((config as any).cmakeOptions !== undefined) {
+    console.warn('cmakeOptions was specified which was disabled in the 0.3.0 release. Please rename it to CMakeOptions');
   }
 
-  config.additionalDefines = [];
+  if (config.addonSubdirectory === undefined) {
+    config.addonSubdirectory = ''
+  }
+
+  config.additionalDefines = []; //internal variable, not supposed to be set by the user
 
   return config as BuildConfigurationDefaulted;
 }
@@ -72,7 +90,7 @@ export type BuildOptionsDefaulted = {
   buildType: string,
   // global cmake options and defines
   globalCMakeOptions?: { name: string, value: string }[];
-  // custom native node abstractions package name if you use a fork instead of official nan
+  // node abstraction API to use (e.g. nan or node-addon-api)
   nodeAPI?: string;
 }
 
@@ -96,23 +114,20 @@ async function whichWrapped(cmd: string): Promise<string | null> {
   }
 }
 
-export async function defaultBuildOptions(configs: BuildOptions, nativeonly: boolean, osonly: boolean): Promise<BuildOptionsDefaulted> {
+export async function defaultBuildOptions(configs: BuildOptions, buildmode: BuildMode): Promise<BuildOptionsDefaulted> {
 
   // Handle missing configs.configurations
   // TODO handle without nativeonly and osonly
-  if (nativeonly && osonly) {
-    console.error(`'osonly' and 'nativeonly' have been specified together. exiting.`);
-    process.exit(1);
-  }
-  if (nativeonly) {
+  if (buildmode.type === 'nativeonly') {
     console.log(
     `--------------------------------------------------
       WARNING: Building only for the current runtime.
       WARNING: DO NOT SHIP THE RESULTING PACKAGE
      --------------------------------------------------`);
+     //Yeah this pretty ugly, but whatever
     configs.configurations = [defaultBuildConfiguration({})];
   }
-  if (osonly) {
+  if (buildmode.type === 'osonly') {
     console.log(
     `--------------------------------------------------
       WARNING: Building only for the current OS.
@@ -123,9 +138,43 @@ export async function defaultBuildOptions(configs: BuildOptions, nativeonly: boo
       process.exit(1);
     }
     configs.configurations = configs.configurations.filter(j => j.os === process.platform);
+    if(configs.configurations.length === 0) {
+      console.error(`No configuration left to build!`);
+      process.exit(1);
+    }
     for (const config of configs.configurations) {
       // A native build should be possible without toolchain file.
       config.toolchainFile = null;
+    }
+  }
+  if (buildmode.type === 'dev-os-only') {
+    console.log(
+      `--------------------------------------------------
+        WARNING: Building dev-os-only package
+        WARNING: DO NOT SHIP THE RESULTING PACKAGE
+       --------------------------------------------------`);
+    if (configs.configurations === undefined) {
+      console.error('No `configurations` entry was found in the package.json');
+      process.exit(1);
+    }
+    const candidateConfig = configs.configurations.find(j => j.os === process.platform && j.dev)
+    if (candidateConfig === undefined) {
+      console.error(`No matching entry with \`dev == true\` and \`os == ${process.platform}\` in \`configurations\``);
+      process.exit(1);
+    }
+    configs.configurations = [candidateConfig]
+    //todo toolchain file?
+  }
+  if(buildmode.type === 'named-configs') {
+    if (configs.configurations === undefined) {
+      console.error('No `configurations` entry was found in the package.json');
+      process.exit(1);
+    }
+    //unnamed configs are always filtered out
+    configs.configurations = configs.configurations.filter(j => (j.name ? buildmode.configsToBuild.includes(j.name) : false))
+    if(configs.configurations.length === 0) {
+      console.error(`No configuration left to build!`);
+      process.exit(1);
     }
   }
 

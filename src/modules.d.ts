@@ -9,6 +9,7 @@ declare module "memory-stream" {
         private buffer;
         private options;
         constructor(options?: MemoryStreamOptions);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         _write(chunk: any, encoding: BufferEncoding, callback: (error?: Error | null) => void): void;
         get(): Buffer;
         toString(): string;

@@ -9,12 +9,13 @@ import { ArgumentBuilder } from './argumentBuilder';
 import { RUN } from './util';
 import { ensureDir, remove, copy, pathExists } from 'fs-extra';
 import { applyOverrides } from './override';
+import { determineBuildMode } from './buildMode'
 
 const DEBUG_LOG = Boolean(process.env.CMAKETSDEBUG);
 
 (async (): Promise<void> => {
 
-  const argv = process.argv;
+  const argv = process.argv.slice(2); //Yeah, we don't need advanced command line handling yet
   let packJson: {'cmake-ts': BuildOptions | undefined} & Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   try {
     // TODO getting the path from the CLI
@@ -31,11 +32,10 @@ const DEBUG_LOG = Boolean(process.env.CMAKETSDEBUG);
   }
 
   // check if `nativeonly` or `osonly` option is specified
-  const nativeonly = argv.includes('nativeonly');
-  const osonly = argv.includes('osonly');
+  const buildMode = await determineBuildMode(argv);
 
   // set the missing options to their default value
-  const configs = await defaultBuildOptions(configsGiven, nativeonly, osonly);
+  const configs = await defaultBuildOptions(configsGiven, buildMode);
 
   // Setup directory structure in configs
   // Target directory
@@ -73,8 +73,8 @@ const DEBUG_LOG = Boolean(process.env.CMAKETSDEBUG);
     console.log('[ DONE ]');
 
     process.stdout.write('> Building directories... ');
-    const stagingDir = resolve(join(configs.stagingDirectory, config.os, config.arch, config.runtime, `${dist.abi}`));
-    const targetDir = resolve(join(configs.targetDirectory, config.os, config.arch, config.runtime, `${dist.abi}`));
+    const stagingDir = resolve(join(configs.stagingDirectory, config.os, config.arch, config.runtime, `${dist.abi}`, config.addonSubdirectory));
+    const targetDir = resolve(join(configs.targetDirectory, config.os, config.arch, config.runtime, `${dist.abi}`, config.addonSubdirectory));
     console.log('[ DONE ]');
 
     process.stdout.write('> Applying overrides... ');
@@ -82,11 +82,12 @@ const DEBUG_LOG = Boolean(process.env.CMAKETSDEBUG);
     console.log(`[ DONE, ${appliedOverrides} applied ]`);
 
     console.log('--------------- CONFIG SUMMARY ---------------');
+    console.log('Name: ', config.name ? config.name : "N/A");
     console.log('OS/Arch:', config.os, config.arch);
     console.log('Runtime:', config.runtime, config.runtimeVersion);
     console.log('Target ABI:', dist.abi);
     console.log('Toolchain File:', config.toolchainFile);
-    console.log('Custom options:', (config.cmakeOptions && config.cmakeOptions.length > 0) ? 'yes' : 'no');
+    console.log('Custom CMake options:', (config.CMakeOptions && config.CMakeOptions.length > 0) ? 'yes' : 'no');
     console.log('Staging area:', stagingDir);
     console.log('Target directory:', targetDir);
     console.log('Build Type', configs.buildType);

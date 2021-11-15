@@ -27,11 +27,12 @@ async function dirHasFile(dir: string, fileName: string) {
 };
 
 function goUp(dir: string) {
-  const items = dir.split(pathSeparator);
+  let myDir = dir;
+  const items = myDir.split(pathSeparator);
   const scope = items[items.length - 2];
   if (scope && scope.charAt(0) === '@') {
-    dir = joinPath(dir, '..');
+    myDir = joinPath(myDir, '..');
   }
-  dir = joinPath(dir, '..', '..');
-  return normalizePath(dir);
+  myDir = joinPath(myDir, '..', '..');
+  return normalizePath(myDir);
 }
