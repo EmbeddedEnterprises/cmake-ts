@@ -55,8 +55,13 @@ export function defaultBuildConfiguration(config: BuildConfiguration): BuildConf
   if (config.CMakeOptions === undefined) {
     config.CMakeOptions = [];
   }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if ((config as any).cmakeOptions !== undefined) {
+    console.warn('cmakeOptions was specified which was disabled in the 0.3.0 release. Please rename it to CMakeOptions');
+  }
+
   if (config.addonSubdirectory === undefined) {
-    config.addonSubdirectory == ''
+    config.addonSubdirectory = ''
   }
 
   config.additionalDefines = []; //internal variable, not supposed to be set by the user
@@ -160,13 +165,13 @@ export async function defaultBuildOptions(configs: BuildOptions, buildmode: Buil
     configs.configurations = [candidateConfig]
     //todo toolchain file?
   }
-  if(buildmode.type == 'named-configs') {
+  if(buildmode.type === 'named-configs') {
     if (configs.configurations === undefined) {
       console.error('No `configurations` entry was found in the package.json');
       process.exit(1);
     }
     //unnamed configs are always filtered out
-    configs.configurations = configs.configurations.filter(j => (!!j.name) ? buildmode.configsToBuild.includes(j.name) : false)
+    configs.configurations = configs.configurations.filter(j => (j.name ? buildmode.configsToBuild.includes(j.name) : false))
     if(configs.configurations.length === 0) {
       console.error(`No configuration left to build!`);
       process.exit(1);
