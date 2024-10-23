@@ -1,6 +1,6 @@
 {
   "name": "@aminya/cmake-ts",
-  "version": "0.3.0-aminya.1",
+  "version": "0.3.0-aminya.2",
   "description": "cmake-js rewrite in typescript to support advanced build configurations",
   "main": "build/lib.js",
   "bin": "build/main.js",
