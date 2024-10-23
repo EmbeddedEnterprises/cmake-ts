@@ -11,21 +11,23 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          - macos-latest
+          - macos-13 # x86
           - windows-latest
         node_version:
           - 14
           - 20
           - 22
-        architecture:
-          - x64
+        include:
+           - os: macos-14 # arm
+             node-version: 16
+           - os: macos-14 # arm
+             node-version: 22
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node_version }}
-          architecture: ${{ matrix.architecture }}
 
       - name: Install dependencies
         run: npm install
