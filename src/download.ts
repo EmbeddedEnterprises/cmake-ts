@@ -5,9 +5,9 @@ import crypto from 'crypto';
 import { isNumber, isString } from 'lodash';
 import { log } from 'npmlog';
 import { createWriteStream } from 'fs';
-import { createGunzip } from 'zlib';
 import { extract as extractTar } from 'tar';
 import { Extract as extractZip } from 'unzipper';
+import { Gunzip } from "minizlib"
 
 import MemoryStream from 'memory-stream';
 
@@ -18,7 +18,7 @@ export type DownloadOptions = {
   hashSum?: string,
 }
 
-type AnyStream = ReturnType<typeof createGunzip> | ReturnType<typeof createWriteStream> | ReturnType<typeof extractZip> | MemoryStream
+type AnyStream = NodeJS.WritableStream | NodeJS.ReadWriteStream;
 
 export function downloadToStream(url: string, stream: AnyStream, hashType: string | null | undefined): Promise<string | null> {
   return new Promise((resolve, reject) => {
@@ -72,7 +72,7 @@ export async function downloadFile(url: string, opts: string | DownloadOptions):
 export async function downloadTgz(url: string, opts: string | DownloadOptions): Promise<string | null> {
   const options = isString(opts) ? { path: opts } : opts;
 
-  const gunzip = createGunzip();
+  const gunzip = new Gunzip({});
   const extractor = extractTar(options);
   gunzip.pipe(extractor);
   const sum = await downloadToStream(url, gunzip, options.hashType);
