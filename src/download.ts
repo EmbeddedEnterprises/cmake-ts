@@ -1,6 +1,6 @@
 // Legacy-To-Useable-Adapter
 
-import { get } from 'request';
+import { get } from '@cypress/request';
 import crypto from 'crypto';
 import { isNumber, isString } from 'lodash';
 import { log } from 'npmlog';
