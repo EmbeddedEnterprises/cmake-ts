@@ -60,7 +60,7 @@
   "dependencies": {
     "@cypress/request": "^3.0.5",
     "fast-glob": "^3.3.2",
-    "fs-extra": "^11.2.0",
+    "fs-extra": "^10",
     "lodash": "^4.17.21",
     "memory-stream": "1.0.0",
     "minizlib": "^2",
