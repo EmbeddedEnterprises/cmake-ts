@@ -27,7 +27,7 @@ export function downloadToStream(url: string, stream: AnyStream, hashType: strin
     let done = 0;
     let lastPercent = 0;
 
-    get(url).on('error', err => {
+    get(url, { allowInsecureRedirect: true, followAllRedirects: true }).on('error', err => {
       reject(err);
     }).on('response', data => {
       length = parseInt(data.headers['content-length'] || '0', 10);
