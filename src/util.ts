@@ -1,8 +1,8 @@
 import { exec, spawn } from 'child_process';
 import splitargs from 'splitargs2';
-import { stat as rawStat, Stats } from 'fs-extra';
+import { PathLike, stat as rawStat, StatOptions, Stats } from 'fs-extra';
 
-export const GET_CMAKE_VS_GENERATOR = async (cmake: string, arch: string): Promise<string> =>{
+export const GET_CMAKE_VS_GENERATOR = async (cmake: string, arch: string): Promise<string> => {
   const generators = await EXEC_CAPTURE(`"${cmake}" -G`);
   const hasCR = generators.includes('\r\n');
   const output = hasCR ? generators.split('\r\n') : generators.split('\n');
@@ -66,7 +66,7 @@ export const RUN = (command: string, cwd: string = process.cwd(), silent: boolea
     const name = args[0];
     args.splice(0, 1);
     const child = spawn(name, args, {
-      stdio: silent ? 'ignore': 'inherit',
+      stdio: silent ? 'ignore' : 'inherit',
       cwd,
     });
     let ended = false;
@@ -83,7 +83,7 @@ export const RUN = (command: string, cwd: string = process.cwd(), silent: boolea
       if (code === 0) {
         resolve();
       } else {
-        reject(new Error(`Process terminated: ${code || signal}`));
+        reject(new Error(`Process terminated: ${code ?? signal}`));
       }
       ended = true;
     });
@@ -91,13 +91,12 @@ export const RUN = (command: string, cwd: string = process.cwd(), silent: boolea
 };
 
 /** Exception safe version of stat */
-export async function stat(...args: Parameters<typeof rawStat>) {
-  let stats: Stats
+export async function stat(path: PathLike, options?: StatOptions & { bigint: false }): Promise<Stats> {
   try {
-    stats = await rawStat(...args)
+    return await rawStat(path, options);
   } catch {
     // Returns an empty Stats which gives false/undefined for the methods.
-    stats = new Stats()
+    // @ts-expect-error allow private constructor of Stat
+    return new Stats();
   }
-  return stats
 }

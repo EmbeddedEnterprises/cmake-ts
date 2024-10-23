@@ -22,8 +22,10 @@ type AnyStream = ReturnType<typeof createGunzip> | ReturnType<typeof createWrite
 
 export function downloadToStream(url: string, stream: AnyStream, hashType: string | null | undefined): Promise<string | null> {
   return new Promise((resolve, reject) => {
-    const shasum = hashType ? crypto.createHash(hashType) : null;
-    let length = 0, done = 0, lastPercent = 0;
+    const shasum = typeof hashType === "string" ? crypto.createHash(hashType) : null;
+    let length = 0;
+    let done = 0;
+    let lastPercent = 0;
 
     get(url).on('error', err => {
       reject(err);
@@ -38,7 +40,7 @@ export function downloadToStream(url: string, stream: AnyStream, hashType: strin
       }
       if (length) {
         done += chunk.length;
-        const pc = Math.round(done / length * 10)*10 + 10;
+        const pc = Math.round(done / length * 10) * 10 + 10;
         if (pc > lastPercent) {
           log('verbose', 'DWNL', `${lastPercent}%`);
           lastPercent = pc;
@@ -56,7 +58,7 @@ export async function downloadToString(url: string): Promise<string> {
   return result.toString()
 }
 
-export async function downloadFile(url: string, opts: string | DownloadOptions): Promise<string| null> {
+export async function downloadFile(url: string, opts: string | DownloadOptions): Promise<string | null> {
   const options = isString(opts) ? { path: opts } : opts;
 
   const result = createWriteStream(options.path as string);

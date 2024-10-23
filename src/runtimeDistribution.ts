@@ -86,11 +86,11 @@ export class RuntimeDistribution {
     });
     const filesNum = files.length;
     if (filesNum === 0) {
-      ret.reject(new Error("couldn't find node_version.h"));
+      await ret.reject(new Error("couldn't find node_version.h"));
       return;
     }
     if (filesNum !== 1) {
-      ret.reject(new Error("more than one node_version.h was found."));
+      await ret.reject(new Error("more than one node_version.h was found."));
       return;
     }
     const fName = files[0];
@@ -98,21 +98,21 @@ export class RuntimeDistribution {
     try {
       contents = await readFile(fName, 'utf8');
     } catch(err) {
-      ret.reject(err);
+      await ret.reject(err as Error);
       return;
     }
     const match = contents.match(/#define\s+NODE_MODULE_VERSION\s+(\d+)/);
     if (!match) {
-      ret.reject(new Error('Failed to find NODE_MODULE_VERSION macro'));
+      await ret.reject(new Error('Failed to find NODE_MODULE_VERSION macro'));
       return;
     }
     const version = parseInt(match[1], 10);
     if (isNaN(version)) {
-      ret.reject(new Error('Invalid version specified by NODE_MODULE_VERSION macro'));
+      await ret.reject(new Error('Invalid version specified by NODE_MODULE_VERSION macro'));
       return;
     }
     this._abi = version;
-    ret.resolve();
+    await ret.resolve();
     return ret.promise;
   }
 
