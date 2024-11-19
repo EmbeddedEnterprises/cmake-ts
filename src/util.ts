@@ -3,6 +3,12 @@ import splitargs from 'splitargs2';
 import { PathLike, stat as rawStat, StatOptions, Stats } from 'fs-extra';
 
 export const GET_CMAKE_VS_GENERATOR = async (cmake: string, arch: string): Promise<string> => {
+  const archString = arch === 'x64' ? 'Win64' : arch === "x86" ? '' : null;
+  if(archString === null) {
+    console.error('Failed to find valid VS gen, using native. Good Luck.');
+    return 'native';
+  }
+
   const generators = await EXEC_CAPTURE(`"${cmake}" -G`);
   const hasCR = generators.includes('\r\n');
   const output = hasCR ? generators.split('\r\n') : generators.split('\n');
@@ -31,15 +37,10 @@ export const GET_CMAKE_VS_GENERATOR = async (cmake: string, arch: string): Promi
   }
 
   const useSwitch = !useVSGen.match(/.*\[arch\]/);
-  if(!useSwitch) {
-    if (arch === 'x64') {
-      useVSGen = useVSGen.replace('[arch]', 'Win64').trim();
-    } else if (arch === 'x86') {
-      useVSGen = useVSGen.replace('[arch]', '').trim();
-    } else {
-      console.error('Failed to find valid VS gen, using native. Good Luck.');
-      return 'native';
-    }
+  if(useSwitch) {
+    useVSGen += " -A" // essentially using this as a flag
+  } else {
+      useVSGen = useVSGen.replace('[arch]', archString).trim();
   }
   return useVSGen;
 }
