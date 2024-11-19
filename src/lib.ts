@@ -212,7 +212,7 @@ export async function defaultBuildOptions(configs: BuildOptions, buildmode: Buil
   let ninja: string | null;
   let make: string | null;
   if (configs.generatorToUse === undefined) {
-    console.log('no generator specified, checking ninja');
+    console.log('no generator specified in package.json, checking ninja');
     ninja = await ninjaP;
     if (!ninja) {
       console.log('ninja not found, checking make');
