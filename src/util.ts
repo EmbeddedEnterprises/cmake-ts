@@ -19,23 +19,27 @@ export const GET_CMAKE_VS_GENERATOR = async (cmake: string, arch: string): Promi
       // Some descriptions are multi-line
       continue;
     }
-    genParts[0] = genParts[0].trim();
+    genParts[0] = genParts[0].replace(/^(\* )/, "").trim();
 
     // eslint-disable-next-line optimize-regex/optimize-regex
-    if (genParts[0].match(/Visual\s+Studio\s+\d+\s+\d+\s+\[arch\]/)) {
+    if (genParts[0].match(/Visual\s+Studio\s+\d+\s+\d+(\s+\[arch\])?/)) {
       console.log('Found generator: ', genParts[0]);
       // The first entry is usually the latest entry
       useVSGen = genParts[0];
       break;
     }
   }
-  if (arch === 'x64') {
-    useVSGen = useVSGen.replace('[arch]', 'Win64').trim();
-  } else if (arch === 'x86') {
-    useVSGen = useVSGen.replace('[arch]', '').trim();
-  } else {
-    console.error('Failed to find valid VS gen, using native. Good Luck.');
-    return 'native';
+
+  const useSwitch = !useVSGen.match(/.*\[arch\]/);
+  if(!useSwitch) {
+    if (arch === 'x64') {
+      useVSGen = useVSGen.replace('[arch]', 'Win64').trim();
+    } else if (arch === 'x86') {
+      useVSGen = useVSGen.replace('[arch]', '').trim();
+    } else {
+      console.error('Failed to find valid VS gen, using native. Good Luck.');
+      return 'native';
+    }
   }
   return useVSGen;
 }
