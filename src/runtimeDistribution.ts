@@ -2,7 +2,6 @@ import { join as joinPath, extname } from 'path';
 import { ensureDir, readFile } from 'fs-extra';
 import { stat } from './util';
 import urlJoin from 'url-join';
-import { Deferred } from 'queueable';
 import { BuildConfigurationDefaulted } from './lib';
 import * as URL_REGISTRY from './urlRegistry';
 import * as DOWNLOADER from './download';
@@ -22,7 +21,7 @@ export class RuntimeDistribution {
 
   // TODO the code uses a side effect of TypeScript constructors in defining the class props
   /* eslint-disable-next-line no-useless-constructor */   /* eslint-disable-next-line no-empty-function */
-  constructor(private config: BuildConfigurationDefaulted) {}
+  constructor(private config: BuildConfigurationDefaulted) { }
 
   get internalPath() {
     return joinPath(
@@ -77,7 +76,6 @@ export class RuntimeDistribution {
   }
 
   async determineABI(): Promise<void> {
-    const ret = new Deferred<void>();
     const files = await glob("*/node_version.h", {
       cwd: joinPath(this.internalPath, "include"),
       absolute: true,
@@ -86,34 +84,35 @@ export class RuntimeDistribution {
     });
     const filesNum = files.length;
     if (filesNum === 0) {
-      ret.reject(new Error("couldn't find node_version.h"));
+      return Promise.reject(new Error("couldn't find node_version.h"));
       return;
     }
     if (filesNum !== 1) {
-      ret.reject(new Error("more than one node_version.h was found."));
+      return Promise.reject(new Error("more than one node_version.h was found."));
       return;
     }
     const fName = files[0];
     let contents: string;
     try {
       contents = await readFile(fName, 'utf8');
-    } catch(err) {
-      ret.reject(err);
-      return;
+    } catch (err) {
+      if (err instanceof Error) {
+        return Promise.reject(err);
+      }
+      throw err;
     }
     const match = contents.match(/#define\s+NODE_MODULE_VERSION\s+(\d+)/);
     if (!match) {
-      ret.reject(new Error('Failed to find NODE_MODULE_VERSION macro'));
+      return Promise.reject(new Error('Failed to find NODE_MODULE_VERSION macro'));
       return;
     }
     const version = parseInt(match[1], 10);
     if (isNaN(version)) {
-      ret.reject(new Error('Invalid version specified by NODE_MODULE_VERSION macro'));
+      return Promise.reject(new Error('Invalid version specified by NODE_MODULE_VERSION macro'));
       return;
     }
     this._abi = version;
-    ret.resolve();
-    return ret.promise;
+    return Promise.resolve();
   }
 
   async ensureDownloaded(): Promise<void> {
@@ -172,7 +171,7 @@ export class RuntimeDistribution {
     await Promise.all(paths.winLibs.map(path => this.downloadLib(path, sums)));
   }
 
-  private async downloadLib(path: {dir: string, name: string}, sums: HashSum[] | null) {
+  private async downloadLib(path: { dir: string, name: string }, sums: HashSum[] | null) {
     const fPath = path.dir ? urlJoin(path.dir, path.name) : path.name;
     const libUrl = urlJoin(this.externalPath, fPath);
     await ensureDir(joinPath(this.internalPath, path.dir));

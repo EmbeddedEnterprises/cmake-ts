@@ -5,28 +5,29 @@ on:
 
 jobs:
   Test:
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os:
           - ubuntu-latest
-          - macos-latest
+          - macos-13 # x86
           - windows-latest
         node_version:
-          - 10
-          - 12
           - 14
-        architecture:
-          - x64
+          - 20
+          - 22
+        include:
+           - os: macos-14 # arm
+             node-version: 16
+           - os: macos-14 # arm
+             node-version: 22
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node_version }}
-          architecture: ${{ matrix.architecture }}
 
       - name: Install dependencies
         run: npm install

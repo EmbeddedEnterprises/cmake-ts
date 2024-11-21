@@ -1,13 +1,13 @@
 // Legacy-To-Useable-Adapter
 
-import { get } from 'request';
+import { get } from '@cypress/request';
 import crypto from 'crypto';
 import { isNumber, isString } from 'lodash';
 import { log } from 'npmlog';
 import { createWriteStream } from 'fs';
-import { createGunzip } from 'zlib';
 import { extract as extractTar } from 'tar';
 import { Extract as extractZip } from 'unzipper';
+import { Gunzip } from "minizlib"
 
 import MemoryStream from 'memory-stream';
 
@@ -18,14 +18,16 @@ export type DownloadOptions = {
   hashSum?: string,
 }
 
-type AnyStream = ReturnType<typeof createGunzip> | ReturnType<typeof createWriteStream> | ReturnType<typeof extractZip> | MemoryStream
+type AnyStream = NodeJS.WritableStream | NodeJS.ReadWriteStream;
 
 export function downloadToStream(url: string, stream: AnyStream, hashType: string | null | undefined): Promise<string | null> {
   return new Promise((resolve, reject) => {
-    const shasum = hashType ? crypto.createHash(hashType) : null;
-    let length = 0, done = 0, lastPercent = 0;
+    const shasum = typeof hashType === "string" ? crypto.createHash(hashType) : null;
+    let length = 0;
+    let done = 0;
+    let lastPercent = 0;
 
-    get(url).on('error', err => {
+    get(url, { allowInsecureRedirect: true, followAllRedirects: true }).on('error', err => {
       reject(err);
     }).on('response', data => {
       length = parseInt(data.headers['content-length'] || '0', 10);
@@ -38,7 +40,7 @@ export function downloadToStream(url: string, stream: AnyStream, hashType: strin
       }
       if (length) {
         done += chunk.length;
-        const pc = Math.round(done / length * 10)*10 + 10;
+        const pc = Math.round(done / length * 10) * 10 + 10;
         if (pc > lastPercent) {
           log('verbose', 'DWNL', `${lastPercent}%`);
           lastPercent = pc;
@@ -56,7 +58,7 @@ export async function downloadToString(url: string): Promise<string> {
   return result.toString()
 }
 
-export async function downloadFile(url: string, opts: string | DownloadOptions): Promise<string| null> {
+export async function downloadFile(url: string, opts: string | DownloadOptions): Promise<string | null> {
   const options = isString(opts) ? { path: opts } : opts;
 
   const result = createWriteStream(options.path as string);
@@ -70,7 +72,7 @@ export async function downloadFile(url: string, opts: string | DownloadOptions):
 export async function downloadTgz(url: string, opts: string | DownloadOptions): Promise<string | null> {
   const options = isString(opts) ? { path: opts } : opts;
 
-  const gunzip = createGunzip();
+  const gunzip = new Gunzip({});
   const extractor = extractTar(options);
   gunzip.pipe(extractor);
   const sum = await downloadToStream(url, gunzip, options.hashType);
