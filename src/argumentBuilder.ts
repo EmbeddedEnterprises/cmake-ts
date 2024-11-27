@@ -20,7 +20,12 @@ export class ArgumentBuilder {
     const defines = await this.buildDefines();
     baseCommand += ` ${ defines.map(d => `-D${d[0]}="${d[1]}"`).join(" ")}`;
     if (this.options.generatorToUse !== 'native') {
-      baseCommand += ` -G"${this.options.generatorToUse}"`;
+      let generatorString = ` -G"${this.options.generatorToUse}"`;
+      if(generatorString.match(/Visual\s+Studio\s+\d+\s+\d+\s-A/)) {
+        generatorString = generatorString.replace(/\s-A/, '');
+        generatorString += ` -A ${this.config.arch}`;
+      }
+      baseCommand += generatorString;
     }
     console.log(baseCommand)
     return baseCommand;
