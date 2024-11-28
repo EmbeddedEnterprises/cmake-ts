@@ -3,6 +3,12 @@ import splitargs from 'splitargs2';
 import { PathLike, stat as rawStat, StatOptions, Stats } from 'fs-extra';
 
 export const GET_CMAKE_VS_GENERATOR = async (cmake: string, arch: string): Promise<string> => {
+  const archString = arch === 'x64' ? 'Win64' : arch === "x86" ? '' : null;
+  if(archString === null) {
+    console.error('Failed to find valid VS gen, using native. Good Luck.');
+    return 'native';
+  }
+
   const generators = await EXEC_CAPTURE(`"${cmake}" -G`);
   const hasCR = generators.includes('\r\n');
   const output = hasCR ? generators.split('\r\n') : generators.split('\n');
@@ -19,23 +25,24 @@ export const GET_CMAKE_VS_GENERATOR = async (cmake: string, arch: string): Promi
       // Some descriptions are multi-line
       continue;
     }
-    genParts[0] = genParts[0].trim();
+    /**
+     * Current MSVS compiler selected in Windows generally is prefixed with "* "
+     */
+    genParts[0] = genParts[0].replace(/^(\* )/, "").trim();
 
     // eslint-disable-next-line optimize-regex/optimize-regex
-    if (genParts[0].match(/Visual\s+Studio\s+\d+\s+\d+\s+\[arch\]/)) {
+    if (genParts[0].match(/Visual\s+Studio\s+\d+\s+\d+(\s+\[arch\])?/)) {
       console.log('Found generator: ', genParts[0]);
       // The first entry is usually the latest entry
       useVSGen = genParts[0];
       break;
     }
   }
-  if (arch === 'x64') {
-    useVSGen = useVSGen.replace('[arch]', 'Win64').trim();
-  } else if (arch === 'x86') {
-    useVSGen = useVSGen.replace('[arch]', '').trim();
+  const useSwitch = !useVSGen.match(/.*\[arch\]/);
+  if(useSwitch) {
+    useVSGen += " -A" // essentially using this as a flag
   } else {
-    console.error('Failed to find valid VS gen, using native. Good Luck.');
-    return 'native';
+    useVSGen = useVSGen.replace('[arch]', archString).trim();
   }
   return useVSGen;
 }
