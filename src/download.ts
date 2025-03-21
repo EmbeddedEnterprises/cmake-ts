@@ -3,12 +3,11 @@
 import { DownloaderHelper } from 'node-downloader-helper';
 import crypto from 'crypto';
 import { log } from 'npmlog';
-import { createReadStream } from 'fs';
 import { readFile, remove } from 'fs-extra';
 import { extract as extractTar } from 'tar';
-import { Extract as extractZip } from 'unzipper';
 import { basename, join } from 'path';
 import { tmpdir } from 'os';
+import extract from 'extract-zip';
 
 export type DownloadOptions = {
   path?: string,
@@ -132,6 +131,7 @@ export async function downloadTgz(url: string, opts: string | DownloadOptions): 
  */
 export async function downloadZip(url: string, opts: string | DownloadOptions): Promise<string | undefined> {
   const options = typeof opts === 'string' ? { path: opts } : opts;
+  const extractPath = options.path ?? options.cwd ?? process.cwd();
 
   const { filePath, hash } = await download(url, undefined, options.hashType);
 
@@ -141,13 +141,10 @@ export async function downloadZip(url: string, opts: string | DownloadOptions): 
       throw new Error(`Checksum mismatch for download ${url}`);
     }
 
-    // Extract the zip file
-    return new Promise((resolve, reject) => {
-      createReadStream(filePath)
-        .pipe(extractZip({ path: options.path as string }))
-        .on('close', () => resolve(hash))
-        .on('error', reject);
-    });
+    // Extract the zip file using extract-zip
+    await extract(filePath, { dir: extractPath });
+    
+    return hash;
   } finally {
     await remove(filePath).catch(() => {
       // Ignore errors

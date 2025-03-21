@@ -88,10 +88,10 @@
     "semver": "^7.6.3",
     "splitargs2": "^0.1.3",
     "tar": "^6",
-    "unzipper": "^0.12.3",
     "url-join": "^4.0.1",
     "which": "^2",
-    "node-downloader-helper": "^2.1.7"
+    "node-downloader-helper": "^2.1.7",
+    "extract-zip": "^2.0.1"
   },
   "packageManager": "pnpm@10.6.5",
   "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/package.json"
