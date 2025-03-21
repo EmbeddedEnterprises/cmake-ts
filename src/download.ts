@@ -2,7 +2,6 @@
 
 import { DownloaderHelper } from 'node-downloader-helper';
 import crypto from 'crypto';
-import { log } from 'npmlog';
 import { readFile, remove } from 'fs-extra';
 import { extract as extractTar } from 'tar';
 import { basename, join } from 'path';
@@ -26,10 +25,6 @@ function download(url: string, path?: string, hashType?: string) {
     const downloader = new DownloaderHelper(url, process.cwd(), {
       fileName: path ?? join(tmpdir(), basename(url)),
       override: true,
-    });
-
-    downloader.on('progress', stats => {
-      log('verbose', 'DWNL', `${stats.progress}`);
     });
 
     downloader.on('error', err => reject(err));
