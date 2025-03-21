@@ -1,7 +1,9 @@
 name: CI
 on:
-  - push
-  - pull_request
+  push:
+    branches:
+      - master
+  pull_request:
 
 jobs:
   Test:
@@ -28,11 +30,13 @@ jobs:
         with:
           node-version: ${{ matrix.node_version }}
 
+      - uses: pnpm/action-setup@v4
+
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
       - name: Build
-        run: npm run build
+        run: pnpm run build
 
       # - name: Tests
-      #   run: npm test
+      #   run: pnpm test

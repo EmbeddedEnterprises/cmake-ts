@@ -1,4 +1,4 @@
-import { ArrayOrSingle, BuildConfigurationDefaulted, OverrideConfig } from 'lib';
+import { ArrayOrSingle, BuildConfigurationDefaulted, OverrideConfig } from './lib';
 import { satisfies } from 'semver';
 
 const knownOverrides: OverrideConfig[] = [{
