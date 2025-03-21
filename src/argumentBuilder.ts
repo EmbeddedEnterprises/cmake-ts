@@ -47,7 +47,7 @@ export class ArgumentBuilder {
     // Trust me, I'm an engineer?
     if (this.config.os === 'win32') {
       const libs = this.rtd.winLibs;
-      if (libs?.length) {
+      if (libs.length) {
         retVal.push(['CMAKE_JS_LIB', libs.join(';')]);
       }
     } else if (this.config.os === 'darwin') {

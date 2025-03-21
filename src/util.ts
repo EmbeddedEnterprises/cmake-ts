@@ -38,7 +38,7 @@ export const GET_CMAKE_VS_GENERATOR = async (cmake: string, arch: string): Promi
       break;
     }
   }
-  const useSwitch = !useVSGen.match(/.*\[arch\]/);
+  const useSwitch = !useVSGen.match(/.*\[arch]/);
   if(useSwitch) {
     useVSGen += " -A" // essentially using this as a flag
   } else {

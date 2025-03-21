@@ -9,7 +9,6 @@
     "test.lint": "eslint .",
     "deps": "npm-check -p",
     "devdeps": "npm-check -ds",
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "tsc -w",
     "build": "shx rm -rf build && tsc",
     "prepare": "npm run build"
@@ -33,7 +32,11 @@
     "build",
     "cmake-js"
   ],
-  "author": "Martin Koppehel",
+  "author": "Amin Yahyaabadi <aminyahyaabadi74@gmail.com>",
+  "contributors": [
+    "Amin Yahyaabadi <aminyahyaabadi74@gmail.com>",
+    "Martin Koppehel <martin@mko.dev>"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/EmbeddedEnterprises/cmake-ts/issues"
@@ -52,6 +55,7 @@
     "@types/unzipper": "~0.10.10",
     "@types/url-join": "~4.0.3",
     "@types/which": "~3.0.4",
+    "eslint": "8",
     "eslint-config-atomic": "^1.22.1",
     "npm-check": "^6.0.1",
     "shx": "^0.3.4",
@@ -72,5 +76,7 @@
     "unzipper": "^0.12.3",
     "url-join": "^4.0.1",
     "which": "^2"
-  }
+  },
+  "packageManager": "pnpm@10.6.5",
+  "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/package.json"
 }
