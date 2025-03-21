@@ -2,7 +2,6 @@
 
 import { get } from '@cypress/request';
 import crypto from 'crypto';
-import { isNumber, isString } from 'lodash';
 import { log } from 'npmlog';
 import { createWriteStream } from 'fs';
 import { extract as extractTar } from 'tar';
@@ -30,8 +29,8 @@ export function downloadToStream(url: string, stream: AnyStream, hashType: strin
     get(url, { allowInsecureRedirect: true, followAllRedirects: true }).on('error', err => {
       reject(err);
     }).on('response', data => {
-      length = parseInt(data.headers['content-length'] || '0', 10);
-      if (!isNumber(length)) {
+      length = parseInt(data.headers['content-length'] ?? '0', 10);
+      if (isNaN(length)) {
         length = 0;
       }
     }).on('data', chunk => {
@@ -59,7 +58,7 @@ export async function downloadToString(url: string): Promise<string> {
 }
 
 export async function downloadFile(url: string, opts: string | DownloadOptions): Promise<string | null> {
-  const options = isString(opts) ? { path: opts } : opts;
+  const options = typeof opts === 'string' ? { path: opts } : opts;
 
   const result = createWriteStream(options.path as string);
   const sum = await downloadToStream(url, result, options.hashType);
@@ -70,7 +69,7 @@ export async function downloadFile(url: string, opts: string | DownloadOptions):
 }
 
 export async function downloadTgz(url: string, opts: string | DownloadOptions): Promise<string | null> {
-  const options = isString(opts) ? { path: opts } : opts;
+  const options = typeof opts === 'string' ? { path: opts } : opts;
 
   const gunzip = new Gunzip({});
   const extractor = extractTar(options);
@@ -83,7 +82,7 @@ export async function downloadTgz(url: string, opts: string | DownloadOptions): 
 }
 
 export async function downloadZip(url: string, opts: string | DownloadOptions): Promise<string | null> {
-  const options = isString(opts) ? { path: opts } : opts;
+  const options = typeof opts === 'string' ? { path: opts } : opts;
 
   const extractor = extractZip({ path: options.path as string });
   const sum = await downloadToStream(url, extractor, options.hashType);
