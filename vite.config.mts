@@ -1,13 +1,28 @@
 import module from "module"
-import { defineConfig } from "vite"
+import { defineConfig, type UserConfig } from "vite"
 import babel from "vite-plugin-babel"
 import babelConfig from "./babel.config.mts"
 
 // Instead of using TARGET env variable, we'll use Vite's mode
-export default defineConfig(({ mode }) => {
+export default defineConfig(async ({ mode }) => {
     const isLegacy = mode.includes('legacy')
     const isMain = mode.includes('main')
-    
+
+    const plugins = isLegacy
+        ? [
+            babel({
+                babelConfig,
+            }),
+        ]
+        : []
+
+    if (process.env.BUILD_ANALYSIS === 'true') {
+        const visualizer = (await import('rollup-plugin-visualizer')).visualizer
+        plugins.push(visualizer({
+            sourcemap: true,
+        }))
+    }
+
     return {
         build: {
             ssr: isMain ? "./src/main.ts" : "./src/lib.ts",
@@ -33,12 +48,6 @@ export default defineConfig(({ mode }) => {
             noExternal: true,
             external: module.builtinModules as string[],
         },
-        plugins: isLegacy
-            ? [
-                babel({
-                    babelConfig,
-                }),
-            ]
-            : [],
-    }
+        plugins,
+    } as UserConfig
 })
