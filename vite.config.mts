@@ -28,6 +28,12 @@ const viteConfig = defineConfig({
         },
         emptyOutDir: false,
     },
+    resolve: {
+        alias: {
+            // unused dependency
+            "@aws-sdk/client-s3": "./src/compat/aws-sdk-client-s3.ts",
+        },
+    },
     ssr: {
         target: "node",
         noExternal: true,
