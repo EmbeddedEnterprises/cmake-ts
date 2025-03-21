@@ -7,7 +7,7 @@ import { join, resolve } from 'path';
 import { RuntimeDistribution } from './runtimeDistribution';
 import { ArgumentBuilder } from './argumentBuilder';
 import { RUN } from './util';
-import { ensureDir, remove, copy, pathExists } from 'fs-extra';
+import { ensureDir, remove, copy, pathExists, readJson } from 'fs-extra';
 import { applyOverrides } from './override';
 import { determineBuildMode } from './buildMode'
 
@@ -19,7 +19,8 @@ const DEBUG_LOG = Boolean(process.env.CMAKETSDEBUG);
   let packJson: {'cmake-ts': BuildOptions | undefined} & Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   try {
     // TODO getting the path from the CLI
-    packJson = require(resolve(join(process.cwd(), 'package.json')));
+    const packageJsonPath = resolve(join(process.cwd(), 'package.json'));
+    packJson = await readJson(packageJsonPath);
   } catch (err) {
     console.error('Failed to load package.json, maybe your cwd is wrong:', err);
     process.exit(1);
