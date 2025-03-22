@@ -4,40 +4,37 @@ import { DownloaderHelper } from 'node-downloader-helper';
 import crypto from 'crypto';
 import { readFile, remove } from 'fs-extra';
 import { extract as extractTar } from 'tar';
-import { basename, join } from 'path';
+import { basename, dirname, join } from 'path';
 import { tmpdir } from 'os';
 import extract from 'extract-zip';
+
+export type HashType = 'sha256' | 'sha512' | 'sha1' | 'md5' | 'sha384' | 'sha224';
 
 export type DownloadOptions = {
   path?: string,
   cwd?: string,
-  hashType?: string,
+  hashType?: HashType,
   hashSum?: string,
 }
 
 /**
  * Downloads a file to a temporary location and returns the file path and hash
  */
-function download(url: string, path?: string, hashType?: string) {
+function download(url: string, givenPath?: string, hashType?: HashType) {
   return new Promise<{ filePath: string, hash?: string }>((resolve, reject) => {
 
-    // Create a temporary file path for the download
-    const downloader = new DownloaderHelper(url, process.cwd(), {
-      fileName: path ?? join(tmpdir(), basename(url)),
-      override: true,
+    const filePath = givenPath ?? join(tmpdir(), basename(url));
+    const fileName = basename(filePath);
+    const fileDir = dirname(filePath);
+
+    const downloader = new DownloaderHelper(url, fileDir, {
+      fileName,
     });
 
     downloader.on('error', err => reject(err));
     downloader.on('end', async downloadInfo => {
       try {
-        // Calculate hash if needed
-        let hash = undefined;
-        if (hashType !== undefined) {
-          const fileBuffer = await readFile(downloadInfo.filePath);
-          const shasum = crypto.createHash(hashType);
-          shasum.update(fileBuffer);
-          hash = shasum.digest('hex');
-        }
+        const hash = hashType !== undefined ? await calculateHash(downloadInfo.filePath, hashType) : undefined;
 
         resolve({
           filePath: downloadInfo.filePath,
@@ -50,6 +47,16 @@ function download(url: string, path?: string, hashType?: string) {
 
     downloader.start().catch(err => reject(err));
   });
+}
+
+/**
+ * Calculates the hash of a file
+ */
+async function calculateHash(filePath: string, hashType: HashType) {
+  const fileBuffer = await readFile(filePath);
+  const shasum = crypto.createHash(hashType);
+  shasum.update(fileBuffer);
+  return shasum.digest('hex');
 }
 
 /**
@@ -81,7 +88,7 @@ export async function downloadFile(url: string, opts: string | DownloadOptions):
 
   try {
     // Verify hash if needed
-    if (!checkHashSum(hash, options)) {
+    if (!isHashSumValid(hash, options)) {
       throw new Error(`Checksum mismatch for download ${url}`);
     }
 
@@ -103,7 +110,7 @@ export async function downloadTgz(url: string, opts: string | DownloadOptions): 
 
   try {
     // Verify hash if needed
-    if (!checkHashSum(hash, options)) {
+    if (!isHashSumValid(hash, options)) {
       throw new Error(`Checksum mismatch for download ${url}`);
     }
 
@@ -132,13 +139,13 @@ export async function downloadZip(url: string, opts: string | DownloadOptions): 
 
   try {
     // Verify hash if needed
-    if (!checkHashSum(hash, options)) {
+    if (!isHashSumValid(hash, options)) {
       throw new Error(`Checksum mismatch for download ${url}`);
     }
 
     // Extract the zip file using extract-zip
     await extract(filePath, { dir: extractPath });
-    
+
     return hash;
   } finally {
     await remove(filePath).catch(() => {
@@ -150,6 +157,9 @@ export async function downloadZip(url: string, opts: string | DownloadOptions): 
 /**
  * Checks if the calculated hash matches the expected hash
  */
-function checkHashSum(sum: string | undefined, options: DownloadOptions): boolean {
-  return options.hashType === undefined || options.hashSum === undefined || options.hashSum === sum;
+function isHashSumValid(sum: string | undefined, options: DownloadOptions): boolean {
+  // No hash type or hash sum is valid
+  return options.hashType === undefined || options.hashSum === undefined ||
+    // Check if the hash sum is valid
+    options.hashSum === sum;
 }
