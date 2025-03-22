@@ -8,7 +8,7 @@ import * as DOWNLOADER from './download';
 import glob from 'fast-glob'
 
 export type HashSum = { getPath: string, sum: string };
-const TEST_SUM = (sums: HashSum[], sum: string | null, fPath: string) => {
+const TEST_SUM = (sums: HashSum[], sum: string | undefined, fPath: string) => {
   const serverSum = sums.find(s => s.getPath === fPath);
   if (serverSum && serverSum.sum === sum) {
     return true;
@@ -177,7 +177,7 @@ export class RuntimeDistribution {
     await ensureDir(joinPath(this.internalPath, path.dir));
     const sum = await DOWNLOADER.downloadFile(libUrl, {
       path: joinPath(this.internalPath, fPath),
-      hashType: sums ? "sha256" : null,
+      hashType: sums ? "sha256" : undefined,
     });
     if (sums && !TEST_SUM(sums, sum, fPath)) {
       throw new Error("Checksum mismatch");

@@ -1,4 +1,4 @@
-import resolve from "resolve";
+import resolve from "resolve/async.js";
 
 export function requireInclude(resolvedPath: string) {
   try {
