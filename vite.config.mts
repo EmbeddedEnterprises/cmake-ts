@@ -40,7 +40,9 @@ export default defineConfig(async ({ mode }) => {
         resolve: {
             alias: {
                 // unused dependency
-                "@aws-sdk/client-s3": "./src/compat/aws-sdk-client-s3.ts",
+                "@aws-sdk/client-s3": "./src/deps/aws-sdk-client-s3.ts",
+                // deduplicate mkdirp via fs-extra
+                "mkdirp": "./src/deps/mkdirp.ts",
             },
         },
         ssr: {
