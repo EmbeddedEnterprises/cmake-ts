@@ -3,7 +3,7 @@
 import { DownloaderHelper } from 'node-downloader-helper';
 import crypto from 'crypto';
 import { readFile, remove } from 'fs-extra';
-import { extract as extractTar } from 'tar';
+import extractTar from 'tar/lib/extract.js';
 import { basename, dirname, join } from 'path';
 import { tmpdir } from 'os';
 import extract from 'extract-zip';
