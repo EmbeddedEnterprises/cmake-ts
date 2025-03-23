@@ -1,3 +1,0 @@
-[submodule "test/fixtures/zeromq.js"]
-	path = test/fixtures/zeromq.js
-	url = https://github.com/zeromq/zeromq.js

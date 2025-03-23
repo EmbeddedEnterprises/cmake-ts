@@ -84,12 +84,10 @@ export class RuntimeDistribution {
     });
     const filesNum = files.length;
     if (filesNum === 0) {
-      return Promise.reject(new Error("couldn't find node_version.h"));
-      return;
+      return Promise.reject(new Error(`couldn't find include/*/node_version.h in ${this.internalPath}. Make sure you install the dependencies for building the package.`));
     }
     if (filesNum !== 1) {
-      return Promise.reject(new Error("more than one node_version.h was found."));
-      return;
+      return Promise.reject(new Error(`more than one node_version.h was found in ${this.internalPath}.`));
     }
     const fName = files[0];
     let contents: string;
@@ -104,12 +102,10 @@ export class RuntimeDistribution {
     const match = contents.match(/#define\s+NODE_MODULE_VERSION\s+(\d+)/);
     if (!match) {
       return Promise.reject(new Error('Failed to find NODE_MODULE_VERSION macro'));
-      return;
     }
     const version = parseInt(match[1], 10);
     if (isNaN(version)) {
       return Promise.reject(new Error('Invalid version specified by NODE_MODULE_VERSION macro'));
-      return;
     }
     this._abi = version;
     return Promise.resolve();

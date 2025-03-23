@@ -27,7 +27,7 @@
     "build.modern-main": "vite build --mode modern-main",
     "build.modern-lib": "vite build --mode modern-lib",
     "build": "run-p build.legacy-main build.legacy-lib build.modern-main build.modern-lib build.tsc",
-    "test": "pnpm dlx vitest"
+    "test": "pnpm dlx vitest --watch false"
   },
   "files": [
     "build/**/*.js",
@@ -79,6 +79,7 @@
     "vite": "^6.2.2",
     "vitest": "^3.0.9",
     "vite-plugin-babel": "^1.3.0",
+    "zeromq": "^6.3.0",
     "fast-glob": "^3.3.2",
     "fs-extra": "^10",
     "resolve": "^1.22.8",
