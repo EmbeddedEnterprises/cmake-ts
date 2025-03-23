@@ -1,6 +1,6 @@
 {
   "name": "cmake-ts",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "cmake-js rewrite in typescript to support advanced build configurations",
   "main": "build/lib.js",
   "module": "build/lib.mjs",
@@ -38,10 +38,10 @@
     "test": "pnpm dlx vitest --watch false"
   },
   "files": [
-    "build/**/*.js",
-    "build/**/*.js.map",
-    "build/**/*.d.ts",
-    "build/**/*.d.ts.map"
+    "build/**/*",
+    "src/**/*",
+    "./*.mts",
+    "./tsconfig.json"
   ],
   "repository": {
     "type": "git",
