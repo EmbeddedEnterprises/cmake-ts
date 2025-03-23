@@ -28,7 +28,7 @@ export default defineConfig(async (configEnv) => {
             ssr: isMain ? "./src/main.ts" : "./src/lib.ts",
             outDir: isLegacy ? "./build/legacy" : "./build/modern",
             target: isLegacy ? "node12" : "node20",
-            minify: "esbuild",
+            minify: process.env.NODE_ENV === 'development' ? false : "esbuild",
             sourcemap: true,
             rollupOptions: {
                 output: {

@@ -91,5 +91,11 @@
     "extract-zip": "^2.0.1"
   },
   "packageManager": "pnpm@10.6.5",
-  "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/package.json"
+  "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/package.json",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "core-js",
+      "esbuild"
+    ]
+  }
 }
