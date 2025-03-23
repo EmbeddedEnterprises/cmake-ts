@@ -21,8 +21,8 @@
   "bin": "build/main.js",
   "scripts": {
     "clean": "shx rm -rf build",
-    "lint": "eslint . --fix",
-    "test.lint": "eslint .",
+    "lint": "eslint . --cache \"./**/*.{js,ts,mjs,mts,cjs,cts,json,yaml,yml}\" --fix",
+    "test.lint": "eslint . --cache \"./**/*.{js,ts,mjs,mts,cjs,cts,json,yaml,yml}\"",
     "dev.tsc": "tsc -w --pretty",
     "dev.legacy-main": "vite --mode legacy-main",
     "dev.legacy-lib": "vite --mode legacy-lib",

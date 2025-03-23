@@ -56,5 +56,8 @@ jobs:
       - name: Build
         run: pnpm run build
 
+      - name: Lint
+        run: pnpm run test.lint
+
       # - name: Tests
       #   run: pnpm test
