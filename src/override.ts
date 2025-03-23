@@ -30,7 +30,7 @@ const knownOverrides: OverrideConfig[] = [{
 }];
 
 function matchAgainstArray<T>(value: T, target?: ArrayOrSingle<T>) {
-  if (!target) {
+  if (target === undefined) {
     // no target value means all are accepted
     return true;
   }
@@ -52,7 +52,7 @@ function matchOverride(config: BuildConfigurationDefaulted, ov: OverrideConfig) 
     return false;
   }
 
-  if (ov.match.runtimeVersion) {
+  if (ov.match.runtimeVersion !== undefined) {
     const compares = Array.isArray(ov.match.runtimeVersion) ? ov.match.runtimeVersion : [ov.match.runtimeVersion];
 
     if (!compares.some(v => satisfies(config.runtimeVersion, v, { includePrerelease: true }))) {

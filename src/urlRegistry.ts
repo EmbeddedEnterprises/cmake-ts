@@ -2,10 +2,11 @@ import { BuildConfigurationDefaulted } from './lib';
 import gte from 'semver/functions/gte';
 import lt from 'semver/functions/lt';
 import os from 'os';
+import { getEnvVar } from './util';
 
-const NODE_MIRROR = process.env.NVM_NODEJS_ORG_MIRROR || "https://nodejs.org/dist";
-const IOJS_MIRROR = process.env.NVM_IOJS_ORG_MIRROR || "https://iojs.org/dist";
-const ELECTRON_MIRROR = process.env.ELECTRON_MIRROR || "https://artifacts.electronjs.org/headers/dist";
+const NODE_MIRROR = getEnvVar('NVM_NODEJS_ORG_MIRROR') ?? "https://nodejs.org/dist";
+const IOJS_MIRROR = getEnvVar('NVM_IOJS_ORG_MIRROR') ?? "https://iojs.org/dist";
+const ELECTRON_MIRROR = getEnvVar('ELECTRON_MIRROR') ?? "https://artifacts.electronjs.org/headers/dist";
 
 export const HOME_DIRECTORY = process.env[(os.platform() === "win32") ? "USERPROFILE" : "HOME"] as string;
 

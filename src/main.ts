@@ -6,12 +6,12 @@ import { BuildOptions, defaultBuildOptions, defaultBuildConfiguration } from './
 import { join, resolve } from 'path';
 import { RuntimeDistribution } from './runtimeDistribution';
 import { ArgumentBuilder } from './argumentBuilder';
-import { RUN } from './util';
+import { getEnvVar, RUN } from './util';
 import { ensureDir, remove, copy, pathExists, readJson } from 'fs-extra';
 import { applyOverrides } from './override';
 import { determineBuildMode } from './buildMode'
 
-const DEBUG_LOG = Boolean(process.env.CMAKETSDEBUG);
+const DEBUG_LOG = getEnvVar('CMAKETSDEBUG');
 
 (async (): Promise<void> => {
 
@@ -106,7 +106,7 @@ const DEBUG_LOG = Boolean(process.env.CMAKETSDEBUG);
     const cmdline = await argBuilder.buildCmakeCommandLine();
     const buildcmdline = argBuilder.buildGeneratorCommandLine(stagingDir);
     console.log('[ DONE ]');
-    if (DEBUG_LOG) {
+    if (DEBUG_LOG !== undefined) {
       console.log('====> configure: ', cmdline);
       console.log('====> build:     ', buildcmdline);
     }
@@ -126,7 +126,7 @@ const DEBUG_LOG = Boolean(process.env.CMAKETSDEBUG);
     process.stdout.write(`> Copying ${configs.projectName}.node to target directory... `);
     await ensureDir(targetDir);
     if (configs.generatorToUse.includes('Visual Studio')) {
-      if (DEBUG_LOG) {
+      if (DEBUG_LOG !== undefined) {
         console.log(`Applying copy fix for MSVC projects`);
       }
       await copy(join(stagingDir, configs.buildType, `${configs.projectName}.node`), join(targetDir, `${configs.projectName}.node`));

@@ -2,6 +2,14 @@ import { exec, spawn } from 'child_process';
 import splitargs from 'splitargs2';
 import { PathLike, stat as rawStat, StatOptions, Stats } from 'fs-extra';
 
+export function getEnvVar(name: string) {
+  const value = process.env[name];
+  if (typeof value === 'string' && value.length > 0) {
+    return value;
+  }
+  return undefined;
+}
+
 export const GET_CMAKE_VS_GENERATOR = async (cmake: string, arch: string): Promise<string> => {
   const archString = arch === 'x64' ? 'Win64' : arch === "x86" ? '' : null;
   if(archString === null) {
