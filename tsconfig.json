@@ -38,6 +38,13 @@
   "compileOnSave": false,
   "include": [
     "./src",
-    "./*.mts"
+    "./*.mts",
+    "test/**/*.ts",
+    "test/**/*.mts"
+],
+  "exclude": [
+    "./node_modules",
+    "./build",
+    "test/fixtures"
   ]
 }

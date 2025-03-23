@@ -4,9 +4,9 @@ import babel from "vite-plugin-babel"
 import babelConfig from "./babel.config.mts"
 
 // Instead of using TARGET env variable, we'll use Vite's mode
-export default defineConfig(async ({ mode }) => {
-    const isLegacy = mode.includes('legacy')
-    const isMain = mode.includes('main')
+export default defineConfig(async (configEnv) => {
+    const isLegacy = configEnv.mode.includes('legacy')
+    const isMain = configEnv.mode.includes('main')
 
     const plugins = isLegacy
         ? [
@@ -28,7 +28,7 @@ export default defineConfig(async ({ mode }) => {
             ssr: isMain ? "./src/main.ts" : "./src/lib.ts",
             outDir: isLegacy ? "./build/legacy" : "./build/modern",
             target: isLegacy ? "node12" : "node20",
-            minify: "esbuild",
+            minify: process.env.NODE_ENV === 'development' ? false : "esbuild",
             sourcemap: true,
             rollupOptions: {
                 output: {

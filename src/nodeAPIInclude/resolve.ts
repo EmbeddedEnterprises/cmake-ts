@@ -1,12 +1,37 @@
 import resolve from "resolve/async.js";
 
-export function requireInclude(resolvedPath: string) {
+type NodeAddonApiImport = {
+  include: string,
+  include_dir: string,
+  /** @deprecated */
+  gyp: string,
+  targets: string,
+  version: string,
+  isNodeApiBuiltin: boolean,
+  needsFlag: false
+};
+
+async function getRequire() {
+  if (typeof require === "function") {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    return require;
+  }
+  const { createRequire } = await import("module");
+  return createRequire(import.meta.url);
+}
+
+export async function requireInclude(resolvedPath: string) {
   try {
+    const require = await getRequire();
+
     let consoleOutput: string | null = null;
     const origConsole = console.log;
-    console.log = (msg: string) => { consoleOutput = msg };
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const requireResult = require(resolvedPath);
+    console.log = (msg: string) => {
+      consoleOutput = msg
+    };
+
+    const requireResult = require(resolvedPath) as NodeAddonApiImport;
+
     console.log = origConsole;
 
     if (typeof requireResult === "string") {
@@ -19,6 +44,7 @@ export function requireInclude(resolvedPath: string) {
       } else if (typeof requireResult.include === "string") {
         // for old NAPI
         return requireResult.include;
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       } else if (consoleOutput !== null) {
         // for recent NAN packages. Will open a PR with NAN.
         return consoleOutput;

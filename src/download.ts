@@ -7,6 +7,7 @@ import extractTar from 'tar/lib/extract.js';
 import { basename, dirname, join } from 'path';
 import { tmpdir } from 'os';
 import extract from 'extract-zip';
+import { ExtractOptions as TarExtractOptions } from 'tar';
 
 export type HashType = 'sha256' | 'sha512' | 'sha1' | 'md5' | 'sha384' | 'sha224';
 
@@ -100,10 +101,12 @@ export async function downloadFile(url: string, opts: string | DownloadOptions):
   }
 }
 
+type DownloadTgzOptions = DownloadOptions & TarExtractOptions;
+
 /**
  * Downloads and extracts a .tgz file
  */
-export async function downloadTgz(url: string, opts: string | DownloadOptions): Promise<string | undefined> {
+export async function downloadTgz(url: string, opts: string | DownloadTgzOptions): Promise<string | undefined> {
   const options = typeof opts === 'string' ? { path: opts } : opts;
 
   const { filePath, hash } = await download(url, undefined, options.hashType);
@@ -117,7 +120,8 @@ export async function downloadTgz(url: string, opts: string | DownloadOptions): 
     // Extract the tgz file
     await extractTar({
       file: filePath,
-      cwd: options.path ?? options.cwd ?? process.cwd()
+      cwd: options.path ?? options.cwd ?? process.cwd(),
+      ...options
     });
 
     return hash;

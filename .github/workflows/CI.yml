@@ -13,24 +13,42 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          - macos-13 # x86
+          - macos-13 
           - windows-latest
         node_version:
           - 20
           - 22
+        cpp_arch:
+          - x64
         include:
            - os: macos-14 # arm
              node-version: 16
+             cpp_arch: arm64
+
            - os: macos-14 # arm
              node-version: 22
+             cpp_arch: arm64
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node_version }}
 
       - uses: pnpm/action-setup@v4
+
+      # - name: Setup Cpp
+      #   if: ${{ matrix.native }}
+      #   uses: aminya/setup-cpp@v1
+      #   with:
+      #     vcvarsall: true
+      #     cmake: true
+      #     ninja: true
+      #     python: true
+      #     vcpkg: ee2d2a100103e0f3613c60655dcf15be7d5157b8
+      #     architecture: ${{ matrix.cpp_arch }}
 
       - name: Install dependencies
         run: pnpm install
