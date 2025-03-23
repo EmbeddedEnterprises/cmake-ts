@@ -1,4 +1,21 @@
 {
   "extends": "eslint-config-atomic",
-  "ignorePatterns": ["build/", "dist/", "node_modules/"]
+  "ignorePatterns": [
+    "build/",
+    "dist/",
+    "node_modules/"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "*.ts"
+      ],
+      "rules": {
+        "no-empty-function": "off",
+        "@typescript-eslint/no-empty-function": "error",
+        "no-useless-constructor": "off",
+        "@typescript-eslint/no-useless-constructor": "error"
+      }
+    }
+  ]
 }

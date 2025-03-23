@@ -1,5 +1,5 @@
 import type { TransformOptions } from "@babel/core"
-// @ts-ignore
+// @ts-expect-error untyped plugin
 import RemoveNodePrefix from "@upleveled/babel-plugin-remove-node-prefix"
 
 const babelConfig: TransformOptions = {
