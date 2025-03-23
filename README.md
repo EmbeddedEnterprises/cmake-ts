@@ -6,6 +6,10 @@ This project is loosely inspired by [cmake-js](https://github.com/cmake-js/cmake
 
 It is intended to prebuild addons for different versions of NodeJS and Electron and ship a binary version.
 
+## Example
+
+See [zeromq.js](https://github.com/zeromq/zeromq.js) for an real-world example of how to use this module.
+
 ## Configuration
 
 Configuration is done entirely via `package.json`. You can specify multiple build configurations under the `cmake-ts` key:
