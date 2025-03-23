@@ -171,7 +171,7 @@ export async function defaultBuildOptions(configs: BuildOptions, buildmode: Buil
       process.exit(1);
     }
     //unnamed configs are always filtered out
-    configs.configurations = configs.configurations.filter(j => (j.name ? buildmode.configsToBuild.includes(j.name) : false))
+    configs.configurations = configs.configurations.filter(config => (config.name !== undefined ? buildmode.configsToBuild.includes(config.name) : false))
     if(configs.configurations.length === 0) {
       console.error(`No configuration left to build!`);
       process.exit(1);
@@ -199,7 +199,7 @@ export async function defaultBuildOptions(configs: BuildOptions, buildmode: Buil
 
   if (configs.cmakeToUse === undefined) {
     const cmake = await whichWrapped('cmake');
-    if (!cmake) {
+    if (cmake === null) {
       console.error('cmake binary not found, try to specify \'cmakeToUse\'');
       process.exit(1);
     }
@@ -207,17 +207,16 @@ export async function defaultBuildOptions(configs: BuildOptions, buildmode: Buil
   }
 
   // handle missing generator
-  const ninjaP = whichWrapped('ninja');
-  const makeP = whichWrapped('make');
-  let ninja: string | null;
-  let make: string | null;
+  const [ninja, make] = await Promise.all([
+    whichWrapped('ninja'),
+    whichWrapped('make'),
+  ]);
+
   if (configs.generatorToUse === undefined) {
     console.log('no generator specified in package.json, checking ninja');
-    ninja = await ninjaP;
-    if (!ninja) {
+    if (ninja === null) {
       console.log('ninja not found, checking make');
-      make = await makeP;
-      if (!make) {
+      if (make === null) {
         console.log('make not found, using native');
         if (process.platform === 'win32') {
           // I'm on windows, so fixup the architecture mess.
@@ -243,15 +242,13 @@ export async function defaultBuildOptions(configs: BuildOptions, buildmode: Buil
   // handle missing generatorBinary
   if (configs.generatorBinary === undefined) {
     if (configs.generatorToUse === 'Ninja') {
-      ninja = await ninjaP;
-      if (!ninja) {
+      if (ninja === null) {
         console.error('Ninja was specified as generator but no ninja binary could be found. Specify it via \'generatorBinary\'');
         process.exit(1);
       }
       configs.generatorBinary = ninja;
     } else if (configs.generatorToUse === 'Unix Makefiles') {
-      make = await makeP;
-      if (!make) {
+      if (make === null) {
         console.error('Unix Makefiles was specified as generator but no make binary could be found. Specify it via \'generatorBinary\'');
         process.exit(1);
       }

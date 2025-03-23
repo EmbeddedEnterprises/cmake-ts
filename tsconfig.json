@@ -24,7 +24,7 @@
       // target Node.js 12 https://node.green/#ES2019
       "ES2019",
       // https://node.green/#ES2020-features-String-prototype-matchAll
-      "ES2020.String",
+      "ES2020.String"
     ],
     "target": "ESNext",
     "allowJs": true,
@@ -41,7 +41,7 @@
     "./*.mts",
     "test/**/*.ts",
     "test/**/*.mts"
-],
+  ],
   "exclude": [
     "./node_modules",
     "./build",
