@@ -25,7 +25,7 @@ suite("zeromq", () => {
 
     for (const bundle of ["legacy", "modern"]) {
         test(`cmake-ts ${bundle} nativeonly`, async () => {
-            const cmakeTsPath = join(root, `build/${bundle}/main.${bundle === "legacy" ? "js" : "mjs"}`)
+            const cmakeTsPath = join(root, `build/main.${bundle === "legacy" ? "js" : "mjs"}`)
 
             execFileSync(process.execPath, ["--enable-source-maps", cmakeTsPath, "nativeonly"], {
                 stdio: "inherit",
