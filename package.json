@@ -2,15 +2,23 @@
   "name": "cmake-ts",
   "version": "0.4.0",
   "description": "cmake-js rewrite in typescript to support advanced build configurations",
-  "main": "build/legacy/lib.js",
-  "module": "build/modern/lib.js",
+  "main": "build/lib.js",
+  "module": "build/lib.mjs",
   "exports": {
     ".": {
-      "require": "./build/legacy/lib.js",
-      "import": "./build/modern/lib.js"
+      "require": "./build/lib.js",
+      "import": "./build/lib.mjs"
+    },
+    "./main": {
+      "require": "./build/main.js",
+      "import": "./build/main.mjs"
+    },
+    "./lib": {
+      "require": "./build/lib.js",
+      "import": "./build/lib.mjs"
     }
   },
-  "bin": "build/legacy/main.js",
+  "bin": "build/main.js",
   "scripts": {
     "clean": "shx rm -rf build",
     "lint": "eslint . --fix",
@@ -20,13 +28,13 @@
     "dev.legacy-lib": "vite --mode legacy-lib",
     "dev.modern-main": "vite --mode modern-main",
     "dev.modern-lib": "vite --mode modern-lib",
-    "dev": "run-p dev.legacy-main dev.legacy-lib dev.modern-main dev.modern-lib dev.tsc",
+    "dev": "cross-env NODE_ENV=development run-p dev.legacy-main dev.legacy-lib dev.modern-main dev.modern-lib dev.tsc",
     "build.tsc": "tsc --pretty",
     "build.legacy-main": "vite build --mode legacy-main",
     "build.legacy-lib": "vite build --mode legacy-lib",
     "build.modern-main": "vite build --mode modern-main",
     "build.modern-lib": "vite build --mode modern-lib",
-    "build": "run-p build.legacy-main build.legacy-lib build.modern-main build.modern-lib build.tsc",
+    "build": "cross-env NODE_ENV=production run-p build.legacy-main build.legacy-lib build.modern-main build.modern-lib build.tsc",
     "test": "pnpm dlx vitest --watch false"
   },
   "files": [
