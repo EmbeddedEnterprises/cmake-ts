@@ -1,4 +1,5 @@
 import resolve from "resolve/async.js";
+import { getRequire } from "./getRequire.js";
 
 type NodeAddonApiImport = {
   include: string,
@@ -10,15 +11,6 @@ type NodeAddonApiImport = {
   isNodeApiBuiltin: boolean,
   needsFlag: false
 };
-
-async function getRequire() {
-  if (typeof require === "function") {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    return require;
-  }
-  const { createRequire } = await import("module");
-  return createRequire(import.meta.url);
-}
 
 export async function requireInclude(resolvedPath: string) {
   try {
