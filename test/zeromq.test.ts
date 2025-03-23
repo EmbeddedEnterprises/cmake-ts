@@ -1,19 +1,18 @@
-import { beforeAll, expect, suite, test } from "vitest"
+import { beforeEach, expect, suite, test } from "vitest"
 import { execFileSync } from "child_process"
 import path, { join } from "path"
 import { existsSync, remove } from "fs-extra"
 import { fileURLToPath } from "url"
 import glob from "fast-glob"
 
-const isCjs = typeof __dirname === "string"
-const dirname = isCjs ? __dirname : path.dirname(fileURLToPath(import.meta.url))
+const dirname = typeof __dirname === "string" ? __dirname : path.dirname(fileURLToPath(import.meta.url))
 const root = path.dirname(dirname)
 
 suite("zeromq", () => {
     const zeromqPath = join(root, "node_modules/zeromq")
+    expect(existsSync(zeromqPath), `Zeromq path ${zeromqPath} does not exist`).toBe(true)
 
-    beforeAll(async () => {
-        expect(existsSync(zeromqPath), `Zeromq path ${zeromqPath} does not exist`).toBe(true)
+    beforeEach(async () => {
 
         await Promise.all([
             remove(join(zeromqPath, "build")),
@@ -21,21 +20,23 @@ suite("zeromq", () => {
         ])
     })
 
-    test("cmake-ts binary nativeonly", async () => {
-        const cmakeTsPath = join(root, isCjs ? "build/legacy/main.js" : "build/modern/main.mjs")
+    for (const bundle of ["legacy", "modern"]) {
+        test(`cmake-ts ${bundle} nativeonly`, async () => {
+            const cmakeTsPath = join(root, `build/${bundle}/main.${bundle === "legacy" ? "js" : "mjs"}`)
 
-        execFileSync(process.execPath, ["--enable-source-maps", cmakeTsPath, "nativeonly"], {
-            stdio: "inherit",
-            cwd: zeromqPath,
+            execFileSync(process.execPath, ["--enable-source-maps", cmakeTsPath, "nativeonly"], {
+                stdio: "inherit",
+                cwd: zeromqPath,
+            })
+
+            const addons = await glob(`build/${process.platform}/${process.arch}/node/*/addon.node`, {
+                cwd: zeromqPath,
+                absolute: true,
+                onlyFiles: true,
+                braceExpansion: false,
+            })
+
+            expect(addons.length).toBe(1)
         })
-
-        const addons = await glob(`build/${process.platform}/${process.arch}/node/*/addon.node`, {
-            cwd: zeromqPath,
-            absolute: true,
-            onlyFiles: true,
-            braceExpansion: false,
-        })
-
-        expect(addons.length).toBe(1)
-    })
+    }
 })
