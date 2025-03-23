@@ -33,7 +33,7 @@ export class ArgumentBuilder {
     const retVal: [string, string][] = [];
     retVal.push(['CMAKE_BUILD_TYPE', this.options.buildType]);
 
-    if (this.config.toolchainFile) {
+    if (this.config.toolchainFile !== null) {
       retVal.push(['CMAKE_TOOLCHAIN_FILE', resolve(this.config.toolchainFile)]);
     }
 
@@ -62,17 +62,17 @@ export class ArgumentBuilder {
     }
 
     // Search nodeAPI if installed and required
-    if (this.options.nodeAPI?.includes('nan')) {
+    if (this.options.nodeAPI?.includes('nan') === true) {
       console.warn(`WARNING: specified nodeAPI ${this.options.nodeAPI} seems to be nan - The usage of nan is discouraged due to subtle and hard-to-fix ABI issues! Consider using node-addon-api / N-API instead!`)
     }
-    if (!this.options.nodeAPI) {
+    if (this.options.nodeAPI === undefined) {
       console.warn('WARNING: nodeAPI was not specified. The default changed from "nan" to "node-addon-api" in v0.3.0! Please make sure this is intended.');
     }
     const nodeApiInclude = await getNodeApiInclude(this.options.packageDirectory, this.options.nodeAPI ?? "node-addon-api");
-    if (this.options.nodeAPI && !nodeApiInclude) {
+    if (this.options.nodeAPI !== undefined && nodeApiInclude === null) {
       console.log(`WARNING: nodeAPI was specified, but module "${this.options.nodeAPI}" could not be found!`);
     }
-    if (nodeApiInclude) {
+    if (nodeApiInclude !== null) {
       includes.push(nodeApiInclude);
     }
     // Pass includes to cmake
