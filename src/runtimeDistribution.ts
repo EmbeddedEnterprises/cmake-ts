@@ -143,16 +143,16 @@ export class RuntimeDistribution {
     const tarUrl = urlJoin(this.externalPath, tarLocalPath);
     const sum = await DOWNLOADER.downloadTgz(tarUrl, {
       cwd: this.internalPath,
-      hashType: sums ? 'sha256' : null,
+      hashType: sums ? 'sha256' : undefined,
       strip: 1,
       filter: (p: string) => {
         if (p === this.internalPath) {
           return true;
         }
         const ext = extname(p);
-        return ext && ext.toLowerCase() === '.h';
+        return ext !== '' && ext.toLowerCase() === '.h';
       },
-    } as DOWNLOADER.DownloadOptions);
+    });
     if (sums && !TEST_SUM(sums, sum, tarLocalPath)) {
       throw new Error("Checksum mismatch");
     }
