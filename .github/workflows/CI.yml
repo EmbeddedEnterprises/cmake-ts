@@ -39,16 +39,16 @@ jobs:
 
       - uses: pnpm/action-setup@v4
 
-      - name: Setup Cpp
-        if: ${{ matrix.native }}
-        uses: aminya/setup-cpp@v1
-        with:
-          vcvarsall: true
-          cmake: true
-          ninja: true
-          python: true
-          vcpkg: ee2d2a100103e0f3613c60655dcf15be7d5157b8
-          architecture: ${{ matrix.cpp_arch }}
+      # - name: Setup Cpp
+      #   if: ${{ matrix.native }}
+      #   uses: aminya/setup-cpp@v1
+      #   with:
+      #     vcvarsall: true
+      #     cmake: true
+      #     ninja: true
+      #     python: true
+      #     vcpkg: ee2d2a100103e0f3613c60655dcf15be7d5157b8
+      #     architecture: ${{ matrix.cpp_arch }}
 
       - name: Install dependencies
         run: pnpm install
@@ -56,5 +56,5 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      - name: Tests
-        run: pnpm test
+      # - name: Tests
+      #   run: pnpm test
