@@ -15,7 +15,6 @@ export default defineConfig(async (configEnv) => {
                 reporter: ['text', 'html'],
             },
             include: ["test/**/*.test.ts", "test/**/*.test.mts"],
-            globalSetup: ['./test/setup.ts'],
             typecheck: {
                 enabled: true,
                 tsconfig: './tsconfig.json'

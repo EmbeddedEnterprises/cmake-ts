@@ -4,12 +4,12 @@ import glob from "fast-glob"
 import { existsSync, remove } from "fs-extra"
 import path, { join } from "path"
 import { fileURLToPath } from "url"
-import { beforeEach, expect, suite, test } from "vitest"
+import { beforeAll, beforeEach, expect, suite, test } from "vitest"
 import { HOME_DIRECTORY } from "../src/urlRegistry"
 const dirname = typeof __dirname === "string" ? __dirname : path.dirname(fileURLToPath(import.meta.url))
 const root = path.dirname(dirname)
 
-suite("zeromq", (tests) => {
+suite("zeromq", { timeout: 300_000 }, (tests) => {
     if (isCI) {
         tests.skip("Skipping zeromq test on CI")
         return
@@ -17,6 +17,17 @@ suite("zeromq", (tests) => {
 
     const zeromqPath = join(root, "node_modules/zeromq")
     expect(existsSync(zeromqPath), `Zeromq path ${zeromqPath} does not exist`).toBe(true)
+
+    beforeAll(() => {
+        execFileSync("pnpm", ["build"], {
+            stdio: 'inherit',
+            env: {
+                ...process.env,
+                NODE_ENV: 'development',
+            }
+        })
+        console.log('Build completed')
+    })
 
     beforeEach(async () => {
         await Promise.all([
