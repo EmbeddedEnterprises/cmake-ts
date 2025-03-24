@@ -1,5 +1,5 @@
 {
-  "extends": "eslint-config-atomic/strict",
+  "extends": "eslint-config-atomic",
   "ignorePatterns": [
     "build/",
     "dist/",
