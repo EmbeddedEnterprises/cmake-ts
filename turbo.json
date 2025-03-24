@@ -2,7 +2,8 @@
     "$schema": "https://turbo.build/schema.json",
     "globalEnv": [
         "OS",
-        "RUNNER_OS"
+        "RUNNER_OS",
+        "BUILD_ANALYSIS"
     ],
     "tasks": {
         "build.tsc": {
