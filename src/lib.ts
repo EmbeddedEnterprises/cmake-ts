@@ -1,5 +1,5 @@
 import which from 'which';
-import { GET_CMAKE_VS_GENERATOR } from './util';
+import { getCmakeGenerator } from './util';
 import { BuildMode } from './buildMode'
 
 export type ArrayOrSingle<T> = T | T[];
@@ -220,7 +220,7 @@ export async function defaultBuildOptions(configs: BuildOptions, buildmode: Buil
         console.log('make not found, using native');
         if (process.platform === 'win32') {
           // I'm on windows, so fixup the architecture mess.
-          const generator = await GET_CMAKE_VS_GENERATOR(configs.cmakeToUse, process.arch);
+          const generator = await getCmakeGenerator(configs.cmakeToUse, process.arch);
           configs.generatorToUse = generator;
           configs.generatorBinary = 'native';
         } else {

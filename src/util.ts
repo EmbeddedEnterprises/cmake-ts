@@ -1,4 +1,4 @@
-import { exec, spawn } from 'child_process';
+import * as cp from 'child_process';
 import splitargs from 'splitargs2';
 import { PathLike, stat as rawStat, StatOptions, Stats } from 'fs-extra';
 
@@ -10,14 +10,14 @@ export function getEnvVar(name: string) {
   return undefined;
 }
 
-export const GET_CMAKE_VS_GENERATOR = async (cmake: string, arch: string): Promise<string> => {
+export async function getCmakeGenerator(cmake: string, arch: string): Promise<string> {
   const archString = arch === 'x64' ? 'Win64' : arch === "x86" ? '' : null;
-  if(archString === null) {
+  if (archString === null) {
     console.error('Failed to find valid VS gen, using native. Good Luck.');
     return 'native';
   }
 
-  const generators = await EXEC_CAPTURE(`"${cmake}" -G`);
+  const generators = await execCapture(`"${cmake}" -G`);
   const hasCR = generators.includes('\r\n');
   const output = hasCR ? generators.split('\r\n') : generators.split('\n');
   let found = false;
@@ -47,25 +47,25 @@ export const GET_CMAKE_VS_GENERATOR = async (cmake: string, arch: string): Promi
     }
   }
   const useSwitch = !useVSGen.match(/.*\[arch]/);
-  if(useSwitch) {
-    useVSGen += " -A" // essentially using this as a flag
+  if (useSwitch) {
+    useVSGen += " -A"; // essentially using this as a flag
   } else {
     useVSGen = useVSGen.replace('[arch]', archString).trim();
   }
   return useVSGen;
 }
 
-export const EXEC_CAPTURE = (command: string): Promise<string> => {
+export function execCapture(command: string): Promise<string> {
   return new Promise(resolve => {
-    exec(command, (_, stdout, stderr) => {
+    cp.exec(command, (_, stdout, stderr) => {
       resolve(stdout || stderr);
     });
   });
-};
+}
 
-export const EXEC = (command: string): Promise<string> => {
+export function exec(command: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    exec(command, (err, stdout, stderr) => {
+    cp.exec(command, (err, stdout, stderr) => {
       if (err) {
         reject(new Error(`${err.message}\n${stdout || stderr}`));
       } else {
@@ -73,14 +73,14 @@ export const EXEC = (command: string): Promise<string> => {
       }
     });
   });
-};
+}
 
-export const RUN = (command: string, cwd: string = process.cwd(), silent: boolean = false): Promise<void> => {
+export function run(command: string, cwd: string = process.cwd(), silent: boolean = false): Promise<void> {
   return new Promise((resolve, reject) => {
     const args = splitargs(command);
     const name = args[0];
     args.splice(0, 1);
-    const child = spawn(name, args, {
+    const child = cp.spawn(name, args, {
       stdio: silent ? 'ignore' : 'inherit',
       cwd,
     });
@@ -103,7 +103,7 @@ export const RUN = (command: string, cwd: string = process.cwd(), silent: boolea
       ended = true;
     });
   });
-};
+}
 
 /** Exception safe version of stat */
 export async function stat(path: PathLike, options?: StatOptions & { bigint: false }): Promise<Stats> {

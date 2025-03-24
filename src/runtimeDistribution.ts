@@ -8,7 +8,7 @@ import { downloadToString, downloadTgz, downloadFile } from './download';
 import glob from 'fast-glob'
 
 export type HashSum = { getPath: string, sum: string };
-function test_sum(sums: HashSum[], sum: string | undefined, fPath: string) {
+function testHashSum(sums: HashSum[], sum: string | undefined, fPath: string) {
   const serverSum = sums.find(s => s.getPath === fPath);
   if (serverSum && serverSum.sum === sum) {
     return true;
@@ -156,7 +156,7 @@ export class RuntimeDistribution {
         },
       }
     });
-    if (sums && !test_sum(sums, sum, tarLocalPath)) {
+    if (sums && !testHashSum(sums, sum, tarLocalPath)) {
       throw new Error("Checksum mismatch");
     }
   }
@@ -178,7 +178,7 @@ export class RuntimeDistribution {
       path: joinPath(this.internalPath(), fPath),
       hashType: sums ? "sha256" : undefined,
     });
-    if (sums && !test_sum(sums, sum, fPath)) {
+    if (sums && !testHashSum(sums, sum, fPath)) {
       throw new Error("Checksum mismatch");
     }
   }

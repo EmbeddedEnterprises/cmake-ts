@@ -6,7 +6,7 @@ import { BuildOptions, defaultBuildOptions, defaultBuildConfiguration } from './
 import { join, resolve } from 'path';
 import { RuntimeDistribution } from './runtimeDistribution';
 import { ArgumentBuilder } from './argumentBuilder';
-import { getEnvVar, RUN } from './util';
+import { getEnvVar, run } from './util';
 import { ensureDir, remove, copy, pathExists, readJson } from 'fs-extra';
 import { applyOverrides } from './override';
 import { determineBuildMode } from './buildMode'
@@ -114,12 +114,12 @@ async function main(): Promise<void> {
     // Invoke CMake
     process.stdout.write('> Invoking CMake... ');
     // TODO: Capture stdout/stderr and display only when having an error
-    await RUN(cmdline, stagingDir, false);
+    await run(cmdline, stagingDir, false);
     console.log('[ DONE ]');
 
     // Actually build the software
     process.stdout.write(`> Invoking ${configs.generatorBinary}... `);
-    await RUN(buildcmdline, stagingDir, false);
+    await run(buildcmdline, stagingDir, false);
     console.log('[ DONE ]');
 
     // Copy back the previously built binary
