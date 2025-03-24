@@ -142,16 +142,18 @@ export class RuntimeDistribution {
     const tarLocalPath = URL_REGISTRY.getPathsForConfig(this.config).tarPath;
     const tarUrl = urlJoin(this.externalPath, tarLocalPath);
     const sum = await DOWNLOADER.downloadTgz(tarUrl, {
-      cwd: this.internalPath,
       hashType: sums ? 'sha256' : undefined,
-      strip: 1,
-      filter: (p: string) => {
-        if (p === this.internalPath) {
-          return true;
-        }
-        const ext = extname(p);
-        return ext !== '' && ext.toLowerCase() === '.h';
-      },
+      extractOptions: {
+        cwd: this.internalPath,
+        strip: 1,
+        filter: (p: string) => {
+          if (p === this.internalPath) {
+            return true;
+          }
+          const ext = extname(p);
+          return ext !== '' && ext.toLowerCase() === '.h';
+        },
+      }
     });
     if (sums && !TEST_SUM(sums, sum, tarLocalPath)) {
       throw new Error("Checksum mismatch");

@@ -98,7 +98,7 @@ suite('Download Module', () => {
             const extractPath = path.join(testTmpDir, 'node-headers');
             await fs.ensureDir(extractPath);
 
-            await downloadTgz(nodeHeadersUrl, { path: extractPath });
+            await downloadTgz(nodeHeadersUrl, { extractOptions: { cwd: extractPath } });
 
             // Check if files were extracted
             const files = await fs.readdir(extractPath);
@@ -122,8 +122,10 @@ suite('Download Module', () => {
             await fs.ensureDir(extractPath);
 
             await downloadTgz(nodeHeadersUrl, {
-                path: extractPath,
-                strip: 1
+                extractOptions: {
+                    strip: 1,
+                    cwd: extractPath,
+                }
             });
 
             // With strip=1, the node-v23.4.0 directory should be stripped
@@ -136,4 +138,4 @@ suite('Download Module', () => {
             expect(await fs.pathExists(nodeHeaderFile)).toBe(true);
         });
     });
-});
+}, { timeout: 10_000 });

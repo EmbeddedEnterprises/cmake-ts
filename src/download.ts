@@ -8,13 +8,23 @@ import { ExtractOptions as TarExtractOptions } from 'tar';
 
 export type HashType = 'sha256' | 'sha512' | 'sha1' | 'md5' | 'sha384' | 'sha224';
 
-export type DownloadOptions = {
-  path?: string,
-  cwd?: string,
+export type DownloadCoreOptions = {
   hashType?: HashType,
   hashSum?: string,
   timeout?: number,
 }
+
+export type DownloadOptions = DownloadCoreOptions & {
+  path?: string,
+}
+
+export type DownloadFileOptions = DownloadCoreOptions & {
+  path: string,
+}
+
+export type DownloadTgzOptions = DownloadOptions & {
+  extractOptions?: TarExtractOptions,
+};
 
 type DownloadResult = {
   filePath: string,
@@ -65,7 +75,7 @@ export async function calculateHash(filePath: string, hashType: HashType) {
 /**
  * Downloads content from a URL and returns it as a string
  */
-export async function downloadToString(url: string, options: DownloadOptions = {}): Promise<string> {
+export async function downloadToString(url: string, options: DownloadCoreOptions = {}): Promise<string> {
   const { filePath } = await download(url, options);
 
   try {
@@ -80,7 +90,7 @@ export async function downloadToString(url: string, options: DownloadOptions = {
 /**
  * Downloads a file from a URL to a specified path
  */
-export async function downloadFile(url: string, options: DownloadOptions & { path: string }): Promise<string | undefined> {
+export async function downloadFile(url: string, options: DownloadFileOptions): Promise<string | undefined> {
   const { hash } = await download(url, options);
 
   // Verify hash if needed
@@ -90,8 +100,6 @@ export async function downloadFile(url: string, options: DownloadOptions & { pat
 
   return hash;
 }
-
-type DownloadTgzOptions = DownloadOptions & TarExtractOptions;
 
 /**
  * Downloads and extracts a .tgz file
@@ -108,8 +116,7 @@ export async function downloadTgz(url: string, options: DownloadTgzOptions): Pro
     // Extract the tgz file
     await extractTar({
       file: filePath,
-      cwd: options.path ?? options.cwd ?? process.cwd(),
-      ...options
+      ...options.extractOptions,
     });
 
     return hash;
