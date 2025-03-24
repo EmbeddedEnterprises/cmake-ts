@@ -1,6 +1,6 @@
 {
   "name": "cmake-ts",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "cmake-js rewrite in typescript to support advanced build configurations",
   "main": "build/lib.js",
   "module": "build/lib.mjs",
@@ -9,13 +9,29 @@
       "require": "./build/lib.js",
       "import": "./build/lib.mjs"
     },
-    "./main": {
-      "require": "./build/main.js",
-      "import": "./build/main.mjs"
+    "./*": {
+      "require": "./build/*.js",
+      "import": "./build/*.mjs"
     },
-    "./lib": {
-      "require": "./build/lib.js",
-      "import": "./build/lib.mjs"
+    "./*.js": {
+      "require": "./build/*.js",
+      "import": "./build/*.mjs"
+    },
+    "./*.mjs": {
+      "require": "./build/*.js",
+      "import": "./build/*.mjs"
+    },
+    "./build/*": {
+      "require": "./build/*.js",
+      "import": "./build/*.mjs"
+    },
+    "./build/*.js": {
+      "require": "./build/*.js",
+      "import": "./build/*.mjs"
+    },
+    "./build/*.mjs": {
+      "require": "./build/*.js",
+      "import": "./build/*.mjs"
     }
   },
   "bin": "build/main.js",
