@@ -9,7 +9,7 @@ const root = path.dirname(dirname)
 
 const testTmpDir = path.join(root, "test", ".tmp");
 
-suite('Download Module', () => {
+suite('Download Module', { timeout: 20_000 }, () => {
     // Real Node.js distribution URLs for testing
     const nodeBaseUrl = 'https://nodejs.org/dist/v23.4.0';
     const nodeHeadersUrl = `${nodeBaseUrl}/node-v23.4.0-headers.tar.gz`;
@@ -163,7 +163,7 @@ suite('Download Module', () => {
             expect(hash).toBe(nodeHeadersHash);
         });
     });
-}, { timeout: 10_000 });
+});
 
 
 type HashSum = { hash: string, file: string };
