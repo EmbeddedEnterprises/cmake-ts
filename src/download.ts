@@ -23,6 +23,7 @@ export type DownloadFileOptions = DownloadCoreOptions & {
 }
 
 export type DownloadTgzOptions = DownloadOptions & {
+  removeAfterExtract?: boolean,
   extractOptions?: TarExtractOptions,
 };
 
@@ -121,9 +122,11 @@ export async function downloadTgz(url: string, options: DownloadTgzOptions): Pro
 
     return hash;
   } finally {
-    await remove(filePath).catch(() => {
-      // Ignore errors
-    });
+    if (options.removeAfterExtract ?? true) {
+      await remove(filePath).catch(() => {
+        // Ignore errors
+      });
+    }
   }
 }
 

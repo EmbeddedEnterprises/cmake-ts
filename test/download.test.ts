@@ -1,4 +1,4 @@
-import { suite, expect, test, beforeAll } from 'vitest';
+import { suite, expect, test, beforeEach } from 'vitest';
 import { downloadToString, downloadFile, downloadTgz, calculateHash } from '../src/download';
 import * as fs from 'fs-extra';
 import * as path from 'path';
@@ -16,7 +16,7 @@ suite('Download Module', () => {
     const nodeDocsUrl = `${nodeBaseUrl}/docs/apilinks.json`;
     const nodeShasumUrl = `${nodeBaseUrl}/SHASUMS256.txt`;
 
-    beforeAll(async () => {
+    beforeEach(async () => {
         await fs.remove(testTmpDir);
         await fs.ensureDir(testTmpDir);
     });
@@ -137,5 +137,41 @@ suite('Download Module', () => {
             const nodeHeaderFile = path.join(includeDir, 'node', 'node.h');
             expect(await fs.pathExists(nodeHeaderFile)).toBe(true);
         });
+
+        test('should verify the hash of the downloaded file', async () => {
+            const extractPath = path.join(testTmpDir, 'node-headers');
+            await fs.ensureDir(extractPath);
+
+            const shasum = await downloadToString(nodeShasumUrl);
+            const hashSums = parseSHASUM(shasum);
+            const nodeHeadersHash = hashSums.find(h => h.file === 'node-v23.4.0-headers.tar.gz')?.hash;
+            expect(nodeHeadersHash).toBeDefined();
+
+            const downloadPath = path.join(testTmpDir, 'node-headers.tar.gz');
+            await downloadTgz(nodeHeadersUrl, {
+                path: downloadPath,
+                hashSum: nodeHeadersHash,
+                removeAfterExtract: false,
+                extractOptions: { cwd: extractPath }
+            });
+
+            expect(await fs.pathExists(downloadPath)).toBe(true);
+            expect(await fs.pathExists(path.join(extractPath, 'node-v23.4.0'))).toBe(true);
+
+
+            const hash = await calculateHash(downloadPath, 'sha256');
+            expect(hash).toBe(nodeHeadersHash);
+        });
     });
 }, { timeout: 10_000 });
+
+
+type HashSum = { hash: string, file: string };
+
+function parseSHASUM(content: string): HashSum[] {
+    const lines = content.split('\n');
+    return lines.map(line => {
+        const [hash, file] = line.split('  ');
+        return { hash, file };
+    });
+}

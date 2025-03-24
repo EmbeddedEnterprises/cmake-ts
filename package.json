@@ -51,7 +51,7 @@
     "build.modern-main": "vite build --mode modern-main",
     "build.modern-lib": "vite build --mode modern-lib",
     "build": "cross-env NODE_ENV=production run-p build.legacy-main build.legacy-lib build.modern-main build.modern-lib build.tsc",
-    "test": "pnpm dlx vitest --watch false"
+    "test": "cross-env NODE_OPTIONS=--enable-source-maps pnpm dlx vitest --watch false"
   },
   "files": [
     "build/**/*",
