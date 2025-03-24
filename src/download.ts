@@ -1,59 +1,76 @@
-// Simplified download implementation
-
 import { DownloaderHelper } from 'node-downloader-helper';
 import crypto from 'crypto';
-import { readFile, remove } from 'fs-extra';
+import { ensureDir, readFile, remove } from 'fs-extra';
 import extractTar from 'tar/lib/extract.js';
 import { basename, dirname, join } from 'path';
 import { tmpdir } from 'os';
-import extract from 'extract-zip';
 import { ExtractOptions as TarExtractOptions } from 'tar';
 
 export type HashType = 'sha256' | 'sha512' | 'sha1' | 'md5' | 'sha384' | 'sha224';
 
-export type DownloadOptions = {
-  path?: string,
-  cwd?: string,
+export type DownloadCoreOptions = {
   hashType?: HashType,
   hashSum?: string,
+  timeout?: number,
+}
+
+export type DownloadOptions = DownloadCoreOptions & {
+  path?: string,
+}
+
+export type DownloadFileOptions = DownloadCoreOptions & {
+  path: string,
+}
+
+export type DownloadTgzOptions = DownloadOptions & {
+  removeAfterExtract?: boolean,
+  extractOptions?: TarExtractOptions,
+};
+
+type DownloadResult = {
+  filePath: string,
+  hash: string | undefined
 }
 
 /**
  * Downloads a file to a temporary location and returns the file path and hash
  */
-function download(url: string, givenPath?: string, hashType?: HashType) {
-  return new Promise<{ filePath: string, hash?: string }>((resolve, reject) => {
-
-    const filePath = givenPath ?? join(tmpdir(), basename(url));
+async function download(url: string, opts: DownloadOptions) {
+  try {
+    const filePath = opts.path ?? join(tmpdir(), basename(url));
     const fileName = basename(filePath);
     const fileDir = dirname(filePath);
 
-    const downloader = new DownloaderHelper(url, fileDir, {
-      fileName,
-    });
-
-    downloader.on('error', err => reject(err));
-    downloader.on('end', async downloadInfo => {
-      try {
-        const hash = hashType !== undefined ? await calculateHash(downloadInfo.filePath, hashType) : undefined;
-
-        resolve({
-          filePath: downloadInfo.filePath,
-          hash
-        });
-      } catch (err) {
-        reject(err);
-      }
-    });
-
-    downloader.start().catch(err => reject(err));
+  await ensureDir(fileDir);
+  const downloader = new DownloaderHelper(url, fileDir, {
+    fileName,
+    timeout: opts.timeout ?? -1,
   });
+
+  downloader.on('error', err => {
+    throw err;
+  });
+
+  const result: DownloadResult = {
+    filePath,
+    hash: undefined,
+  };
+
+  await downloader.start();
+
+  // calculate hash after download is complete
+  result.hash = opts.hashType !== undefined ? await calculateHash(filePath, opts.hashType) : undefined;
+
+    return result;
+  } catch (err) {
+    throw new Error(`Failed to download ${url}: ${err}`);
+  }
 }
 
 /**
  * Calculates the hash of a file
  */
-async function calculateHash(filePath: string, hashType: HashType) {
+export async function calculateHash(filePath: string, hashType: HashType) {
   const fileBuffer = await readFile(filePath);
   const shasum = crypto.createHash(hashType);
   shasum.update(fileBuffer);
@@ -63,8 +80,8 @@ async function calculateHash(filePath: string, hashType: HashType) {
 /**
  * Downloads content from a URL and returns it as a string
  */
-export async function downloadToString(url: string): Promise<string> {
-  const { filePath } = await download(url);
+export async function downloadToString(url: string, options: DownloadCoreOptions = {}): Promise<string> {
+  const { filePath } = await download(url, options);
 
   try {
     return await readFile(filePath, 'utf8');
@@ -78,83 +95,42 @@ export async function downloadToString(url: string): Promise<string> {
 /**
  * Downloads a file from a URL to a specified path
  */
-export async function downloadFile(url: string, opts: string | DownloadOptions): Promise<string | undefined> {
-  const options = typeof opts === 'string' ? { path: opts } : opts;
-  const targetPath = options.path;
-  if (targetPath === undefined) {
-    throw new Error('Target path is required');
+export async function downloadFile(url: string, options: DownloadFileOptions): Promise<string | undefined> {
+  const { hash } = await download(url, options);
+
+  // Verify hash if needed
+  if (!isHashSumValid(hash, options)) {
+    throw new Error(`Checksum mismatch for download ${url}. Expected ${options.hashSum}, got ${hash}`);
   }
 
-  const { filePath, hash } = await download(url, targetPath, options.hashType);
-
-  try {
-    // Verify hash if needed
-    if (!isHashSumValid(hash, options)) {
-      throw new Error(`Checksum mismatch for download ${url}`);
-    }
-
-    return hash;
-  } finally {
-    await remove(filePath).catch(() => {
-      // Ignore errors
-    });
-  }
+  return hash;
 }
-
-type DownloadTgzOptions = DownloadOptions & TarExtractOptions;
 
 /**
  * Downloads and extracts a .tgz file
  */
-export async function downloadTgz(url: string, opts: string | DownloadTgzOptions): Promise<string | undefined> {
-  const options = typeof opts === 'string' ? { path: opts } : opts;
-
-  const { filePath, hash } = await download(url, undefined, options.hashType);
+export async function downloadTgz(url: string, options: DownloadTgzOptions): Promise<string | undefined> {
+  const { filePath, hash } = await download(url, options);
 
   try {
     // Verify hash if needed
     if (!isHashSumValid(hash, options)) {
-      throw new Error(`Checksum mismatch for download ${url}`);
+      throw new Error(`Checksum mismatch for download ${url}. Expected ${options.hashSum}, got ${hash}`);
     }
 
     // Extract the tgz file
     await extractTar({
       file: filePath,
-      cwd: options.path ?? options.cwd ?? process.cwd(),
-      ...options
+      ...options.extractOptions,
     });
 
     return hash;
   } finally {
-    await remove(filePath).catch(() => {
-      // Ignore errors
-    });
-  }
-}
-
-/**
- * Downloads and extracts a .zip file
- */
-export async function downloadZip(url: string, opts: string | DownloadOptions): Promise<string | undefined> {
-  const options = typeof opts === 'string' ? { path: opts } : opts;
-  const extractPath = options.path ?? options.cwd ?? process.cwd();
-
-  const { filePath, hash } = await download(url, undefined, options.hashType);
-
-  try {
-    // Verify hash if needed
-    if (!isHashSumValid(hash, options)) {
-      throw new Error(`Checksum mismatch for download ${url}`);
+    if (options.removeAfterExtract ?? true) {
+      await remove(filePath).catch(() => {
+        // Ignore errors
+      });
     }
-
-    // Extract the zip file using extract-zip
-    await extract(filePath, { dir: extractPath });
-
-    return hash;
-  } finally {
-    await remove(filePath).catch(() => {
-      // Ignore errors
-    });
   }
 }
 
