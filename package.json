@@ -112,8 +112,7 @@
     "tar": "^6",
     "url-join": "^4.0.1",
     "which": "^2",
-    "node-downloader-helper": "^2.1.7",
-    "extract-zip": "^2.0.1"
+    "node-downloader-helper": "^2.1.7"
   },
   "packageManager": "pnpm@10.6.5",
   "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/package.json",

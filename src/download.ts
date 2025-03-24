@@ -4,7 +4,6 @@ import { ensureDir, readFile, remove } from 'fs-extra';
 import extractTar from 'tar/lib/extract.js';
 import { basename, dirname, join } from 'path';
 import { tmpdir } from 'os';
-import extract from 'extract-zip';
 import { ExtractOptions as TarExtractOptions } from 'tar';
 
 export type HashType = 'sha256' | 'sha512' | 'sha1' | 'md5' | 'sha384' | 'sha224';
@@ -112,31 +111,6 @@ export async function downloadTgz(url: string, options: DownloadTgzOptions): Pro
       cwd: options.path ?? options.cwd ?? process.cwd(),
       ...options
     });
-
-    return hash;
-  } finally {
-    await remove(filePath).catch(() => {
-      // Ignore errors
-    });
-  }
-}
-
-/**
- * Downloads and extracts a .zip file
- */
-export async function downloadZip(url: string, options: DownloadOptions): Promise<string | undefined> {
-  const extractPath = options.path ?? options.cwd ?? process.cwd();
-
-  const { filePath, hash } = await download(url, options);
-
-  try {
-    // Verify hash if needed
-    if (!isHashSumValid(hash, options)) {
-      throw new Error(`Checksum mismatch for download ${url}. Expected ${options.hashSum}, got ${hash}`);
-    }
-
-    // Extract the zip file using extract-zip
-    await extract(filePath, { dir: extractPath });
 
     return hash;
   } finally {

@@ -1,8 +1,7 @@
-import { suite, expect, beforeEach, afterEach, test, beforeAll } from 'vitest';
-import { downloadToString, downloadFile, downloadTgz, downloadZip, calculateHash } from '../src/download';
+import { suite, expect, test, beforeAll } from 'vitest';
+import { downloadToString, downloadFile, downloadTgz, calculateHash } from '../src/download';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import * as crypto from 'crypto';
 import { fileURLToPath } from 'url';
 
 const dirname = typeof __dirname === "string" ? __dirname : path.dirname(fileURLToPath(import.meta.url))
@@ -15,7 +14,6 @@ suite('Download Module', () => {
     const nodeBaseUrl = 'https://nodejs.org/dist/v23.4.0';
     const nodeHeadersUrl = `${nodeBaseUrl}/node-v23.4.0-headers.tar.gz`;
     const nodeDocsUrl = `${nodeBaseUrl}/docs/apilinks.json`;
-    const nodeWinZipUrl = `${nodeBaseUrl}/node-v23.4.0-win-x64.zip`;
     const nodeShasumUrl = `${nodeBaseUrl}/SHASUMS256.txt`;
 
     beforeAll(async () => {
@@ -136,46 +134,6 @@ suite('Download Module', () => {
             // Check for node.h file
             const nodeHeaderFile = path.join(includeDir, 'node', 'node.h');
             expect(await fs.pathExists(nodeHeaderFile)).toBe(true);
-        });
-    });
-
-    suite('downloadZip', () => {
-        test('should download and extract Node.js Windows zip file', async function () {
-            const extractPath = path.join(testTmpDir, 'extracted-zip');
-            await fs.ensureDir(extractPath);
-
-            await downloadZip(nodeWinZipUrl, { path: extractPath });
-
-            // Check if files were extracted
-            const files = await fs.readdir(extractPath);
-            expect(files.length).toBeGreaterThan(0);
-
-            // Verify specific files that should be in the Node.js Windows package
-            expect(await fs.pathExists(path.join(extractPath, 'node.exe'))).toBe(true);
-            expect(await fs.pathExists(path.join(extractPath, 'npm.cmd'))).toBe(true);
-            expect(await fs.pathExists(path.join(extractPath, 'LICENSE'))).toBe(true);
-        });
-
-        test('should download and extract Node.js Windows zip file with options', async function () {
-            const extractPath = path.join(testTmpDir, 'extracted-zip-with-options');
-            await fs.ensureDir(extractPath);
-
-            // First download to calculate hash
-            const tempPath = path.join(testTmpDir, 'temp-node.zip');
-            await downloadFile(nodeWinZipUrl, { path: tempPath });
-            const hash = await calculateHash(tempPath, 'sha256');
-
-            // Now download with hash verification
-            const result = await downloadZip(nodeWinZipUrl, {
-                path: extractPath,
-                hashType: 'sha256',
-                hashSum: hash
-            });
-
-            expect(result).toBe(hash);
-
-            // Verify extraction worked
-            expect(await fs.pathExists(path.join(extractPath, 'node.exe'))).toBe(true);
         });
     });
 });
