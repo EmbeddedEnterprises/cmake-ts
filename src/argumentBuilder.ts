@@ -1,7 +1,7 @@
 import { BuildConfigurationDefaulted, BuildOptionsDefaulted } from './lib';
 import { RuntimeDistribution } from './runtimeDistribution';
 import { join, resolve } from 'path';
-import * as URL_REGISTRY from './urlRegistry';
+import { getPathsForConfig } from './urlRegistry';
 import { getNodeApiInclude } from './nodeAPIInclude';
 
 export class ArgumentBuilder {
@@ -29,7 +29,7 @@ export class ArgumentBuilder {
   }
 
   async buildDefines(): Promise<[string, string][]> {
-    const pathConfig = URL_REGISTRY.getPathsForConfig(this.config);
+    const pathConfig = getPathsForConfig(this.config);
     const retVal: [string, string][] = [];
     retVal.push(['CMAKE_BUILD_TYPE', this.options.buildType]);
 
@@ -39,7 +39,7 @@ export class ArgumentBuilder {
 
     // Trust me, I'm an engineer?
     if (this.config.os === 'win32') {
-      const libs = this.rtd.winLibs;
+      const libs = this.rtd.winLibs();
       if (libs.length) {
         retVal.push(['CMAKE_JS_LIB', libs.join(';')]);
       }
@@ -51,13 +51,13 @@ export class ArgumentBuilder {
     // Search headers, modern node versions have those in /include/node
     const includes: string[] = [];
     if (pathConfig.headerOnly) {
-      includes.push(join(this.rtd.internalPath, '/include/node'));
+      includes.push(join(this.rtd.internalPath(), '/include/node'));
     } else {
       // ancient ones need v8 includes, too
       includes.push(
-        join(this.rtd.internalPath, '/src'),
-        join(this.rtd.internalPath, '/deps/v8/include'),
-        join(this.rtd.internalPath, '/deps/uv/include')
+        join(this.rtd.internalPath(), '/src'),
+        join(this.rtd.internalPath(), '/deps/v8/include'),
+        join(this.rtd.internalPath(), '/deps/uv/include')
       );
     }
 
@@ -83,7 +83,7 @@ export class ArgumentBuilder {
       ['NODE_ARCH', this.config.arch],
       ['NODE_PLATFORM', this.config.os],
       ['NODE_RUNTIMEVERSION', this.config.runtimeVersion],
-      ['NODE_ABI_VERSION', `${this.rtd.abi}`],
+      ['NODE_ABI_VERSION', `${this.rtd.abi()}`],
     );
 
     // push additional overrides

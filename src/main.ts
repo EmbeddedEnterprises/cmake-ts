@@ -13,7 +13,7 @@ import { determineBuildMode } from './buildMode'
 
 const DEBUG_LOG = getEnvVar('CMAKETSDEBUG');
 
-(async (): Promise<void> => {
+async function main(): Promise<void> {
 
   const argv = process.argv.slice(2); //Yeah, we don't need advanced command line handling yet
   let packJson: {'cmake-ts': BuildOptions | undefined} & Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -74,8 +74,8 @@ const DEBUG_LOG = getEnvVar('CMAKETSDEBUG');
     console.log('[ DONE ]');
 
     process.stdout.write('> Building directories... ');
-    const stagingDir = resolve(join(configs.stagingDirectory, config.os, config.arch, config.runtime, `${dist.abi}`, config.addonSubdirectory));
-    const targetDir = resolve(join(configs.targetDirectory, config.os, config.arch, config.runtime, `${dist.abi}`, config.addonSubdirectory));
+    const stagingDir = resolve(join(configs.stagingDirectory, config.os, config.arch, config.runtime, `${dist.abi()}`, config.addonSubdirectory));
+    const targetDir = resolve(join(configs.targetDirectory, config.os, config.arch, config.runtime, `${dist.abi()}`, config.addonSubdirectory));
     console.log('[ DONE ]');
 
     process.stdout.write('> Applying overrides... ');
@@ -86,7 +86,7 @@ const DEBUG_LOG = getEnvVar('CMAKETSDEBUG');
     console.log('Name: ', config.name ? config.name : "N/A");
     console.log('OS/Arch:', config.os, config.arch);
     console.log('Runtime:', config.runtime, config.runtimeVersion);
-    console.log('Target ABI:', dist.abi);
+    console.log('Target ABI:', dist.abi());
     console.log('Toolchain File:', config.toolchainFile);
     console.log('Custom CMake options:', (config.CMakeOptions && config.CMakeOptions.length > 0) ? 'yes' : 'no');
     console.log('Staging area:', stagingDir);
@@ -137,7 +137,9 @@ const DEBUG_LOG = getEnvVar('CMAKETSDEBUG');
 
     console.log('----------------- END CONFIG -----------------');
   }
-})().catch((err: Error) => {
+}
+
+main().catch((err: Error) => {
   console.log("Generic error occured", err);
   process.exit(1);
 });

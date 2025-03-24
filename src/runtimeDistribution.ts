@@ -3,12 +3,12 @@ import { ensureDir, readFile } from 'fs-extra';
 import { stat } from './util';
 import urlJoin from 'url-join';
 import { BuildConfigurationDefaulted } from './lib';
-import * as URL_REGISTRY from './urlRegistry';
-import * as DOWNLOADER from './download';
+import { HOME_DIRECTORY, getPathsForConfig } from './urlRegistry';
+import { downloadToString, downloadTgz, downloadFile } from './download';
 import glob from 'fast-glob'
 
 export type HashSum = { getPath: string, sum: string };
-const TEST_SUM = (sums: HashSum[], sum: string | undefined, fPath: string) => {
+function test_sum(sums: HashSum[], sum: string | undefined, fPath: string) {
   const serverSum = sums.find(s => s.getPath === fPath);
   if (serverSum && serverSum.sum === sum) {
     return true;
@@ -23,9 +23,9 @@ export class RuntimeDistribution {
   /* eslint-disable-next-line no-useless-constructor */   /* eslint-disable-next-line no-empty-function */
   constructor(private config: BuildConfigurationDefaulted) { }
 
-  get internalPath() {
+  public internalPath() {
     return joinPath(
-      URL_REGISTRY.HOME_DIRECTORY,
+      HOME_DIRECTORY,
       '.cmake-ts',
       this.config.runtime,
       this.config.os,
@@ -34,60 +34,60 @@ export class RuntimeDistribution {
     );
   }
 
-  get externalPath() {
-    return URL_REGISTRY.getPathsForConfig(this.config).externalPath;
+  private externalPath() {
+    return getPathsForConfig(this.config).externalPath;
   }
 
-  get winLibs() {
-    return URL_REGISTRY.getPathsForConfig(this.config).winLibs.map(lib => joinPath(this.internalPath, lib.dir, lib.name));
+  public winLibs() {
+    return getPathsForConfig(this.config).winLibs.map(lib => joinPath(this.internalPath(), lib.dir, lib.name));
   }
 
-  get headerOnly() {
-    return URL_REGISTRY.getPathsForConfig(this.config).headerOnly;
+  private headerOnly() {
+    return getPathsForConfig(this.config).headerOnly;
   }
 
-  get abi() {
+  public abi() {
     return this._abi;
   }
 
-  async checkDownloaded(): Promise<boolean> {
+  private async checkDownloaded(): Promise<boolean> {
     let headers = false;
     let libs = true;
-    let stats = await stat(this.internalPath);
+    let stats = await stat(this.internalPath());
     if (!stats.isDirectory()) {
       headers = false;
     }
-    if (this.headerOnly) {
-      stats = await stat(joinPath(this.internalPath, "include/node/node.h"));
+    if (this.headerOnly()) {
+      stats = await stat(joinPath(this.internalPath(), "include/node/node.h"));
       headers = stats.isFile();
     } else {
-      stats = await stat(joinPath(this.internalPath, "src/node.h"));
+      stats = await stat(joinPath(this.internalPath(), "src/node.h"));
       if (stats.isFile()) {
-        stats = await stat(joinPath(this.internalPath, "deps/v8/include/v8.h"));
+        stats = await stat(joinPath(this.internalPath(), "deps/v8/include/v8.h"));
         headers = stats.isFile();
       }
     }
     if (this.config.os === 'win32') {
-      const libStats = await Promise.all(this.winLibs.map(lib => stat(lib)));
+      const libStats = await Promise.all(this.winLibs().map(lib => stat(lib)));
       const libsAreFile = libStats.every(libStat => libStat.isFile())
       libs = libsAreFile
     }
     return headers && libs;
   }
 
-  async determineABI(): Promise<void> {
+  public async determineABI(): Promise<void> {
     const files = await glob("*/node_version.h", {
-      cwd: joinPath(this.internalPath, "include"),
+      cwd: joinPath(this.internalPath(), "include"),
       absolute: true,
       onlyFiles: true,
       braceExpansion: false,
     });
     const filesNum = files.length;
     if (filesNum === 0) {
-      return Promise.reject(new Error(`couldn't find include/*/node_version.h in ${this.internalPath}. Make sure you install the dependencies for building the package.`));
+      return Promise.reject(new Error(`couldn't find include/*/node_version.h in ${this.internalPath()}. Make sure you install the dependencies for building the package.`));
     }
     if (filesNum !== 1) {
-      return Promise.reject(new Error(`more than one node_version.h was found in ${this.internalPath}.`));
+      return Promise.reject(new Error(`more than one node_version.h was found in ${this.internalPath()}.`));
     }
     const fName = files[0];
     let contents: string;
@@ -111,22 +111,23 @@ export class RuntimeDistribution {
     return Promise.resolve();
   }
 
-  async ensureDownloaded(): Promise<void> {
+  public async ensureDownloaded(): Promise<void> {
     if (!(await this.checkDownloaded())) {
       await this.download();
     }
   }
-  async download(): Promise<void> {
-    await ensureDir(this.internalPath);
+
+  private async download(): Promise<void> {
+    await ensureDir(this.internalPath());
     const sums = await this.downloadHashSums();
     await this.downloadTar(sums);
     await this.downloadLibs(sums);
   }
 
-  async downloadHashSums(): Promise<HashSum[] | null> {
+  private async downloadHashSums(): Promise<HashSum[] | null> {
     if (this.config.runtime === 'node' || this.config.runtime === 'iojs') {
-      const sumurl = urlJoin(this.externalPath, "SHASUMS256.txt");
-      const str = await DOWNLOADER.downloadToString(sumurl);
+      const sumurl = urlJoin(this.externalPath(), "SHASUMS256.txt");
+      const str = await downloadToString(sumurl);
       return str.split('\n').map(line => {
         const parts = line.split(/\s+/);
         return {
@@ -138,16 +139,16 @@ export class RuntimeDistribution {
     return null;
   }
 
-  async downloadTar(sums: HashSum[] | null): Promise<void> {
-    const tarLocalPath = URL_REGISTRY.getPathsForConfig(this.config).tarPath;
-    const tarUrl = urlJoin(this.externalPath, tarLocalPath);
-    const sum = await DOWNLOADER.downloadTgz(tarUrl, {
+  private async downloadTar(sums: HashSum[] | null): Promise<void> {
+    const tarLocalPath = getPathsForConfig(this.config).tarPath;
+    const tarUrl = urlJoin(this.externalPath(), tarLocalPath);
+    const sum = await downloadTgz(tarUrl, {
       hashType: sums ? 'sha256' : undefined,
       extractOptions: {
-        cwd: this.internalPath,
+        cwd: this.internalPath(),
         strip: 1,
         filter: (p: string) => {
-          if (p === this.internalPath) {
+          if (p === this.internalPath()) {
             return true;
           }
           const ext = extname(p);
@@ -155,29 +156,29 @@ export class RuntimeDistribution {
         },
       }
     });
-    if (sums && !TEST_SUM(sums, sum, tarLocalPath)) {
+    if (sums && !test_sum(sums, sum, tarLocalPath)) {
       throw new Error("Checksum mismatch");
     }
   }
 
-  async downloadLibs(sums: HashSum[] | null): Promise<void> {
+  private async downloadLibs(sums: HashSum[] | null): Promise<void> {
     if (this.config.os !== 'win32') {
       return;
     }
-    const paths = URL_REGISTRY.getPathsForConfig(this.config);
+    const paths = getPathsForConfig(this.config);
     // download libs in parallel
     await Promise.all(paths.winLibs.map(path => this.downloadLib(path, sums)));
   }
 
   private async downloadLib(path: { dir: string, name: string }, sums: HashSum[] | null) {
     const fPath = path.dir ? urlJoin(path.dir, path.name) : path.name;
-    const libUrl = urlJoin(this.externalPath, fPath);
-    await ensureDir(joinPath(this.internalPath, path.dir));
-    const sum = await DOWNLOADER.downloadFile(libUrl, {
-      path: joinPath(this.internalPath, fPath),
+    const libUrl = urlJoin(this.externalPath(), fPath);
+    await ensureDir(joinPath(this.internalPath(), path.dir));
+    const sum = await downloadFile(libUrl, {
+      path: joinPath(this.internalPath(), fPath),
       hashType: sums ? "sha256" : undefined,
     });
-    if (sums && !TEST_SUM(sums, sum, fPath)) {
+    if (sums && !test_sum(sums, sum, fPath)) {
       throw new Error("Checksum mismatch");
     }
   }
