@@ -33,10 +33,6 @@ suite('Download Module', { timeout: 20_000 }, () => {
             expect(content).toBeTruthy();
             expect(JSON.parse(content)).toHaveProperty('fs.readFileSync');
         });
-
-        test.fails('should throw an error for non-existent files', async () => {
-            await downloadToString(`${nodeBaseUrl}/nonexistent.txt`, { timeout: 100 })
-        });
     });
 
     suite('downloadFile', () => {

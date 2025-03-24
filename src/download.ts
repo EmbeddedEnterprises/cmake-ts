@@ -36,9 +36,10 @@ type DownloadResult = {
  * Downloads a file to a temporary location and returns the file path and hash
  */
 async function download(url: string, opts: DownloadOptions) {
-  const filePath = opts.path ?? join(tmpdir(), basename(url));
-  const fileName = basename(filePath);
-  const fileDir = dirname(filePath);
+  try {
+    const filePath = opts.path ?? join(tmpdir(), basename(url));
+    const fileName = basename(filePath);
+    const fileDir = dirname(filePath);
 
   await ensureDir(fileDir);
   const downloader = new DownloaderHelper(url, fileDir, {
@@ -60,7 +61,10 @@ async function download(url: string, opts: DownloadOptions) {
   // calculate hash after download is complete
   result.hash = opts.hashType !== undefined ? await calculateHash(filePath, opts.hashType) : undefined;
 
-  return result;
+    return result;
+  } catch (err) {
+    throw new Error(`Failed to download ${url}: ${err}`);
+  }
 }
 
 /**
