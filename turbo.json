@@ -1,0 +1,41 @@
+{
+    "$schema": "https://turbo.build/schema.json",
+    "globalEnv": [
+        "OS",
+        "RUNNER_OS"
+    ],
+    "tasks": {
+        "build.tsc": {
+            "outputs": []
+        },
+        "build.legacy-main": {
+            "outputs": ["build/main.js", "build/main.js.map"]
+        },
+        "build.legacy-lib": {
+            "outputs": ["build/lib.js", "build/lib.js.map"]
+        },
+        "build.modern-main": {
+            "outputs": ["build/main.mjs", "build/main.mjs.map"]
+        },
+        "build.modern-lib": {
+            "outputs": ["build/lib.mjs", "build/lib.mjs.map"]
+        },
+        "build.turbo": {
+            "dependsOn": [
+                "build.tsc",
+                "build.legacy-main",
+                "build.legacy-lib",
+                "build.modern-main",
+                "build.modern-lib"
+            ],
+            "outputs": ["build/*.js", "build/*.js.map", "build/*.mjs", "build/*.mjs.map"]
+        },
+        "lint.turbo": {
+            "outputs": ["./.eslintcache"]
+        },
+        "test.lint.turbo": {
+            "outputs": ["./.eslintcache"]
+        }
+    },
+    "ui": "stream"
+}

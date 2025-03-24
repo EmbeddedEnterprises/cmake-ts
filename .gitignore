@@ -6,3 +6,4 @@ stats.html
 .eslintcache
 .tmp/
 coverage/
+.turbo/
