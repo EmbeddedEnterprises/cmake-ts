@@ -36,15 +36,6 @@
     "outDir": "./build"
   },
   "compileOnSave": false,
-  "include": [
-    "./src",
-    "./*.mts",
-    "test/**/*.ts",
-    "test/**/*.mts"
-  ],
-  "exclude": [
-    "./node_modules",
-    "./build",
-    "test/fixtures"
-  ]
+  "include": ["./src", "./*.mts", "test/**/*.ts", "test/**/*.mts"],
+  "exclude": ["./node_modules", "./build", "test/fixtures"]
 }

@@ -1,4 +1,4 @@
-import { mkdirp, mkdirpSync } from 'fs-extra/lib/mkdirs/index.js';
+import { mkdirp, mkdirpSync } from "fs-extra/lib/mkdirs/index.js"
 
-export default mkdirp;
-export { mkdirpSync as sync };
+export default mkdirp
+export { mkdirpSync as sync }
