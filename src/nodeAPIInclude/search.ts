@@ -1,5 +1,5 @@
-import { join as joinPath, sep as pathSeparator, normalize as normalizePath } from "path"
-import { stat } from "../util"
+import { join as joinPath, normalize as normalizePath, sep as pathSeparator } from "path"
+import { stat } from "../util.js"
 
 export async function searchPackage(projectRoot: string, packageName: string): Promise<string | null> {
   const isNode = await isNodeProject(projectRoot)

@@ -1,6 +1,6 @@
 import * as cp from "child_process"
+import { type PathLike, type StatOptions, Stats, stat as rawStat } from "fs-extra"
 import splitargs from "splitargs2"
-import { PathLike, stat as rawStat, StatOptions, Stats } from "fs-extra"
 
 export function getEnvVar(name: string) {
   const value = process.env[name]
