@@ -2,20 +2,20 @@
 
 /* eslint-disable node/shebang */
 
-import { BuildOptions, defaultBuildOptions, defaultBuildConfiguration } from "./lib"
 import { join, resolve } from "path"
-import { RuntimeDistribution } from "./runtimeDistribution"
-import { ArgumentBuilder } from "./argumentBuilder"
-import { getEnvVar, run } from "./util"
-import { ensureDir, remove, copy, pathExists, readJson } from "fs-extra"
-import { applyOverrides } from "./override"
-import { determineBuildMode } from "./buildMode"
+import { copy, ensureDir, pathExists, readJson, remove } from "fs-extra"
+import { ArgumentBuilder } from "./argumentBuilder.js"
+import { determineBuildMode } from "./buildMode.js"
+import { type BuildOptions, defaultBuildConfiguration, defaultBuildOptions } from "./lib.js"
+import { applyOverrides } from "./override.js"
+import { RuntimeDistribution } from "./runtimeDistribution.js"
+import { getEnvVar, run } from "./util.js"
 
 const DEBUG_LOG = getEnvVar("CMAKETSDEBUG")
 
 async function main(): Promise<void> {
   const argv = process.argv.slice(2) //Yeah, we don't need advanced command line handling yet
-  let packJson: { "cmake-ts": BuildOptions | undefined } & Record<string, any> // eslint-disable-line @typescript-eslint/no-explicit-any
+  let packJson: { "cmake-ts": BuildOptions | undefined } & Record<string, unknown>
   try {
     // TODO getting the path from the CLI
     const packageJsonPath = resolve(join(process.cwd(), "package.json"))
@@ -129,7 +129,7 @@ async function main(): Promise<void> {
     await ensureDir(targetDir)
     if (configs.generatorToUse.includes("Visual Studio")) {
       if (DEBUG_LOG !== undefined) {
-        console.log(`Applying copy fix for MSVC projects`)
+        console.log("Applying copy fix for MSVC projects")
       }
       await copy(
         join(stagingDir, configs.buildType, `${configs.projectName}.node`),

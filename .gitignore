@@ -7,3 +7,4 @@ stats.html
 .tmp/
 coverage/
 .turbo/
+.cache/

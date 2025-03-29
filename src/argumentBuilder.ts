@@ -1,8 +1,8 @@
-import { BuildConfigurationDefaulted, BuildOptionsDefaulted } from "./lib"
-import { RuntimeDistribution } from "./runtimeDistribution"
 import { join, resolve } from "path"
-import { getPathsForConfig } from "./urlRegistry"
-import { getNodeApiInclude } from "./nodeAPIInclude"
+import type { BuildConfigurationDefaulted, BuildOptionsDefaulted } from "./lib.js"
+import { getNodeApiInclude } from "./nodeAPIInclude/index.js"
+import type { RuntimeDistribution } from "./runtimeDistribution.js"
+import { getPathsForConfig } from "./urlRegistry.js"
 
 export class ArgumentBuilder {
   constructor(
@@ -48,7 +48,7 @@ export class ArgumentBuilder {
       }
     } else if (this.config.os === "darwin") {
       // Darwin can't link against node, so skip it.
-      retVal.push(["CMAKE_JS_CXX_FLAGS", `-undefined dynamic_lookup`])
+      retVal.push(["CMAKE_JS_CXX_FLAGS", "-undefined dynamic_lookup"])
     }
 
     // Search headers, modern node versions have those in /include/node
@@ -100,14 +100,14 @@ export class ArgumentBuilder {
     retVal.push(["CMAKE_JS_DEFINES", this.config.additionalDefines.join(";")])
 
     if (this.options.globalCMakeOptions && this.options.globalCMakeOptions.length > 0) {
-      this.options.globalCMakeOptions.forEach((j) => {
+      for (const j of this.options.globalCMakeOptions) {
         retVal.push([j.name, j.value.replace(/\$ROOT\$/g, resolve(this.options.packageDirectory))])
-      })
+      }
     }
     if (this.config.CMakeOptions && this.config.CMakeOptions.length > 0) {
-      this.config.CMakeOptions.forEach((j) => {
+      for (const j of this.config.CMakeOptions) {
         retVal.push([j.name, j.value.replace(/\$ROOT\$/g, resolve(this.options.packageDirectory))])
-      })
+      }
     }
     return retVal
   }

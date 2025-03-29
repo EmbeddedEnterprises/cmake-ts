@@ -1,5 +1,5 @@
 import module from "module"
-import { defineConfig, type UserConfig } from "vite"
+import { type UserConfig, defineConfig } from "vite"
 import babel from "vite-plugin-babel"
 import babelConfig from "./babel.config.mts"
 
