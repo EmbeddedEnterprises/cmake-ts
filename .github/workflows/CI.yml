@@ -13,7 +13,7 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          - macos-13 
+          - macos-13
           - windows-latest
         node_version:
           - 20
@@ -21,13 +21,13 @@ jobs:
         cpp_arch:
           - x64
         include:
-           - os: macos-14 # arm
-             node-version: 16
-             cpp_arch: arm64
+          - os: macos-14 # arm
+            node-version: 16
+            cpp_arch: arm64
 
-           - os: macos-14 # arm
-             node-version: 22
-             cpp_arch: arm64
+          - os: macos-14 # arm
+            node-version: 22
+            cpp_arch: arm64
     steps:
       - uses: actions/checkout@v4
         with:
