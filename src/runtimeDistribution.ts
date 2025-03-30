@@ -1,11 +1,11 @@
-import { join as joinPath, extname } from "path"
-import { ensureDir, readFile } from "fs-extra"
-import { stat } from "./util"
-import urlJoin from "url-join"
-import { BuildConfigurationDefaulted } from "./lib"
-import { HOME_DIRECTORY, getPathsForConfig } from "./urlRegistry"
-import { downloadToString, downloadTgz, downloadFile } from "./download"
+import { extname, join as joinPath } from "path"
 import glob from "fast-glob"
+import { ensureDir, readFile } from "fs-extra"
+import urlJoin from "url-join"
+import { downloadFile, downloadTgz, downloadToString } from "./download.js"
+import type { BuildConfigurationDefaulted } from "./lib.js"
+import { HOME_DIRECTORY, getPathsForConfig } from "./urlRegistry.js"
+import { stat } from "./util.js"
 
 export type HashSum = { getPath: string; sum: string }
 function testHashSum(sums: HashSum[], sum: string | undefined, fPath: string) {
@@ -107,8 +107,8 @@ export class RuntimeDistribution {
     if (!match) {
       return Promise.reject(new Error("Failed to find NODE_MODULE_VERSION macro"))
     }
-    const version = parseInt(match[1], 10)
-    if (isNaN(version)) {
+    const version = Number.parseInt(match[1], 10)
+    if (Number.isNaN(version)) {
       return Promise.reject(new Error("Invalid version specified by NODE_MODULE_VERSION macro"))
     }
     this._abi = version

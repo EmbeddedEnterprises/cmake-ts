@@ -1,6 +1,6 @@
 import { pathExists } from "fs-extra"
-import { resolvePackage, requireInclude } from "./resolve"
-import { searchPackage } from "./search"
+import { requireInclude, resolvePackage } from "./resolve.js"
+import { searchPackage } from "./search.js"
 
 export async function getNodeApiInclude(projectRoot: string, nodeAPI: string): Promise<string | null> {
   // first check if the given nodeAPI is a include path

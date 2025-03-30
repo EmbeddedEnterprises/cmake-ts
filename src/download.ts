@@ -1,10 +1,10 @@
-import { DownloaderHelper } from "node-downloader-helper"
 import crypto from "crypto"
-import { ensureDir, readFile, remove } from "fs-extra"
-import extractTar from "tar/lib/extract.js"
-import { basename, dirname, join } from "path"
 import { tmpdir } from "os"
-import { ExtractOptions as TarExtractOptions } from "tar"
+import { basename, dirname, join } from "path"
+import { ensureDir, readFile, remove } from "fs-extra"
+import { DownloaderHelper } from "node-downloader-helper"
+import type { ExtractOptions as TarExtractOptions } from "tar"
+import extractTar from "tar/lib/extract.js"
 
 export type HashType = "sha256" | "sha512" | "sha1" | "md5" | "sha384" | "sha224"
 

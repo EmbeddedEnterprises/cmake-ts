@@ -17,15 +17,28 @@
     "build.modern-lib": {
       "outputs": ["build/lib.mjs", "build/lib.mjs.map"]
     },
-    "build.turbo": {
-      "dependsOn": ["build.tsc", "build.legacy-main", "build.legacy-lib", "build.modern-main", "build.modern-lib"],
-      "outputs": ["build/*.js", "build/*.js.map", "build/*.mjs", "build/*.mjs.map"]
+    "lint.eslint": {},
+    "lint.biome": {
+      "cache": false
     },
     "lint.turbo": {
-      "outputs": ["./.eslintcache"]
+      "dependsOn": ["lint.eslint", "lint.biome"]
     },
-    "test.lint.turbo": {
-      "outputs": ["./.eslintcache"]
+    "test.lint.eslint": {},
+    "test.lint.biome": {
+      "cache": false
+    },
+    "format.prettier": {
+      "inputs": ["**/*.{yaml,yml,md}", "package.json", "pnpm-lock.yaml", "prettier.config.mjs", ".prettierignore"]
+    },
+    "format.biome": {
+      "cache": false
+    },
+    "test.format.prettier": {
+      "inputs": ["**/*.{yaml,yml,md}", "package.json", "pnpm-lock.yaml", "prettier.config.mjs", ".prettierignore"]
+    },
+    "test.format.biome": {
+      "cache": false
     }
   },
   "ui": "stream"

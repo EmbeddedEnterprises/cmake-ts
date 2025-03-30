@@ -1,4 +1,4 @@
-import { defineConfig, mergeConfig, type ViteUserConfig } from "vitest/config"
+import { type ViteUserConfig, defineConfig, mergeConfig } from "vitest/config"
 import viteConfig from "./vite.config.mjs"
 
 export default defineConfig(async (configEnv) => {

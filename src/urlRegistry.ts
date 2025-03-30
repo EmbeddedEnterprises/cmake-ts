@@ -1,8 +1,8 @@
-import { BuildConfigurationDefaulted } from "./lib"
+import os from "os"
 import gte from "semver/functions/gte"
 import lt from "semver/functions/lt"
-import os from "os"
-import { getEnvVar } from "./util"
+import type { BuildConfigurationDefaulted } from "./lib.js"
+import { getEnvVar } from "./util.js"
 
 const NODE_MIRROR = getEnvVar("NVM_NODEJS_ORG_MIRROR") ?? "https://nodejs.org/dist"
 const IOJS_MIRROR = getEnvVar("NVM_IOJS_ORG_MIRROR") ?? "https://iojs.org/dist"

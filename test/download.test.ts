@@ -1,8 +1,8 @@
-import { suite, expect, test, beforeEach } from "vitest"
-import { downloadToString, downloadFile, downloadTgz, calculateHash } from "../src/download"
-import * as fs from "fs-extra"
 import * as path from "path"
 import { fileURLToPath } from "url"
+import * as fs from "fs-extra"
+import { beforeEach, expect, suite, test } from "vitest"
+import { calculateHash, downloadFile, downloadTgz, downloadToString } from "../src/download.js"
 
 const dirname = typeof __dirname === "string" ? __dirname : path.dirname(fileURLToPath(import.meta.url))
 const root = path.dirname(dirname)
