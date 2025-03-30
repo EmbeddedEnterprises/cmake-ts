@@ -88,6 +88,7 @@
     "@types/url-join": "~4.0.3",
     "@types/which": "~3.0.4",
     "@types/escape-quotes": "^1.0.0",
+    "@types/mri": "^1.2.0",
     "@upleveled/babel-plugin-remove-node-prefix": "^1.0.5",
     "turbo": "^2.4.4",
     "cross-env": "^7.0.3",
@@ -115,7 +116,8 @@
     "url-join": "^4.0.1",
     "which": "^2",
     "node-downloader-helper": "^2.1.7",
-    "escape-quotes": "^1.0.2"
+    "escape-quotes": "^1.0.2",
+    "mri": "^1.2.0"
   },
   "packageManager": "pnpm@10.7.0",
   "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/package.json",

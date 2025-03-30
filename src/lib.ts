@@ -1,5 +1,5 @@
 import which from "which"
-import type { BuildMode } from "./buildMode.js"
+import type { Options } from "./args.js"
 import { getCmakeGenerator } from "./util.js"
 
 export type ArrayOrSingle<T> = T | T[]
@@ -121,10 +121,10 @@ async function whichWrapped(cmd: string): Promise<string | null> {
   }
 }
 
-export async function defaultBuildOptions(configs: BuildOptions, buildmode: BuildMode): Promise<BuildOptionsDefaulted> {
+export async function defaultBuildOptions(configs: BuildOptions, opts: Options): Promise<BuildOptionsDefaulted> {
   // Handle missing configs.configurations
   // TODO handle without nativeonly and osonly
-  if (buildmode.type === "nativeonly") {
+  if (opts.type === "nativeonly") {
     console.log(
       `--------------------------------------------------
       WARNING: Building only for the current runtime.
@@ -134,7 +134,7 @@ export async function defaultBuildOptions(configs: BuildOptions, buildmode: Buil
     //Yeah this pretty ugly, but whatever
     configs.configurations = [defaultBuildConfiguration({})]
   }
-  if (buildmode.type === "osonly") {
+  if (opts.type === "osonly") {
     console.log(
       `--------------------------------------------------
       WARNING: Building only for the current OS.
@@ -155,7 +155,7 @@ export async function defaultBuildOptions(configs: BuildOptions, buildmode: Buil
       config.toolchainFile = null
     }
   }
-  if (buildmode.type === "dev-os-only") {
+  if (opts.type === "dev-os-only") {
     console.log(
       `--------------------------------------------------
         WARNING: Building dev-os-only package
@@ -174,14 +174,14 @@ export async function defaultBuildOptions(configs: BuildOptions, buildmode: Buil
     configs.configurations = [candidateConfig]
     //todo toolchain file?
   }
-  if (buildmode.type === "named-configs") {
+  if (opts.type === "named-configs") {
     if (configs.configurations === undefined) {
       console.error("No `configurations` entry was found in the package.json")
       process.exit(1)
     }
     // unnamed configs are always filtered out
     configs.configurations = configs.configurations.filter((config) => {
-      return config.name !== undefined ? buildmode.configsToBuild.includes(config.name) : false
+      return config.name !== undefined ? opts.configsToBuild.includes(config.name) : false
     })
     if (configs.configurations.length === 0) {
       console.error("No configuration left to build!")

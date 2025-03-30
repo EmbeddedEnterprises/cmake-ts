@@ -1,20 +1,20 @@
 #!/usr/bin/env node
 
-/* eslint-disable node/shebang */
-
 import { join, relative, resolve } from "path"
 import { copy, ensureDir, pathExists, readFile, readJson, remove, writeFile } from "fs-extra"
 import { ArgumentBuilder } from "./argumentBuilder.js"
-import { determineBuildMode } from "./buildMode.js"
 import { type BuildOptions, defaultBuildConfiguration, defaultBuildOptions } from "./lib.js"
 import { applyOverrides } from "./override.js"
 import { RuntimeDistribution } from "./runtimeDistribution.js"
 import { getEnvVar, run } from "./util.js"
+import { parseArgs } from "./args.js"
 
 const DEBUG_LOG = getEnvVar("CMAKETSDEBUG")
 
 async function main(): Promise<void> {
-  const argv = process.argv.slice(2) //Yeah, we don't need advanced command line handling yet
+  // check if `nativeonly` or `osonly` option is specified
+  const opts = parseArgs()
+
   let packJson: { "cmake-ts": BuildOptions | undefined } & Record<string, unknown>
   try {
     // TODO getting the path from the CLI
@@ -31,11 +31,8 @@ async function main(): Promise<void> {
     process.exit(1)
   }
 
-  // check if `nativeonly` or `osonly` option is specified
-  const buildMode = await determineBuildMode(argv)
-
   // set the missing options to their default value
-  const configs = await defaultBuildOptions(configsGiven, buildMode)
+  const configs = await defaultBuildOptions(configsGiven, opts)
 
   // Setup directory structure in configs
   // Target directory
@@ -45,7 +42,7 @@ async function main(): Promise<void> {
 
   const stagingExists = await pathExists(configs.stagingDirectory)
 
-  console.log("running in", configs.packageDirectory, "command", argv)
+  console.log("running in", configs.packageDirectory, "command", opts)
 
   process.stdout.write("> Setting up staging directory... ")
   if (stagingExists) {
@@ -85,17 +82,17 @@ async function main(): Promise<void> {
     const appliedOverrides = applyOverrides(config)
     console.log(`[ DONE, ${appliedOverrides} applied ]`)
 
-    console.log("--------------- CONFIG SUMMARY ---------------")
-    console.log("Name: ", config.name ? config.name : "N/A")
-    console.log("OS/Arch:", config.os, config.arch)
-    console.log("Runtime:", config.runtime, config.runtimeVersion)
-    console.log("Target ABI:", dist.abi())
-    console.log("Toolchain File:", config.toolchainFile)
-    console.log("Custom CMake options:", config.CMakeOptions && config.CMakeOptions.length > 0 ? "yes" : "no")
-    console.log("Staging area:", stagingDir)
-    console.log("Target directory:", targetDir)
-    console.log("Build Type", configs.buildType)
-    console.log("----------------------------------------------")
+    console.log(`--------------- CONFIG SUMMARY ---------------
+Name: ${config.name ? config.name : "N/A"}
+OS/Arch: ${config.os} ${config.arch}
+Runtime: ${config.runtime} ${config.runtimeVersion}
+Target ABI: ${dist.abi()}
+Toolchain File: ${config.toolchainFile}
+Custom CMake options: ${config.CMakeOptions && config.CMakeOptions.length > 0 ? "yes" : "no"}
+Staging area: ${stagingDir}
+Target directory: ${targetDir}
+Build Type: ${configs.buildType}
+----------------------------------------------`)
 
     // Create target directory
     process.stdout.write("> Setting up config specific staging directory... ")
@@ -109,8 +106,8 @@ async function main(): Promise<void> {
     const buildcmdline = argBuilder.buildGeneratorCommandLine(stagingDir)
     console.log("[ DONE ]")
     if (DEBUG_LOG !== undefined) {
-      console.log("====> configure: ", cmdline)
-      console.log("====> build:     ", buildcmdline)
+      console.log(`====> configure: ${cmdline}
+====> build:     ${buildcmdline}`)
     }
 
     // Invoke CMake
