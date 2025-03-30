@@ -1,11 +1,11 @@
 import { execFileSync } from "child_process"
+import path, { join } from "path"
+import { fileURLToPath } from "url"
 import { isCI } from "ci-info"
 import glob from "fast-glob"
 import { existsSync, remove } from "fs-extra"
-import path, { join } from "path"
-import { fileURLToPath } from "url"
 import { beforeAll, beforeEach, expect, suite, test } from "vitest"
-import { HOME_DIRECTORY } from "../src/urlRegistry"
+import { HOME_DIRECTORY } from "../src/urlRegistry.js"
 const dirname = typeof __dirname === "string" ? __dirname : path.dirname(fileURLToPath(import.meta.url))
 const root = path.dirname(dirname)
 

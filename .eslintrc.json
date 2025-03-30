@@ -1,9 +1,9 @@
 {
   "extends": "eslint-config-atomic",
-  "ignorePatterns": ["build/", "dist/", "node_modules/", "coverage/"],
+  "ignorePatterns": ["build/", "dist/", "node_modules/", "coverage/", "stats.html", ".cache/", ".turbo/"],
   "overrides": [
     {
-      "files": ["*.ts"],
+      "files": ["**/*.ts"],
       "rules": {
         "no-empty-function": "off",
         "@typescript-eslint/no-empty-function": "error",

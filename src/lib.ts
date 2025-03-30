@@ -1,6 +1,6 @@
 import which from "which"
-import { getCmakeGenerator } from "./util"
-import { BuildMode } from "./buildMode"
+import type { BuildMode } from "./buildMode.js"
+import { getCmakeGenerator } from "./util.js"
 
 export type ArrayOrSingle<T> = T | T[]
 
@@ -57,8 +57,7 @@ export function defaultBuildConfiguration(config: BuildConfiguration): BuildConf
   if (config.CMakeOptions === undefined) {
     config.CMakeOptions = []
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if ((config as any).cmakeOptions !== undefined) {
+  if ("cmakeOptions" in config && config.cmakeOptions !== undefined) {
     console.warn("cmakeOptions was specified which was disabled in the 0.3.0 release. Please rename it to CMakeOptions")
   }
 
@@ -142,7 +141,7 @@ export async function defaultBuildOptions(configs: BuildOptions, buildmode: Buil
     }
     configs.configurations = configs.configurations.filter((j) => j.os === process.platform)
     if (configs.configurations.length === 0) {
-      console.error(`No configuration left to build!`)
+      console.error("No configuration left to build!")
       process.exit(1)
     }
     for (const config of configs.configurations) {
@@ -174,12 +173,12 @@ export async function defaultBuildOptions(configs: BuildOptions, buildmode: Buil
       console.error("No `configurations` entry was found in the package.json")
       process.exit(1)
     }
-    //unnamed configs are always filtered out
-    configs.configurations = configs.configurations.filter((config) =>
-      config.name !== undefined ? buildmode.configsToBuild.includes(config.name) : false,
-    )
+    // unnamed configs are always filtered out
+    configs.configurations = configs.configurations.filter((config) => {
+      return config.name !== undefined ? buildmode.configsToBuild.includes(config.name) : false
+    })
     if (configs.configurations.length === 0) {
-      console.error(`No configuration left to build!`)
+      console.error("No configuration left to build!")
       process.exit(1)
     }
   }
@@ -270,9 +269,11 @@ export async function defaultBuildOptions(configs: BuildOptions, buildmode: Buil
     console.warn("`buildType` was missing. Considering 'Release'")
   }
 
-  configs.configurations?.forEach((v) => {
-    v.additionalDefines = []
-  })
+  if (configs.configurations) {
+    for (const v of configs.configurations) {
+      v.additionalDefines = []
+    }
+  }
 
   // TODO move the code related to globalCMakeOptions
   // TODO move the code related to nodeAPI
