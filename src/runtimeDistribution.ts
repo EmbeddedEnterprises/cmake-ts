@@ -1,6 +1,6 @@
 import { extname, join as joinPath } from "path"
 import glob from "fast-glob"
-import { ensureDir, readFile } from "fs-extra"
+import { ensureDir, pathExists, readFile } from "fs-extra"
 import urlJoin from "url-join"
 import { downloadFile, downloadTgz, downloadToString } from "./download.js"
 import type { BuildConfigurationDefaulted } from "./lib.js"
@@ -112,6 +112,11 @@ export class RuntimeDistribution {
       return Promise.reject(new Error("Invalid version specified by NODE_MODULE_VERSION macro"))
     }
     this._abi = version
+
+    this.config.abi = version
+
+    this.config.libc = await detectLibc()
+
     return Promise.resolve()
   }
 
@@ -189,4 +194,18 @@ export class RuntimeDistribution {
       throw new Error("Checksum mismatch")
     }
   }
+}
+
+async function detectLibc() {
+  if (process.platform === "linux") {
+    if (await pathExists("/etc/alpine-release")) {
+      return "musl"
+    }
+    return "glibc"
+  } else if (process.platform === "darwin") {
+    return "libc"
+  } else if (process.platform === "win32") {
+    return "msvc"
+  }
+  return "unknown"
 }

@@ -3,7 +3,7 @@
 /* eslint-disable node/shebang */
 
 import { join, relative, resolve } from "path"
-import { copy, ensureDir, pathExists, readJson, remove, writeFile, readFile } from "fs-extra"
+import { copy, ensureDir, pathExists, readFile, readJson, remove, writeFile } from "fs-extra"
 import { ArgumentBuilder } from "./argumentBuilder.js"
 import { determineBuildMode } from "./buildMode.js"
 import { type BuildOptions, defaultBuildConfiguration, defaultBuildOptions } from "./lib.js"

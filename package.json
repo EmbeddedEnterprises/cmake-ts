@@ -36,7 +36,7 @@
   },
   "bin": "build/main.js",
   "scripts": {
-    "clean": "shx rm -rf build",
+    "clean": "shx rm -rf build ./test/.tmp",
     "lint.eslint": "eslint . --cache --cache-location ./.cache/.eslintcache \"./**/*.{js,ts,mjs,mts,cjs,cts,json,yaml,yml}\" --fix",
     "lint.biome": "biome check --write --unsafe .",
     "lint": "turbo run lint.eslint lint.biome",

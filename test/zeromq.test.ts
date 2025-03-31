@@ -4,6 +4,7 @@ import { fileURLToPath } from "url"
 import { isCI } from "ci-info"
 import { existsSync, readJson, remove } from "fs-extra"
 import { beforeAll, beforeEach, expect, suite, test } from "vitest"
+import type { BuildConfigurationDefaulted } from "../src/lib.js"
 import { HOME_DIRECTORY } from "../src/urlRegistry.js"
 
 const dirname = typeof __dirname === "string" ? __dirname : path.dirname(fileURLToPath(import.meta.url))
@@ -53,19 +54,25 @@ suite("zeromq", { timeout: 300_000 }, (tests) => {
       expect(existsSync(manifestPath), `Manifest file ${manifestPath} does not exist`).toBe(true)
       const manifest = (await readJson(manifestPath)) as Record<string, string>
 
+      const configKey = JSON.parse(Object.keys(manifest)[0]) as BuildConfigurationDefaulted
+
+      const expectedConfig: BuildConfigurationDefaulted = {
+        name: "",
+        dev: false,
+        os: process.platform,
+        arch: process.arch,
+        runtime: "node",
+        runtimeVersion: process.versions.node,
+        toolchainFile: null,
+        CMakeOptions: [],
+        addonSubdirectory: "",
+        additionalDefines: [],
+        abi: configKey.abi,
+        libc: configKey.libc,
+      }
+
       expect(manifest).toEqual({
-        [JSON.stringify({
-          name: "",
-          dev: false,
-          os: process.platform,
-          arch: process.arch,
-          runtime: "node",
-          runtimeVersion: process.versions.node,
-          toolchainFile: null,
-          CMakeOptions: [],
-          addonSubdirectory: "",
-          additionalDefines: [],
-        })]: addonPath,
+        [JSON.stringify(expectedConfig)]: addonPath,
       })
 
       // check if the addon.node file exists

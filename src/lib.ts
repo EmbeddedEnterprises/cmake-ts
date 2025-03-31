@@ -17,6 +17,12 @@ export type BuildConfigurationDefaulted = {
 
   // list of additional definitions to fixup node quirks for some specific versions
   additionalDefines: string[]
+
+  /** The ABI number that is used by the runtime. */
+  abi?: number
+
+  /** The libc that is used by the runtime. */
+  libc?: string
 }
 
 export type BuildConfiguration = Partial<BuildConfigurationDefaulted>
