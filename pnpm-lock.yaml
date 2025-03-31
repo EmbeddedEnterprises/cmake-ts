@@ -17,6 +17,9 @@ importers:
       '@types/babel__core':
         specifier: ~7.20.5
         version: 7.20.5
+      '@types/escape-quotes':
+        specifier: ^1.0.0
+        version: 1.0.0
       '@types/fs-extra':
         specifier: ~11.0.4
         version: 11.0.4
@@ -50,6 +53,9 @@ importers:
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
+      escape-quotes:
+        specifier: ^1.0.2
+        version: 1.0.2
       eslint:
         specifier: '8'
         version: 8.57.1
@@ -634,6 +640,9 @@ packages:
 
   '@types/debug@4.1.12':
     resolution: {integrity: sha512-vIChWdVG3LG1SMxEvI/AK+FWJthlrqlTu7fbrlywTkkaONwk/UAGaULXRlf8vkzFBLVm0zkMdCquhL5aOjhXPQ==}
+
+  '@types/escape-quotes@1.0.0':
+    resolution: {integrity: sha512-W7MUb/9brjZoqT/lWoYnwwudLct8N7GEXPeeVTfF17rkEPPYAPsn2pn/AG/VNaFCuU7ws3Qc6tcKTAIG84k0tA==}
 
   '@types/estree@1.0.7':
     resolution: {integrity: sha512-w28IoSUCJpidD/TGviZwwMJckNESJZXFu7NBZ5YJ4mEUnNraUn9Pm8HSZm/jDF1pDWYKspWE7oVphigUPRakIQ==}
@@ -1402,6 +1411,9 @@ packages:
   escalade@3.2.0:
     resolution: {integrity: sha512-WUj2qlxaQtO4g6Pq5c29GTcWGDyd8itL8zTlipgECz3JesAiiOKotd8JU6otB3PACgG6xkJUyVhboMS+bje/jA==}
     engines: {node: '>=6'}
+
+  escape-quotes@1.0.2:
+    resolution: {integrity: sha512-JpLFzklNReeakCpyj59s78P5F72q0ZUpDnp2BuIk9TtTjj2HMsgiWBChw17BlZT8dRhMtmSb1jE2+pTP1iFYyw==}
 
   escape-string-regexp@1.0.5:
     resolution: {integrity: sha512-vbRorB5FUQWvla16U8R/qgaFIya2qGzwDrNmCZuYKrbdSUMG6I1ZCGQRefkRVhuOkIGVne7BQ35DSfo1qvJqFg==}
@@ -3842,6 +3854,8 @@ snapshots:
     dependencies:
       '@types/ms': 2.1.0
 
+  '@types/escape-quotes@1.0.0': {}
+
   '@types/estree@1.0.7': {}
 
   '@types/fs-extra@11.0.4':
@@ -4788,8 +4802,11 @@ snapshots:
 
   escalade@3.2.0: {}
 
-  escape-string-regexp@1.0.5:
-    optional: true
+  escape-quotes@1.0.2:
+    dependencies:
+      escape-string-regexp: 1.0.5
+
+  escape-string-regexp@1.0.5: {}
 
   escape-string-regexp@2.0.0: {}
 

@@ -2,10 +2,11 @@ import { execFileSync } from "child_process"
 import path, { join } from "path"
 import { fileURLToPath } from "url"
 import { isCI } from "ci-info"
-import glob from "fast-glob"
-import { existsSync, remove } from "fs-extra"
+import { existsSync, readJson, remove } from "fs-extra"
 import { beforeAll, beforeEach, expect, suite, test } from "vitest"
+import type { BuildConfigurationDefaulted } from "../src/lib.js"
 import { HOME_DIRECTORY } from "../src/urlRegistry.js"
+
 const dirname = typeof __dirname === "string" ? __dirname : path.dirname(fileURLToPath(import.meta.url))
 const root = path.dirname(dirname)
 
@@ -46,14 +47,37 @@ suite("zeromq", { timeout: 300_000 }, (tests) => {
         cwd: zeromqPath,
       })
 
-      const addons = await glob(`build/${process.platform}/${process.arch}/node/*/addon.node`, {
-        cwd: zeromqPath,
-        absolute: true,
-        onlyFiles: true,
-        braceExpansion: false,
+      const addonPath = `${process.platform}/${process.arch}/node/131/addon.node`
+
+      // check manifest file
+      const manifestPath = join(zeromqPath, "build/manifest.json")
+      expect(existsSync(manifestPath), `Manifest file ${manifestPath} does not exist`).toBe(true)
+      const manifest = (await readJson(manifestPath)) as Record<string, string>
+
+      const configKey = JSON.parse(Object.keys(manifest)[0]) as BuildConfigurationDefaulted
+
+      const expectedConfig: BuildConfigurationDefaulted = {
+        name: "",
+        dev: false,
+        os: process.platform,
+        arch: process.arch,
+        runtime: "node",
+        runtimeVersion: process.versions.node,
+        toolchainFile: null,
+        CMakeOptions: [],
+        addonSubdirectory: "",
+        additionalDefines: [],
+        abi: configKey.abi,
+        libc: configKey.libc,
+      }
+
+      expect(manifest).toEqual({
+        [JSON.stringify(expectedConfig)]: addonPath,
       })
 
-      expect(addons.length).toBe(1)
+      // check if the addon.node file exists
+      const addonNodePath = join(zeromqPath, "build", addonPath)
+      expect(existsSync(addonNodePath), `Addon node file ${addonNodePath} does not exist`).toBe(true)
     })
   }
 })

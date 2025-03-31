@@ -2,8 +2,8 @@
 
 /* eslint-disable node/shebang */
 
-import { join, resolve } from "path"
-import { copy, ensureDir, pathExists, readJson, remove } from "fs-extra"
+import { join, relative, resolve } from "path"
+import { copy, ensureDir, pathExists, readFile, readJson, remove, writeFile } from "fs-extra"
 import { ArgumentBuilder } from "./argumentBuilder.js"
 import { determineBuildMode } from "./buildMode.js"
 import { type BuildOptions, defaultBuildConfiguration, defaultBuildOptions } from "./lib.js"
@@ -127,18 +127,27 @@ async function main(): Promise<void> {
     // Copy back the previously built binary
     process.stdout.write(`> Copying ${configs.projectName}.node to target directory... `)
     await ensureDir(targetDir)
-    if (configs.generatorToUse.includes("Visual Studio")) {
-      if (DEBUG_LOG !== undefined) {
-        console.log("Applying copy fix for MSVC projects")
-      }
-      await copy(
-        join(stagingDir, configs.buildType, `${configs.projectName}.node`),
-        join(targetDir, `${configs.projectName}.node`),
-      )
-    } else {
-      await copy(join(stagingDir, `${configs.projectName}.node`), join(targetDir, `${configs.projectName}.node`))
-    }
+
+    const addonPath = join(targetDir, `${configs.projectName}.node`)
+    const sourceAddonPath = configs.generatorToUse.includes("Visual Studio")
+      ? join(stagingDir, configs.buildType, `${configs.projectName}.node`)
+      : join(stagingDir, `${configs.projectName}.node`)
+    await copy(sourceAddonPath, addonPath)
+
     console.log("[ DONE ]")
+
+    console.log("Adding the built config to the manifest file...")
+
+    // read the manifest if it exists
+    const manifestPath = join(configs.targetDirectory, "manifest.json")
+    let manifest: Record<string, string> = {}
+    if (await pathExists(manifestPath)) {
+      const manifestContent = await readFile(manifestPath, "utf-8")
+      manifest = JSON.parse(manifestContent)
+    }
+    // add the new entry to the manifest
+    manifest[JSON.stringify(config)] = relative(configs.targetDirectory, addonPath)
+    await writeFile(manifestPath, JSON.stringify(manifest, null, 2))
 
     console.log("----------------- END CONFIG -----------------")
   }
