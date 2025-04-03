@@ -6,7 +6,6 @@ import babelConfig from "./babel.config.mts"
 // Instead of using TARGET env variable, we'll use Vite's mode
 export default defineConfig(async (configEnv) => {
   const isLegacy = configEnv.mode.includes("legacy")
-  const isMain = configEnv.mode.includes("main")
 
   const plugins = isLegacy
     ? [
@@ -27,7 +26,7 @@ export default defineConfig(async (configEnv) => {
 
   return {
     build: {
-      ssr: isMain ? "./src/main.ts" : "./src/lib.ts",
+      ssr: "./src/main.ts",
       outDir: "./build",
       target: isLegacy ? "node12" : "node20",
       minify: process.env.NODE_ENV === "development" ? false : "esbuild",
@@ -35,6 +34,15 @@ export default defineConfig(async (configEnv) => {
       rollupOptions: {
         output: {
           format: isLegacy ? "cjs" : "es",
+          manualChunks: {
+            lib: ["./src/lib.ts"],
+          },
+          chunkFileNames: (chunkInfo) => {
+            if (chunkInfo.name === "lib") {
+              return isLegacy ? "lib.js" : "lib.mjs"
+            }
+            return chunkInfo
+          },
         },
       },
       emptyOutDir: false,

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { parseArgs } from "./args.js"
-import { build } from "./build.js"
+import { build } from "./lib.js"
 
 function main(): Promise<number> {
   const opts = parseArgs()
