@@ -4,7 +4,7 @@ import { fileURLToPath } from "url"
 import { isCI } from "ci-info"
 import { existsSync, readJson, remove } from "fs-extra"
 import { beforeAll, beforeEach, expect, suite, test } from "vitest"
-import type { BuildConfigurationDefaulted } from "../src/lib.js"
+import type { BuildConfiguration } from "../src/lib.js"
 import { HOME_DIRECTORY } from "../src/urlRegistry.js"
 
 const dirname = typeof __dirname === "string" ? __dirname : path.dirname(fileURLToPath(import.meta.url))
@@ -42,7 +42,7 @@ suite("zeromq", { timeout: 300_000 }, (tests) => {
     test(`cmake-ts ${bundle} nativeonly`, async () => {
       const cmakeTsPath = join(root, `build/main.${bundle === "legacy" ? "js" : "mjs"}`)
 
-      execFileSync(process.execPath, ["--enable-source-maps", cmakeTsPath, "nativeonly"], {
+      execFileSync(process.execPath, ["--enable-source-maps", cmakeTsPath, "nativeonly", "--debug"], {
         stdio: "inherit",
         cwd: zeromqPath,
       })
@@ -54,9 +54,9 @@ suite("zeromq", { timeout: 300_000 }, (tests) => {
       expect(existsSync(manifestPath), `Manifest file ${manifestPath} does not exist`).toBe(true)
       const manifest = (await readJson(manifestPath)) as Record<string, string>
 
-      const configKey = JSON.parse(Object.keys(manifest)[0]) as BuildConfigurationDefaulted
+      const configKey = JSON.parse(Object.keys(manifest)[0]) as BuildConfiguration
 
-      const expectedConfig: BuildConfigurationDefaulted = {
+      const expectedConfig: BuildConfiguration = {
         name: "",
         dev: false,
         os: process.platform,

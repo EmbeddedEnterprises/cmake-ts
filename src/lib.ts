@@ -4,101 +4,84 @@ import { getCmakeGenerator } from "./util.js"
 
 export type ArrayOrSingle<T> = T | T[]
 
-export type BuildConfigurationDefaulted = {
+export type BuildConfiguration = {
+  /** The name of the build configuration. */
   name: string
-  dev: boolean
-  os: typeof process.platform
-  arch: typeof process.arch
-  runtime: string
-  runtimeVersion: string
-  toolchainFile: string | null
-  CMakeOptions?: { name: string; value: string }[]
-  addonSubdirectory: string
 
-  // list of additional definitions to fixup node quirks for some specific versions
-  additionalDefines: string[]
+  // Platform
+
+  /** The operating system that is used by the runtime (e.g. win32, darwin, linux, etc.) */
+  os: typeof process.platform
+  /** The architecture that is used by the runtime (e.g. x64, arm64, etc.) */
+  arch: typeof process.arch
+
+  // Runtime
+
+  /** The runtime that is used by the runtime (e.g. node, electron, etc.) */
+  runtime: string
+  /** node abstraction API to use (e.g. nan or node-addon-api) */
+  nodeAPI?: string
+  /** The version of the runtime that is used by the runtime. */
+  runtimeVersion: string
+
+  // ABI/libc
 
   /** The ABI number that is used by the runtime. */
   abi?: number
-
   /** The libc that is used by the runtime. */
   libc?: string
-}
 
-export type BuildConfiguration = Partial<BuildConfigurationDefaulted>
+  // Optimization levels
 
-export function defaultBuildConfiguration(config: BuildConfiguration): BuildConfigurationDefaulted {
-  if (config.name === undefined) {
-    config.name = "" //Empty name should be fine (TM)
-  }
-  if (config.dev === undefined) {
-    config.dev = false
-  }
-  if (config.os === undefined) {
-    config.os = process.platform
-    console.warn(`'os' was missing in the 'configurations'. Defaulting to the current operating system ${config.os}`)
-  }
-
-  if (config.arch === undefined) {
-    config.arch = process.arch
-    console.warn(`'arch' was missing in the 'configurations'. Defaulting to the current architecture ${config.arch}`)
-  }
-
-  if (config.runtime === undefined) {
-    config.runtime = "node"
-    console.warn("`runtime` was missing in the `configurations`. Defaulting to `node`")
-  }
-
-  if (config.runtimeVersion === undefined) {
-    config.runtimeVersion = process.versions.node
-    console.warn(
-      `'runtimeVersion' was missing in the 'configurations'. Defaulting to the current runtimeVersion ${config.runtimeVersion}`,
-    )
-  }
-
-  if (config.toolchainFile === undefined) {
-    config.toolchainFile = null
-  }
-
-  if (config.CMakeOptions === undefined) {
-    config.CMakeOptions = []
-  }
-  if ("cmakeOptions" in config && config.cmakeOptions !== undefined) {
-    console.warn("cmakeOptions was specified which was disabled in the 0.3.0 release. Please rename it to CMakeOptions")
-  }
-
-  if (config.addonSubdirectory === undefined) {
-    config.addonSubdirectory = ""
-  }
-
-  config.additionalDefines = [] //internal variable, not supposed to be set by the user
-
-  return config as BuildConfigurationDefaulted
-}
-
-export type BuildOptionsDefaulted = {
-  // A list of configurations to build
-  configurations: BuildConfiguration[]
-  // directory of the package which is being built
-  packageDirectory: string
-  // name of the built node addon
-  projectName: string
-  // directory where the binaries will end
-  targetDirectory: string
-  // directory where intermediate files will end up
-  stagingDirectory: string
-  // which cmake instance to use
-  cmakeToUse: string
-  // which cmake generator to use
-  generatorToUse: string
-  // cmake generator binary.
-  generatorBinary: string
-  // Debug or release build
+  /** Release, Debug, or RelWithDebInfo build */
   buildType: string
-  // global cmake options and defines
-  globalCMakeOptions?: { name: string; value: string }[]
-  // node abstraction API to use (e.g. nan or node-addon-api)
-  nodeAPI?: string
+  /** Whether the build is a development build. */
+  dev: boolean
+
+  // Paths
+
+  /** The subdirectory of the package which is being built. */
+  addonSubdirectory: string
+  /** directory of the package which is being built */
+  packageDirectory: string
+  /** name of the built node addon */
+  projectName: string
+  /** directory where the binaries will end */
+  targetDirectory: string
+  /** directory where intermediate files will end up */
+  stagingDirectory: string
+
+  // Cmake paths
+
+  /** which cmake instance to use */
+  cmakeToUse: string
+  /** cmake generator binary. */
+  generatorBinary: string
+
+  // Cmake options
+
+  /** The toolchain file to use. */
+  toolchainFile?: string
+  /** cmake options */
+  CMakeOptions: { name: string; value: string }[]
+  /** cmake options (alias) */
+  cmakeOptions: { name: string; value: string }[]
+  /** list of additional definitions to fixup node quirks for some specific versions */
+  additionalDefines: string[]
+  /** which cmake generator to use */
+  generatorToUse: string
+}
+
+export type BuildConfigurations = {
+  /** A list of configurations to build */
+  configurations: Partial<BuildConfiguration>[]
+
+  /** global options applied to all configurations in case they are missing */
+} & Partial<BuildConfiguration>
+
+export type CompleteBuildConfigurations = {
+  /** A list of configurations to build */
+  configurations: BuildConfiguration[]
 }
 
 export type OverrideConfig = {
@@ -111,178 +94,101 @@ export type OverrideConfig = {
   addDefines: ArrayOrSingle<string>
 }
 
-export type BuildOptions = Partial<BuildOptionsDefaulted>
-
-async function whichWrapped(cmd: string): Promise<string | null> {
-  try {
-    return await which(cmd)
-  } catch (err) {
-    return null
-  }
-}
-
-export async function defaultBuildOptions(configs: BuildOptions, opts: Options): Promise<BuildOptionsDefaulted> {
-  // Handle missing configs.configurations
-  // TODO handle without nativeonly and osonly
-  if (opts.type === "nativeonly") {
-    console.log(
-      `--------------------------------------------------
-      WARNING: Building only for the current runtime.
-      WARNING: DO NOT SHIP THE RESULTING PACKAGE
-     --------------------------------------------------`,
-    )
-    //Yeah this pretty ugly, but whatever
-    configs.configurations = [defaultBuildConfiguration({})]
-  }
-  if (opts.type === "osonly") {
-    console.log(
-      `--------------------------------------------------
-      WARNING: Building only for the current OS.
-      WARNING: DO NOT SHIP THE RESULTING PACKAGE
-     --------------------------------------------------`,
-    )
-    if (configs.configurations === undefined) {
-      console.error("No `configurations` entry was found in the package.json")
-      process.exit(1)
-    }
-    configs.configurations = configs.configurations.filter((j) => j.os === process.platform)
-    if (configs.configurations.length === 0) {
-      console.error("No configuration left to build!")
-      process.exit(1)
-    }
-    for (const config of configs.configurations) {
-      // A native build should be possible without toolchain file.
-      config.toolchainFile = null
-    }
-  }
-  if (opts.type === "dev-os-only") {
-    console.log(
-      `--------------------------------------------------
-        WARNING: Building dev-os-only package
-        WARNING: DO NOT SHIP THE RESULTING PACKAGE
-       --------------------------------------------------`,
-    )
-    if (configs.configurations === undefined) {
-      console.error("No `configurations` entry was found in the package.json")
-      process.exit(1)
-    }
-    const candidateConfig = configs.configurations.find((j) => j.os === process.platform && j.dev)
-    if (candidateConfig === undefined) {
-      console.error(`No matching entry with \`dev == true\` and \`os == ${process.platform}\` in \`configurations\``)
-      process.exit(1)
-    }
-    configs.configurations = [candidateConfig]
-    //todo toolchain file?
-  }
-  if (opts.type === "named-configs") {
-    if (configs.configurations === undefined) {
-      console.error("No `configurations` entry was found in the package.json")
-      process.exit(1)
-    }
-    // unnamed configs are always filtered out
-    configs.configurations = configs.configurations.filter((config) => {
-      return config.name !== undefined ? opts.configsToBuild.includes(config.name) : false
-    })
-    if (configs.configurations.length === 0) {
-      console.error("No configuration left to build!")
-      process.exit(1)
-    }
-  }
-
-  if (configs.packageDirectory === undefined) {
-    configs.packageDirectory = process.cwd()
-  }
-
-  if (configs.projectName === undefined) {
-    configs.projectName = "addon"
-  }
-
-  if (configs.targetDirectory === undefined) {
-    configs.targetDirectory = "build"
-  }
-
-  if (configs.stagingDirectory === undefined) {
-    configs.stagingDirectory = "staging"
-  }
-
+/**
+ * Add the missing fields to the given build configuration.
+ */
+async function addMissingBuildConfigurationFields(
+  config: Partial<BuildConfiguration>,
+  globalConfig: Partial<BuildConfigurations>,
+) {
   /* eslint-disable require-atomic-updates */
 
-  if (configs.cmakeToUse === undefined) {
-    const cmake = await whichWrapped("cmake")
-    if (cmake === null) {
-      console.error("cmake binary not found, try to specify 'cmakeToUse'")
-      process.exit(1)
+  config.name ??= globalConfig.name ?? ""
+
+  // Platform
+
+  config.os ??= globalConfig.os ?? process.platform
+  config.arch ??= globalConfig.arch ?? process.arch
+
+  // Runtime
+
+  config.runtime ??= globalConfig.runtime ?? "node"
+  config.nodeAPI ??= globalConfig.nodeAPI ?? "node-addon-api"
+  config.runtimeVersion ??=
+    globalConfig.runtimeVersion ?? (config.runtime === "node" ? process.versions.node : undefined)
+
+  // Optimization levels
+
+  config.buildType ??= globalConfig.buildType ?? "Release"
+  config.dev ??= globalConfig.dev ?? false
+
+  // Paths
+  config.packageDirectory ??= globalConfig.packageDirectory ?? process.cwd()
+  config.projectName ??= globalConfig.projectName ?? "addon"
+  config.targetDirectory ??= globalConfig.targetDirectory ?? "build"
+  config.stagingDirectory ??= globalConfig.stagingDirectory ?? "staging"
+
+  // Cmake options
+  config.CMakeOptions = [
+    ...(config.CMakeOptions ?? []),
+    ...(globalConfig.CMakeOptions ?? []),
+    // alias
+    ...(config.cmakeOptions ?? []),
+    ...(globalConfig.cmakeOptions ?? []),
+  ]
+
+  config.additionalDefines ??= globalConfig.additionalDefines ?? []
+
+  config.cmakeToUse ??= globalConfig.cmakeToUse ?? (await which("cmake", { nothrow: true })) ?? "cmake"
+
+  const { generator, binary } = await getCmakeGenerator(config.cmakeToUse, process.arch)
+  config.generatorToUse ??= globalConfig.generatorToUse ?? generator
+  config.generatorBinary ??= globalConfig.generatorBinary ?? binary
+
+  return config as BuildConfiguration
+}
+
+export async function parseBuildConfigs(
+  opts: Options,
+  configFile: Partial<BuildConfigurations>,
+): Promise<BuildConfiguration[] | undefined> {
+  if (opts.command.type !== "build") {
+    return undefined
+  }
+
+  const givenConfigNames = new Set(opts.command.options.configs)
+
+  const configsToBuild: BuildConfiguration[] = []
+
+  // if no named configs are provided, build for the current runtime on the current system with the default configuration
+  if (givenConfigNames.size === 0) {
+    configsToBuild.push(await addMissingBuildConfigurationFields({}, configFile))
+    return
+  }
+
+  // check if the given config names are a subset of the config names in the config file
+  for (const partialConfig of configFile.configurations ?? []) {
+    /* eslint-disable no-await-in-loop */
+    const config = await addMissingBuildConfigurationFields(partialConfig, configFile)
+
+    if (
+      givenConfigNames.has(config.name) ||
+      givenConfigNames.has("named-all") ||
+      (givenConfigNames.has("named-os") && config.os === process.platform) ||
+      (givenConfigNames.has("named-os-dev") && config.os === process.platform && config.dev)
+    ) {
+      configsToBuild.push(config)
+      givenConfigNames.delete(config.name)
     }
-    configs.cmakeToUse = cmake
   }
 
-  // handle missing generator
-  const [ninja, make] = await Promise.all([whichWrapped("ninja"), whichWrapped("make")])
-
-  if (configs.generatorToUse === undefined) {
-    console.log("no generator specified in package.json, checking ninja")
-    if (ninja === null) {
-      console.log("ninja not found, checking make")
-      if (make === null) {
-        console.log("make not found, using native")
-        if (process.platform === "win32") {
-          // I'm on windows, so fixup the architecture mess.
-          const generator = await getCmakeGenerator(configs.cmakeToUse, process.arch)
-          configs.generatorToUse = generator
-          configs.generatorBinary = "native"
-        } else {
-          configs.generatorToUse = "native"
-          configs.generatorBinary = "native"
-        }
-      } else {
-        console.log("found make at", make, "(fallback)")
-        configs.generatorToUse = "Unix Makefiles"
-        configs.generatorBinary = make
-      }
-    } else {
-      console.log("found ninja at", ninja)
-      configs.generatorToUse = "Ninja"
-      configs.generatorBinary = ninja
-    }
+  // parse the remaining config names to extract the runtime, build type, and system
+  // eslint-disable-next-line no-unreachable-loop
+  for (const configName of givenConfigNames) {
+    const _parts = configName.split("-")
+    // TODO
+    throw new Error(`Unsupported config name: ${configName}`)
   }
 
-  // handle missing generatorBinary
-  if (configs.generatorBinary === undefined) {
-    if (configs.generatorToUse === "Ninja") {
-      if (ninja === null) {
-        console.error(
-          "Ninja was specified as generator but no ninja binary could be found. Specify it via 'generatorBinary'",
-        )
-        process.exit(1)
-      }
-      configs.generatorBinary = ninja
-    } else if (configs.generatorToUse === "Unix Makefiles") {
-      if (make === null) {
-        console.error(
-          "Unix Makefiles was specified as generator but no make binary could be found. Specify it via 'generatorBinary'",
-        )
-        process.exit(1)
-      }
-      configs.generatorBinary = make
-    } else {
-      console.error(`Unsupported generator ${configs.generatorToUse}`)
-      process.exit(1)
-    }
-  }
-
-  if (configs.buildType === undefined) {
-    configs.buildType = "Release"
-    console.warn("`buildType` was missing. Considering 'Release'")
-  }
-
-  if (configs.configurations) {
-    for (const v of configs.configurations) {
-      v.additionalDefines = []
-    }
-  }
-
-  // TODO move the code related to globalCMakeOptions
-  // TODO move the code related to nodeAPI
-
-  return configs as BuildOptionsDefaulted
+  return configsToBuild
 }

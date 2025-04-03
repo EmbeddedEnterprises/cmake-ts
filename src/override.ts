@@ -1,5 +1,5 @@
 import satisfies from "semver/functions/satisfies.js"
-import type { ArrayOrSingle, BuildConfigurationDefaulted, OverrideConfig } from "./lib.js"
+import type { ArrayOrSingle, BuildConfiguration, OverrideConfig } from "./lib.js"
 
 const knownOverrides: OverrideConfig[] = [
   {
@@ -48,7 +48,7 @@ function matchAgainstArray<T>(value: T, target?: ArrayOrSingle<T>) {
   return compare.includes(value)
 }
 
-function matchOverride(config: BuildConfigurationDefaulted, ov: OverrideConfig) {
+function matchOverride(config: BuildConfiguration, ov: OverrideConfig) {
   const archMatch = matchAgainstArray(config.arch, ov.match.arch)
   const osMath = matchAgainstArray(config.os, ov.match.os)
   const runtimeMatch = matchAgainstArray(config.runtime, ov.match.runtime)
@@ -79,7 +79,7 @@ function matchOverride(config: BuildConfigurationDefaulted, ov: OverrideConfig) 
   return true
 }
 
-export function applyOverrides(config: BuildConfigurationDefaulted) {
+export function applyOverrides(config: BuildConfiguration) {
   return knownOverrides.reduce((prev, curr) => {
     if (matchOverride(config, curr)) {
       return prev + 1

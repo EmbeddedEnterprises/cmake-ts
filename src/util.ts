@@ -1,6 +1,7 @@
 import * as cp from "child_process"
 import { type PathLike, type StatOptions, Stats, stat as rawStat } from "fs-extra"
 import splitargs from "splitargs2"
+import which from "which"
 
 export function getEnvVar(name: string) {
   const value = process.env[name]
@@ -10,11 +11,29 @@ export function getEnvVar(name: string) {
   return undefined
 }
 
-export async function getCmakeGenerator(cmake: string, arch: string): Promise<string> {
+export async function getCmakeGenerator(
+  cmake: string,
+  arch: string,
+): Promise<{
+  generator: string | undefined
+  binary: string | undefined
+}> {
+  // use ninja if available
+  const ninja = await which("ninja", { nothrow: true })
+  if (ninja !== null) {
+    return {
+      generator: "Ninja",
+      binary: ninja,
+    }
+  }
+
   const archString = arch === "x64" ? "Win64" : arch === "x86" ? "" : null
   if (archString === null) {
     console.error("Failed to find valid VS gen, using native. Good Luck.")
-    return "native"
+    return {
+      generator: "native",
+      binary: undefined,
+    }
   }
 
   const generators = await execCapture(`"${cmake}" -G`)
@@ -50,7 +69,10 @@ export async function getCmakeGenerator(cmake: string, arch: string): Promise<st
   } else {
     useVSGen = useVSGen.replace("[arch]", archString).trim()
   }
-  return useVSGen
+  return {
+    generator: useVSGen,
+    binary: undefined,
+  }
 }
 
 export function execCapture(command: string): Promise<string> {

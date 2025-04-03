@@ -1,12 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { parseArgs } from "../src/args.js"
 
-describe("args", () => {
+describe("parseArgs", () => {
   const originalArgv = process.argv
+
+  const commonArgs = ["node", "./node_modules/cmake-ts/build/main.js"]
 
   beforeEach(() => {
     // Reset process.argv before each test
-    process.argv = ["node", "script.js"]
+    process.argv = commonArgs
   })
 
   afterEach(() => {
@@ -15,49 +17,49 @@ describe("args", () => {
     vi.restoreAllMocks()
   })
 
-  describe("parseArgs", () => {
+  describe("build mode", () => {
     it('should default to "all" when no arguments are provided', () => {
       const result = parseArgs()
-      expect(result).toEqual({ type: "all" })
+      expect(result.buildMode).toEqual({ type: "all" })
     })
 
     it('should parse "all" flag correctly', () => {
-      process.argv = ["node", "script.js", "--all"]
+      process.argv = [...commonArgs, "--all"]
       const result = parseArgs()
-      expect(result).toEqual({ type: "all" })
+      expect(result.buildMode).toEqual({ type: "all" })
     })
 
     it('should parse "nativeonly" flag correctly', () => {
-      process.argv = ["node", "script.js", "--nativeonly"]
+      process.argv = [...commonArgs, "--nativeonly"]
       const result = parseArgs()
-      expect(result).toEqual({ type: "nativeonly" })
+      expect(result.buildMode).toEqual({ type: "nativeonly" })
     })
 
     it('should parse "osonly" flag correctly', () => {
-      process.argv = ["node", "script.js", "--osonly"]
+      process.argv = [...commonArgs, "--osonly"]
       const result = parseArgs()
-      expect(result).toEqual({ type: "osonly" })
+      expect(result.buildMode).toEqual({ type: "osonly" })
     })
 
     it('should parse "dev-os-only" flag correctly', () => {
-      process.argv = ["node", "script.js", "--dev-os-only"]
+      process.argv = [...commonArgs, "--dev-os-only"]
       const result = parseArgs()
-      expect(result).toEqual({ type: "dev-os-only" })
+      expect(result.buildMode).toEqual({ type: "dev-os-only" })
     })
 
     it('should parse "named-configs" with a single config correctly', () => {
-      process.argv = ["node", "script.js", "--named-configs", "config1"]
+      process.argv = [...commonArgs, "--named-configs", "config1"]
       const result = parseArgs()
-      expect(result).toEqual({
+      expect(result.buildMode).toEqual({
         type: "named-configs",
         configsToBuild: ["config1"],
       })
     })
 
     it('should parse "named-configs" with multiple configs as comma-separated string', () => {
-      process.argv = ["node", "script.js", "--named-configs", "config1,config2,config3"]
+      process.argv = [...commonArgs, "--named-configs", "config1,config2,config3"]
       const result = parseArgs()
-      expect(result).toEqual({
+      expect(result.buildMode).toEqual({
         type: "named-configs",
         configsToBuild: ["config1", "config2", "config3"],
       })
@@ -65,22 +67,45 @@ describe("args", () => {
 
     it('should parse "named-configs" with multiple configs as array', () => {
       // This test simulates how mri would handle multiple occurrences of the same flag
-      process.argv = ["node", "script.js", "--named-configs", "config1", "--named-configs", "config2"]
+      process.argv = [...commonArgs, "--named-configs", "config1", "--named-configs", "config2"]
       const result = parseArgs()
-      expect(result).toEqual({
+      expect(result.buildMode).toEqual({
         type: "named-configs",
         configsToBuild: ["config1", "config2"],
       })
     })
 
     it("should throw an error when multiple build modes are specified", () => {
-      process.argv = ["node", "script.js", "--all", "--nativeonly"]
+      process.argv = [...commonArgs, "--all", "--nativeonly"]
       expect(() => parseArgs()).toThrow("Only one build mode flag can be specified")
     })
 
     it.fails("should throw an error when named-configs is empty", () => {
-      process.argv = ["node", "script.js", "--named-configs", ""]
+      process.argv = [...commonArgs, "--named-configs", ""]
       expect(() => parseArgs()).toThrow("'named-configs' needs at least one config name")
+    })
+  })
+
+  describe("debug mode", () => {
+    it("should parse debug flag correctly", () => {
+      const spy = vi.spyOn(console, "debug")
+
+      process.argv = [...commonArgs, "--debug"]
+      const result = parseArgs()
+      expect(result.opts.debug).toEqual(true)
+      expect(spy).toHaveBeenCalledWith("opts", JSON.stringify({ _: [], debug: true }, null, 2))
+      expect(spy).toHaveBeenCalledWith("buildMode", JSON.stringify({ type: "all" }, null, 2))
+    })
+  })
+
+  describe("help", () => {
+    it("should parse help flag correctly", () => {
+      const spy = vi.spyOn(console, "log")
+
+      process.argv = [...commonArgs, "--help"]
+      const result = parseArgs()
+      expect(result.opts.help).toEqual(true)
+      expect(spy).toHaveBeenCalledWith(expect.stringContaining("Usage: cmake-ts"))
     })
   })
 })

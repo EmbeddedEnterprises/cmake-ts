@@ -1,7 +1,7 @@
 import os from "os"
 import gte from "semver/functions/gte"
 import lt from "semver/functions/lt"
-import type { BuildConfigurationDefaulted } from "./lib.js"
+import type { BuildConfiguration } from "./lib.js"
 import { getEnvVar } from "./util.js"
 
 const NODE_MIRROR = getEnvVar("NVM_NODEJS_ORG_MIRROR") ?? "https://nodejs.org/dist"
@@ -10,7 +10,7 @@ const ELECTRON_MIRROR = getEnvVar("ELECTRON_MIRROR") ?? "https://artifacts.elect
 
 export const HOME_DIRECTORY = process.env[os.platform() === "win32" ? "USERPROFILE" : "HOME"] as string
 
-export function getPathsForConfig(config: BuildConfigurationDefaulted) {
+export function getPathsForConfig(config: BuildConfiguration) {
   switch (config.runtime) {
     case "node": {
       return (lt(config.runtimeVersion, "4.0.0") ? nodePrehistoric : nodeModern)(config)
@@ -47,7 +47,7 @@ export function getPathsForConfig(config: BuildConfigurationDefaulted) {
   }
 }
 
-function nodePrehistoric(config: BuildConfigurationDefaulted) {
+function nodePrehistoric(config: BuildConfiguration) {
   return {
     externalPath: `${NODE_MIRROR}/v${config.runtimeVersion}/`,
     winLibs: [
@@ -61,7 +61,7 @@ function nodePrehistoric(config: BuildConfigurationDefaulted) {
   }
 }
 
-function nodeModern(config: BuildConfigurationDefaulted) {
+function nodeModern(config: BuildConfiguration) {
   return {
     externalPath: `${NODE_MIRROR}/v${config.runtimeVersion}/`,
     winLibs: [

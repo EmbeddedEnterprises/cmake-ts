@@ -1,22 +1,21 @@
 import { join, resolve } from "path"
-import type { BuildConfigurationDefaulted, BuildOptionsDefaulted } from "./lib.js"
+import type { BuildConfiguration } from "./lib.js"
 import { getNodeApiInclude } from "./nodeAPIInclude/index.js"
 import type { RuntimeDistribution } from "./runtimeDistribution.js"
 import { getPathsForConfig } from "./urlRegistry.js"
 
 export class ArgumentBuilder {
   constructor(
-    private config: BuildConfigurationDefaulted,
-    private options: BuildOptionsDefaulted,
+    private config: BuildConfiguration,
     private rtd: RuntimeDistribution,
   ) {}
 
   async buildCmakeCommandLine(): Promise<string> {
-    let baseCommand = `"${this.options.cmakeToUse}" "${this.options.packageDirectory}" --no-warn-unused-cli`
+    let baseCommand = `"${this.config.cmakeToUse}" "${this.config.packageDirectory}" --no-warn-unused-cli`
     const defines = await this.buildDefines()
     baseCommand += ` ${defines.map((d) => `-D${d[0]}="${d[1]}"`).join(" ")}`
-    if (this.options.generatorToUse !== "native") {
-      let generatorString = ` -G"${this.options.generatorToUse}"`
+    if (this.config.generatorToUse !== "native") {
+      let generatorString = ` -G"${this.config.generatorToUse}"`
       if (generatorString.match(/Visual\s+Studio\s+\d+\s+\d+\s-A/)) {
         generatorString = generatorString.replace(/\s-A/, "")
         generatorString += ` -A ${this.config.arch}`
@@ -28,15 +27,15 @@ export class ArgumentBuilder {
   }
 
   buildGeneratorCommandLine(stagingDir: string): string {
-    return `"${this.options.cmakeToUse}" --build "${stagingDir}" --config "${this.options.buildType}"`
+    return `"${this.config.cmakeToUse}" --build "${stagingDir}" --config "${this.config.buildType}"`
   }
 
   async buildDefines(): Promise<[string, string][]> {
     const pathConfig = getPathsForConfig(this.config)
     const retVal: [string, string][] = []
-    retVal.push(["CMAKE_BUILD_TYPE", this.options.buildType])
+    retVal.push(["CMAKE_BUILD_TYPE", this.config.buildType])
 
-    if (this.config.toolchainFile !== null) {
+    if (this.config.toolchainFile !== undefined) {
       retVal.push(["CMAKE_TOOLCHAIN_FILE", resolve(this.config.toolchainFile)])
     }
 
@@ -65,22 +64,22 @@ export class ArgumentBuilder {
     }
 
     // Search nodeAPI if installed and required
-    if (this.options.nodeAPI?.includes("nan") === true) {
+    if (this.config.nodeAPI?.includes("nan") === true) {
       console.warn(
-        `WARNING: specified nodeAPI ${this.options.nodeAPI} seems to be nan - The usage of nan is discouraged due to subtle and hard-to-fix ABI issues! Consider using node-addon-api / N-API instead!`,
+        `WARNING: specified nodeAPI ${this.config.nodeAPI} seems to be nan - The usage of nan is discouraged due to subtle and hard-to-fix ABI issues! Consider using node-addon-api / N-API instead!`,
       )
     }
-    if (this.options.nodeAPI === undefined) {
+    if (this.config.nodeAPI === undefined) {
       console.warn(
         'WARNING: nodeAPI was not specified. The default changed from "nan" to "node-addon-api" in v0.3.0! Please make sure this is intended.',
       )
     }
     const nodeApiInclude = await getNodeApiInclude(
-      this.options.packageDirectory,
-      this.options.nodeAPI ?? "node-addon-api",
+      this.config.packageDirectory,
+      this.config.nodeAPI ?? "node-addon-api",
     )
-    if (this.options.nodeAPI !== undefined && nodeApiInclude === null) {
-      console.log(`WARNING: nodeAPI was specified, but module "${this.options.nodeAPI}" could not be found!`)
+    if (this.config.nodeAPI !== undefined && nodeApiInclude === null) {
+      console.log(`WARNING: nodeAPI was specified, but module "${this.config.nodeAPI}" could not be found!`)
     }
     if (nodeApiInclude !== null) {
       includes.push(nodeApiInclude)
@@ -99,14 +98,14 @@ export class ArgumentBuilder {
     // push additional overrides
     retVal.push(["CMAKE_JS_DEFINES", this.config.additionalDefines.join(";")])
 
-    if (this.options.globalCMakeOptions && this.options.globalCMakeOptions.length > 0) {
-      for (const j of this.options.globalCMakeOptions) {
-        retVal.push([j.name, j.value.replace(/\$ROOT\$/g, resolve(this.options.packageDirectory))])
+    if (this.config.CMakeOptions.length !== 0) {
+      for (const j of this.config.CMakeOptions) {
+        retVal.push([j.name, j.value.replace(/\$ROOT\$/g, resolve(this.config.packageDirectory))])
       }
     }
-    if (this.config.CMakeOptions && this.config.CMakeOptions.length > 0) {
+    if (this.config.CMakeOptions.length !== 0) {
       for (const j of this.config.CMakeOptions) {
-        retVal.push([j.name, j.value.replace(/\$ROOT\$/g, resolve(this.options.packageDirectory))])
+        retVal.push([j.name, j.value.replace(/\$ROOT\$/g, resolve(this.config.packageDirectory))])
       }
     }
     return retVal

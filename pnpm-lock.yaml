@@ -23,9 +23,6 @@ importers:
       '@types/fs-extra':
         specifier: ~11.0.4
         version: 11.0.4
-      '@types/mri':
-        specifier: ^1.2.0
-        version: 1.2.0
       '@types/node':
         specifier: ^22.7.9
         version: 22.13.11
@@ -53,6 +50,9 @@ importers:
       ci-info:
         specifier: ^4.2.0
         version: 4.2.0
+      commander:
+        specifier: ^13.1.0
+        version: 13.1.0
       cross-env:
         specifier: ^7.0.3
         version: 7.0.3
@@ -71,9 +71,6 @@ importers:
       fs-extra:
         specifier: ^10
         version: 10.1.0
-      mri:
-        specifier: ^1.2.0
-        version: 1.2.0
       node-downloader-helper:
         specifier: ^2.1.7
         version: 2.1.9
@@ -671,10 +668,6 @@ packages:
   '@types/minimatch@5.1.2':
     resolution: {integrity: sha512-K0VQKziLUWkVKiRVrx4a40iPaxTUefQmjtkQofBkYRcoaaL/8rhwDWww9qWbrgicNOgnpIsMxyNIUM4+n6dUIA==}
 
-  '@types/mri@1.2.0':
-    resolution: {integrity: sha512-G4+QT8Plq6q1UnOX6JgtLrEU/4QXF/Z5oNr6TWdiv9EU2hsJPbemH4rCecwNajzij+2CxrxFg2Y98Q+ViDV79Q==}
-    deprecated: This is a stub types definition. mri provides its own type definitions, so you do not need this installed.
-
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
 
@@ -1153,6 +1146,10 @@ packages:
   combined-stream@1.0.8:
     resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
     engines: {node: '>= 0.8'}
+
+  commander@13.1.0:
+    resolution: {integrity: sha512-/rFeCpNJQbhSZjGVwO9RFV3xPqbnERS8MmIQzCtD/zl6gpJuV/bMLuN92oG3F7d8oDEHHRrujSXNUr8fpjntKw==}
+    engines: {node: '>=18'}
 
   commander@2.20.3:
     resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==}
@@ -2407,10 +2404,6 @@ packages:
     resolution: {integrity: sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==}
     engines: {node: '>=10'}
     hasBin: true
-
-  mri@1.2.0:
-    resolution: {integrity: sha512-tzzskb3bG8LvYGFF/mDTpq3jpI6Q9wc3LEmBaghu+DdCssd1FakN7Bc0hVNmEyGq1bq3RgfkCb3cmQLpNPOroA==}
-    engines: {node: '>=4'}
 
   mrmime@2.0.1:
     resolution: {integrity: sha512-Y3wQdFg2Va6etvQ5I82yUhGdsKrcYox6p7FfL1LbK2J4V01F9TGlepTIhnK24t7koZibmg82KGglhA1XK5IsLQ==}
@@ -3894,10 +3887,6 @@ snapshots:
 
   '@types/minimatch@5.1.2': {}
 
-  '@types/mri@1.2.0':
-    dependencies:
-      mri: 1.2.0
-
   '@types/ms@2.1.0': {}
 
   '@types/node@22.13.11':
@@ -4489,6 +4478,8 @@ snapshots:
   combined-stream@1.0.8:
     dependencies:
       delayed-stream: 1.0.0
+
+  commander@13.1.0: {}
 
   commander@2.20.3:
     optional: true
@@ -6073,8 +6064,6 @@ snapshots:
       yallist: 4.0.0
 
   mkdirp@1.0.4: {}
-
-  mri@1.2.0: {}
 
   mrmime@2.0.1:
     optional: true
