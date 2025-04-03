@@ -82,6 +82,9 @@ export type BuildCommandOptions = {
    *  The configs can be combined with `,` or multiple `--configs` flags. They will be merged together.
    */
   configs: string[]
+
+  /** Show help */
+  help: boolean
 }
 
 /**

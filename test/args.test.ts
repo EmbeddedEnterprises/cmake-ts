@@ -117,7 +117,6 @@ describe("parseArgs", () => {
             osonly: false,
             devOsOnly: false,
             debug: true,
-            help: false,
           },
           null,
           2,
@@ -133,15 +132,12 @@ describe("parseArgs", () => {
         exitCode = code ?? 0
         throw new Error("process.exit was called")
       })
-      const spy = vi.spyOn(process.stderr, "write")
+      const spy = vi.spyOn(process.stdout, "write")
 
       expect(() => parseArgs([...commonArgs, "--help"])).toThrow("process.exit was called")
-      expect(exitCode).toEqual(1)
+      expect(exitCode).toEqual(0)
       expect(spy).toHaveBeenCalledWith(expect.stringContaining("cmake-ts"))
 
-      // help exits with 1
-      expect(() => parseArgs()).toThrow("process.exit was called")
-      expect(exitCode).toEqual(1)
       vi.unstubAllGlobals()
     })
   })

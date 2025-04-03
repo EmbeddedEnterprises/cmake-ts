@@ -26,9 +26,8 @@ export function parseArgs(args?: string[]): Options {
       }
     })
     .description("A CMake-based build system for native NodeJS and Electron addons.")
-    .usage("[command] [options]")
+    .usage("[build or help] [options]")
     .option("--debug", "Enable debug logging", debugDefault)
-    .option("--help, -h", "Show help", false)
     .showHelpAfterError(false)
     .showSuggestionAfterError(true)
 
@@ -36,7 +35,66 @@ export function parseArgs(args?: string[]): Options {
   const buildCommand = program
     .command("build")
     .description("Build the project")
-    .option("-c, --configs <configs...>", "Build specific configurations", [])
+    .option(
+      "-c, --configs <configs...>",
+      `
+    Named config(s) to build, which could be from default configs or the ones defined in the config file (package.json)
+   
+     If no config is provided, it will build for the current runtime on the current system with the Release build type
+   
+    The default configs are combinations of \`<Runtime>\`, \`<BuildType>\`, \`<Platform>\`, and \`<Architecture>\`.
+   
+     - \`<Runtime>\`: the runtime to use
+   
+       e.g.: \`node\`, \`electron\`, \`iojs\`
+   
+     - \`<BuildType>\`: the cmake build type (optimization level)
+   
+       e.g.: \`debug\`, \`release\`, or \`relwithdebinfo\`
+   
+     - \`<Platform>\`: the target platform
+   
+       e.g.: \`win32\`, \`linux\`, \`darwin\`, \`aix\`, \`android\`, \`freebsd\`, \`haiku\`, \`openbsd\`, \`sunos\`, \`cygwin\`, \`netbsd\`
+   
+     - \`<Architecture>\`: the target architecture
+   
+       e.g.: \`x64\`, \`arm64\`, \`ia32\`, \`arm\`, \`loong64\`, \`mips\`, \`mipsel\`, \`ppc\`, \`ppc64\`, \`riscv64\`, \`s390\`, \`s390x\`
+   
+      Any combination of \`<BuildType>\`, \`<Runtime>\`, \`<Platform>\`, and \`<Architecture>\` is valid. Some examples:
+   
+       - \`release\`
+       - \`debug\`
+       - \`relwithdebinfo\`
+       - \`node-release\`
+       - \`node-debug\`
+       - \`electron-release\`
+       - \`electron-debug\`
+       - \`win32-x64\`
+       - \`win32-x64-debug\`
+       - \`linux-x64-debug\`
+       - \`linux-x64-node-debug\`
+       - \`linux-x64-electron-release\`
+       - \`darwin-x64-node-release\`
+       - \`darwin-arm64-node-release\`
+       - \`darwin-arm64-electron-relwithdebinfo\`
+   
+    You can also define your own configs in the config file (package.json).
+   
+     - \`<ConfigName>\`: the name of the config
+   
+       e.g.: \`my-config\`
+   
+     The configs can also be in format of \`named-<property>\`, which builds the configs that match the property.
+   
+       - \`named-os\`: build all the configs in the config file that have the same OS
+       - \`named-os-dev\`: build all the configs in the config file that have the same OS and \`dev\` is true
+       - \`named-all\`: build all the configs in the config file
+   
+   
+     The configs can be combined with \`,\` or multiple \`--configs\` flags. They will be merged together.
+`,
+      [],
+    )
     .action(() => {
       commandOptions.command.type = "build"
     })
@@ -106,9 +164,8 @@ export function parseArgs(args?: string[]): Options {
   }
 
   // Handle build command
+  const buildOpts = buildCommand.opts<BuildCommandOptions>()
   if (opts.command.type === "build") {
-    const buildOpts = buildCommand.opts<BuildCommandOptions>()
-
     addLegacyOptions(buildOpts, opts)
 
     debugOpts()
@@ -117,18 +174,6 @@ export function parseArgs(args?: string[]): Options {
         type: "build",
         options: buildOpts,
       },
-      debug: opts.debug,
-      help: opts.help,
-    }
-  }
-
-  // Handle help command
-  if (opts.help) {
-    program.outputHelp()
-
-    debugOpts()
-    return {
-      command: { type: "help" },
       debug: opts.debug,
       help: opts.help,
     }
