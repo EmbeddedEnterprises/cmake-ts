@@ -1,7 +1,7 @@
-import which from "which"
-import { getCmakeGenerator } from "./util.js"
 import { join, resolve } from "path"
 import { readJson } from "fs-extra"
+import which from "which"
+import { getCmakeGenerator } from "./util.js"
 
 /**
  * The options of cmake-ts that includes the command to run and the global options
