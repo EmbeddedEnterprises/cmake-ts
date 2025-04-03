@@ -88,7 +88,7 @@ export type HelpCommand = {
 /**
  * A command is an object that describes the command to run for cmake-ts
  */
-export type Command = BuildCommand | HelpCommand
+export type Command = BuildCommand | HelpCommand | { type: "error" | "none" }
 
 /**
  * Global options are options that are available for all commands provided by the user as --option
@@ -107,7 +107,7 @@ export type GlobalOptions = {
  */
 export type DeprecatedGlobalOptions = {
   /** Build all configurations
-   * @deprecated Use `build --config all` instead
+   * @deprecated Use `build --config named-all` instead
    */
   all: boolean
 
@@ -117,19 +117,19 @@ export type DeprecatedGlobalOptions = {
   nativeonly: boolean
 
   /** Build only OS configurations
-   * @deprecated Use `build` instead
+   * @deprecated Use `build --config named-os` instead
    */
   osonly: boolean
 
   /** Build only dev OS configurations
-   * @deprecated Use `build --config debug` instead
+   * @deprecated Use `build --config named-os-dev` instead
    */
   devOsOnly: boolean
 
   /** Build only named configurations
    * @deprecated Use `build --config <configs>` instead
    */
-  namedConfigs?: string[] | string
+  namedConfigs?: string[]
 }
 
 /**
@@ -137,48 +137,97 @@ export type DeprecatedGlobalOptions = {
  *
  * @returns The options parsed from the command line arguments.
  */
-export function parseArgs(): Options {
+export function parseArgs(args?: string[]): Options {
   const program = new Commander("cmake-ts")
 
   // Debug flag can be set via environment variable
   const CMAKETSDEBUG = getEnvVar("CMAKETSDEBUG")
   const debugDefault = CMAKETSDEBUG === "true" || CMAKETSDEBUG === "1"
 
+  const commandOptions: Pick<Options, "command"> = {
+    command: { type: "none" },
+  }
+
   program
+    .exitOverride((err) => {
+      if (err.exitCode !== 0 && err.code !== "commander.help") {
+        console.error(err)
+        commandOptions.command.type = "error"
+      }
+    })
     .description("A CMake-based build system for native NodeJS and Electron addons.")
+    .usage("[command] [options]")
     .option("--debug", "Enable debug logging", debugDefault)
     .option("--help, -h", "Show help", false)
+    .showHelpAfterError(false)
+    .showSuggestionAfterError(true)
 
   // Build command
   const buildCommand = program
     .command("build")
     .description("Build the project")
-    .option("-c, --configs <configs...>", "Build specific configurations", ["native"])
+    .option("-c, --configs <configs...>", "Build specific configurations", [])
+    .action(() => {
+      commandOptions.command.type = "build"
+    })
+
+  const deprecatedOpts: DeprecatedGlobalOptions = {
+    all: false,
+    nativeonly: false,
+    osonly: false,
+    devOsOnly: false,
+    namedConfigs: undefined,
+  }
 
   // For backward compatibility, add the old flags as options to the root command
   program
-    .command("all", "(deprecated) Build all configurations. Use build --configs all instead.", { hidden: true })
-    .command("nativeonly", "(deprecated) Building only for the current runtime. Use build with no arguments instead.", {
+    .command("all", { hidden: true })
+    .description("(deprecated) Build all configurations. Use `build --configs named-all` instead.")
+    .action(() => {
+      deprecatedOpts.all = true
+      commandOptions.command.type = "build"
+    })
+  program
+    .command("nativeonly", { hidden: true })
+    .description("(deprecated) Building only for the current runtime. Use `build` instead.")
+    .action(() => {
+      deprecatedOpts.nativeonly = true
+      commandOptions.command.type = "build"
+    })
+  program
+    .command("osonly", { hidden: true })
+    .description("(deprecated) Building only for the current OS. Use `build --configs named-os` instead.")
+    .action(() => {
+      deprecatedOpts.osonly = true
+      commandOptions.command.type = "build"
+    })
+  program
+    .command("dev-os-only", {
       hidden: true,
     })
-    .command("osonly", "(deprecated) Building only for the current OS. Use build --configs named-os instead.", {
+    .description("(deprecated) Build only dev OS configurations. Use `build --configs named-os-dev` instead.")
+    .action(() => {
+      deprecatedOpts.devOsOnly = true
+      commandOptions.command.type = "build"
+    })
+  program
+    .command("named-configs <configs...>", {
       hidden: true,
     })
-    .command(
-      "dev-os-only",
-      "(deprecated) Build only dev OS configurations. Use build --configs named-os-dev instead.",
-      {
-        hidden: true,
-      },
-    )
-    .command("named-configs <configs>", "(deprecated) Build only named configurations. Use build --configs instead", {
-      hidden: true,
+    .description("(deprecated) Build only named configurations. Use `build --configs <configs...>` instead")
+    .action((configs: string[]) => {
+      deprecatedOpts.namedConfigs = configs
+      commandOptions.command.type = "build"
     })
 
-  program.parse(process.argv)
+  program.parse(args)
 
   // get the global options
-  const opts = program.opts<GlobalOptions & DeprecatedGlobalOptions>()
+  const opts: Options & DeprecatedGlobalOptions = {
+    ...commandOptions,
+    ...deprecatedOpts,
+    ...program.opts<GlobalOptions>(),
+  }
 
   // debug options
   if (opts.debug) {
@@ -187,7 +236,7 @@ export function parseArgs(): Options {
 
   // Handle help command
   if (opts.help) {
-    program.help()
+    program.outputHelp()
     return {
       command: { type: "help" },
       debug: opts.debug,
@@ -196,17 +245,22 @@ export function parseArgs(): Options {
   }
 
   // Handle build command
-  const buildOpts = buildCommand.opts<BuildCommandOptions>()
-  addLegacyOptions(buildOpts, opts)
+  if (opts.command.type === "build") {
+    const buildOpts = buildCommand.opts<BuildCommandOptions>()
 
-  return {
-    command: {
-      type: "build",
-      options: buildOpts,
-    },
-    debug: opts.debug,
-    help: opts.help,
+    addLegacyOptions(buildOpts, opts)
+
+    return {
+      command: {
+        type: "build",
+        options: buildOpts,
+      },
+      debug: opts.debug,
+      help: opts.help,
+    }
   }
+
+  return opts
 }
 
 /**
@@ -215,11 +269,7 @@ export function parseArgs(): Options {
 function addLegacyOptions(buildOptions: BuildCommandOptions, opts: DeprecatedGlobalOptions) {
   if (opts.namedConfigs !== undefined) {
     // Handle legacy named-configs option
-    buildOptions.configs = Array.isArray(opts.namedConfigs)
-      ? opts.namedConfigs
-      : typeof opts.namedConfigs === "string"
-        ? opts.namedConfigs.split(",")
-        : []
+    buildOptions.configs = opts.namedConfigs.flatMap((c) => c.split(","))
   }
 
   // Handle legacy mode flags by converting them to appropriate configs

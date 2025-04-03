@@ -9,8 +9,17 @@ import { applyOverrides } from "./override.js"
 import { RuntimeDistribution } from "./runtimeDistribution.js"
 import { run } from "./util.js"
 
-async function main(): Promise<void> {
+async function main(): Promise<number> {
   const opts = parseArgs()
+  if (opts.command.type === "error") {
+    return 1
+  }
+  if (opts.command.type === "none") {
+    return 0
+  }
+  if (opts.help) {
+    return 0
+  }
 
   let packJson: { "cmake-ts": Partial<BuildConfigurations> | undefined } & Record<string, unknown>
   try {
@@ -31,7 +40,7 @@ async function main(): Promise<void> {
   // set the missing options to their default value
   const configsToBuild = await parseBuildConfigs(opts, configFile)
   if (configsToBuild === undefined) {
-    return
+    return 1
   }
 
   for (const config of configsToBuild) {
@@ -140,9 +149,15 @@ Build Type: ${config.buildType}
 
     console.log("----------------- END CONFIG -----------------")
   }
+
+  return 0
 }
 
-main().catch((err: Error) => {
-  console.log("Generic error occured", err)
-  process.exit(1)
-})
+main()
+  .then((exitCode) => {
+    process.exit(exitCode)
+  })
+  .catch((err: Error) => {
+    console.log("Generic error occured", err)
+    process.exit(1)
+  })
