@@ -1,6 +1,6 @@
-import { execFileSync } from "child_process"
 import path, { join } from "path"
 import { fileURLToPath } from "url"
+import { execa } from "execa"
 import { existsSync, readJson, realpath, remove } from "fs-extra"
 import { beforeAll, beforeEach, expect, suite, test } from "vitest"
 import which from "which"
@@ -14,13 +14,14 @@ suite("zeromq", { timeout: 300_000 }, async () => {
   const zeromqPath = await realpath(join(root, "node_modules/zeromq"))
   expect(existsSync(zeromqPath), `Zeromq path ${zeromqPath} does not exist`).toBe(true)
 
-  beforeAll(() => {
-    execFileSync("pnpm", ["build"], {
+  beforeAll(async () => {
+    await execa("pnpm", ["build"], {
       stdio: "inherit",
       env: {
         ...process.env,
         NODE_ENV: "development",
       },
+      shell: true,
     })
     console.log("Build completed")
   })
@@ -37,7 +38,7 @@ suite("zeromq", { timeout: 300_000 }, async () => {
     test(`cmake-ts ${bundle} nativeonly`, async () => {
       const cmakeTsPath = join(root, `build/main.${bundle === "legacy" ? "js" : "mjs"}`)
 
-      execFileSync(process.execPath, ["--enable-source-maps", cmakeTsPath, "nativeonly", "--debug"], {
+      await execa(process.execPath, ["--enable-source-maps", cmakeTsPath, "nativeonly", "--debug"], {
         stdio: "inherit",
         cwd: zeromqPath,
       })
