@@ -2,8 +2,8 @@ import { extname, join as joinPath } from "path"
 import glob from "fast-glob"
 import { ensureDir, pathExists, readFile } from "fs-extra"
 import urlJoin from "url-join"
+import type { BuildConfiguration } from "./config.js"
 import { downloadFile, downloadTgz, downloadToString } from "./download.js"
-import type { BuildConfigurationDefaulted } from "./lib.js"
 import { HOME_DIRECTORY, getPathsForConfig } from "./urlRegistry.js"
 import { stat } from "./util.js"
 
@@ -21,7 +21,7 @@ export class RuntimeDistribution {
 
   // TODO the code uses a side effect of TypeScript constructors in defining the class props
   /* eslint-disable-next-line no-useless-constructor */ /* eslint-disable-next-line no-empty-function */
-  constructor(private config: BuildConfigurationDefaulted) {}
+  constructor(private config: BuildConfiguration) {}
 
   public internalPath() {
     return joinPath(

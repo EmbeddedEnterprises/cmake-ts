@@ -9,7 +9,7 @@ const root = path.dirname(dirname)
 
 const testTmpDir = path.join(root, "test", ".tmp")
 
-suite("Download Module", { timeout: 20_000 }, () => {
+suite("Download Module", { timeout: 20_000, retry: 3 }, () => {
   // Real Node.js distribution URLs for testing
   const nodeBaseUrl = "https://nodejs.org/dist/v23.4.0"
   const nodeHeadersUrl = `${nodeBaseUrl}/node-v23.4.0-headers.tar.gz`

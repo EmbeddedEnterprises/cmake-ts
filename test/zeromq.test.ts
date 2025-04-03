@@ -2,21 +2,22 @@ import { execFileSync } from "child_process"
 import path, { join } from "path"
 import { fileURLToPath } from "url"
 import { isCI } from "ci-info"
-import { existsSync, readJson, remove } from "fs-extra"
+import { existsSync, readJson, realpath, remove } from "fs-extra"
 import { beforeAll, beforeEach, expect, suite, test } from "vitest"
-import type { BuildConfigurationDefaulted } from "../src/lib.js"
+import which from "which"
+import type { BuildConfiguration } from "../src/config.js"
 import { HOME_DIRECTORY } from "../src/urlRegistry.js"
 
 const dirname = typeof __dirname === "string" ? __dirname : path.dirname(fileURLToPath(import.meta.url))
 const root = path.dirname(dirname)
 
-suite("zeromq", { timeout: 300_000 }, (tests) => {
+suite("zeromq", { timeout: 300_000 }, async (tests) => {
   if (isCI) {
     tests.skip("Skipping zeromq test on CI")
     return
   }
 
-  const zeromqPath = join(root, "node_modules/zeromq")
+  const zeromqPath = await realpath(join(root, "node_modules/zeromq"))
   expect(existsSync(zeromqPath), `Zeromq path ${zeromqPath} does not exist`).toBe(true)
 
   beforeAll(() => {
@@ -42,7 +43,7 @@ suite("zeromq", { timeout: 300_000 }, (tests) => {
     test(`cmake-ts ${bundle} nativeonly`, async () => {
       const cmakeTsPath = join(root, `build/main.${bundle === "legacy" ? "js" : "mjs"}`)
 
-      execFileSync(process.execPath, ["--enable-source-maps", cmakeTsPath, "nativeonly"], {
+      execFileSync(process.execPath, ["--enable-source-maps", cmakeTsPath, "nativeonly", "--debug"], {
         stdio: "inherit",
         cwd: zeromqPath,
       })
@@ -54,16 +55,25 @@ suite("zeromq", { timeout: 300_000 }, (tests) => {
       expect(existsSync(manifestPath), `Manifest file ${manifestPath} does not exist`).toBe(true)
       const manifest = (await readJson(manifestPath)) as Record<string, string>
 
-      const configKey = JSON.parse(Object.keys(manifest)[0]) as BuildConfigurationDefaulted
+      const configKey = JSON.parse(Object.keys(manifest)[0]) as BuildConfiguration
+      const configValue = manifest[JSON.stringify(configKey)]
 
-      const expectedConfig: BuildConfigurationDefaulted = {
+      const expectedConfig: BuildConfiguration = {
         name: "",
         dev: false,
         os: process.platform,
         arch: process.arch,
         runtime: "node",
         runtimeVersion: process.versions.node,
-        toolchainFile: null,
+        buildType: "Release",
+        packageDirectory: zeromqPath,
+        projectName: "addon",
+        nodeAPI: "node-addon-api",
+        targetDirectory: await realpath(join(zeromqPath, "build")),
+        stagingDirectory: await realpath(join(zeromqPath, "staging")),
+        cmakeToUse: await which("cmake"),
+        generatorToUse: "Ninja",
+        generatorBinary: await which("ninja"),
         CMakeOptions: [],
         addonSubdirectory: "",
         additionalDefines: [],
@@ -71,9 +81,8 @@ suite("zeromq", { timeout: 300_000 }, (tests) => {
         libc: configKey.libc,
       }
 
-      expect(manifest).toEqual({
-        [JSON.stringify(expectedConfig)]: addonPath,
-      })
+      expect(configKey).toEqual(expectedConfig)
+      expect(configValue).toEqual(addonPath)
 
       // check if the addon.node file exists
       const addonNodePath = join(zeromqPath, "build", addonPath)

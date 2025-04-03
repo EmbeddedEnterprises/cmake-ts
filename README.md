@@ -10,7 +10,84 @@ It is intended to prebuild addons for different versions of NodeJS and Electron 
 
 See [zeromq.js](https://github.com/zeromq/zeromq.js) for an real-world example of how to use this module.
 
-## Configuration
+## Getting Started
+
+Create your `CMakeLists.txt` file based on [the example](/example/CMakeLists.txt) and run the following command to build your project.
+
+```bash
+cmake-ts build
+```
+
+### CLI Arguments
+
+`build` command:
+
+```sh
+Usage: cmake-ts build [options]
+
+Build the project
+
+Options:
+  -c, --configs <configs...>  
+      Named config(s) to build, which could be from default configs or the ones defined in the config file (package.json)
+     
+       If no config is provided, it will build for the current runtime on the current system with the Release build type
+     
+      The default configs are combinations of `<Runtime>`, `<BuildType>`, `<Platform>`, and `<Architecture>`.
+     
+       - `<Runtime>`: the runtime to use
+     
+         e.g.: `node`, `electron`, `iojs`
+     
+       - `<BuildType>`: the cmake build type (optimization level)
+     
+         e.g.: `debug`, `release`, or `relwithdebinfo`
+     
+       - `<Platform>`: the target platform
+     
+         e.g.: `win32`, `linux`, `darwin`, `aix`, `android`, `freebsd`, `haiku`, `openbsd`, `sunos`, `cygwin`, `netbsd`
+     
+       - `<Architecture>`: the target architecture
+     
+         e.g.: `x64`, `arm64`, `ia32`, `arm`, `loong64`, `mips`, `mipsel`, `ppc`, `ppc64`, `riscv64`, `s390`, `s390x`
+     
+        Any combination of `<BuildType>`, `<Runtime>`, `<Platform>`, and `<Architecture>` is valid. Some examples:
+     
+         - `release`
+         - `debug`
+         - `relwithdebinfo`
+         - `node-release`
+         - `node-debug`
+         - `electron-release`
+         - `electron-debug`
+         - `win32-x64`
+         - `win32-x64-debug`
+         - `linux-x64-debug`
+         - `linux-x64-node-debug`
+         - `linux-x64-electron-release`
+         - `darwin-x64-node-release`
+         - `darwin-arm64-node-release`
+         - `darwin-arm64-electron-relwithdebinfo`
+     
+      You can also define your own configs in the config file (package.json).
+     
+       - `<ConfigName>`: the name of the config
+     
+         e.g.: `my-config`
+     
+       The configs can also be in format of `named-<property>`, which builds the configs that match the property.
+     
+         - `named-os`: build all the configs in the config file that have the same OS
+         - `named-os-dev`: build all the configs in the config file that have the same OS and `dev` is true
+         - `named-all`: build all the configs in the config file
+     
+     
+       The configs can be combined with `,` or multiple `--configs` flags. They will be merged together.
+   (default: [])
+  -h, --help                  display help for command
+```
+
+## Configuration File
 
 Configuration is done entirely via `package.json`. You can specify multiple build configurations under the `cmake-ts` key:
 

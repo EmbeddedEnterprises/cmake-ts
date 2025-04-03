@@ -1,0 +1,9 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "emitDeclarationOnly": true,
+    "outDir": "../build",
+    "noEmit": false
+  },
+  "include": ["./**/*.ts", "./**/*.mts", "./**/*.d.ts", "./**/*.d.mts"]
+}

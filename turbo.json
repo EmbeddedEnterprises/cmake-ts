@@ -8,14 +8,8 @@
     "build.legacy-main": {
       "outputs": ["build/main.js", "build/main.js.map"]
     },
-    "build.legacy-lib": {
-      "outputs": ["build/lib.js", "build/lib.js.map"]
-    },
     "build.modern-main": {
       "outputs": ["build/main.mjs", "build/main.mjs.map"]
-    },
-    "build.modern-lib": {
-      "outputs": ["build/lib.mjs", "build/lib.mjs.map"]
     },
     "lint.eslint": {},
     "lint.biome": {
