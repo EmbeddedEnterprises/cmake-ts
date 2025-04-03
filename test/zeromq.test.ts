@@ -5,7 +5,7 @@ import { isCI } from "ci-info"
 import { existsSync, readJson, realpath, remove } from "fs-extra"
 import { beforeAll, beforeEach, expect, suite, test } from "vitest"
 import which from "which"
-import type { BuildConfiguration } from "../src/lib.js"
+import type { BuildConfiguration } from "../src/config.js"
 import { HOME_DIRECTORY } from "../src/urlRegistry.js"
 
 const dirname = typeof __dirname === "string" ? __dirname : path.dirname(fileURLToPath(import.meta.url))

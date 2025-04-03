@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { type BuildCommand, parseArgs } from "../src/args.js"
+import { parseArgs } from "../src/args.js"
+import type { BuildCommand } from "../src/config.js"
 
 describe("parseArgs", () => {
   const originalArgv = process.argv

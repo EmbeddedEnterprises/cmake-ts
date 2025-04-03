@@ -1,5 +1,5 @@
 import satisfies from "semver/functions/satisfies.js"
-import type { ArrayOrSingle, BuildConfiguration, OverrideConfig } from "./lib.js"
+import type { ArrayOrSingle, BuildConfiguration, OverrideConfig } from "./config.js"
 
 const knownOverrides: OverrideConfig[] = [
   {
