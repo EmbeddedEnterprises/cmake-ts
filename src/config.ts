@@ -1,5 +1,7 @@
 import which from "which"
 import { getCmakeGenerator } from "./util.js"
+import { join, resolve } from "path"
+import { readJson } from "fs-extra"
 
 /**
  * The options of cmake-ts that includes the command to run and the global options
@@ -387,3 +389,21 @@ const buildTypes = new Map<BuildConfiguration["buildType"], BuildConfiguration["
 ])
 
 const runtimes = new Set<BuildConfiguration["runtime"]>(["node", "electron", "iojs"])
+
+export async function getConfigFile() {
+  let packJson: { "cmake-ts": Partial<BuildConfigurations> | undefined } & Record<string, unknown>
+  try {
+    // TODO getting the path from the CLI
+    const packageJsonPath = resolve(join(process.cwd(), "package.json"))
+    packJson = await readJson(packageJsonPath)
+  } catch (err) {
+    return new Error(`Failed to load package.json, maybe your cwd is wrong ${err}`)
+  }
+
+  const configFile = packJson["cmake-ts"]
+  if (configFile === undefined) {
+    return new Error("Package.json does not have cmake-ts key defined!")
+  }
+
+  return configFile
+}

@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 import { join, relative, resolve } from "path"
-import { copy, ensureDir, pathExists, readFile, readJson, remove, writeFile } from "fs-extra"
+import { copy, ensureDir, pathExists, readFile, remove, writeFile } from "fs-extra"
 import { parseArgs } from "./args.js"
 import { ArgumentBuilder } from "./argumentBuilder.js"
-import { type BuildConfigurations, parseBuildConfigs } from "./config.js"
+import { getConfigFile, parseBuildConfigs } from "./config.js"
 import { Logger } from "./logger.js"
 import { applyOverrides } from "./override.js"
 import { RuntimeDistribution } from "./runtimeDistribution.js"
@@ -24,20 +24,10 @@ async function main(): Promise<number> {
 
   const logger = new Logger(opts.debug)
 
-  let packJson: { "cmake-ts": Partial<BuildConfigurations> | undefined } & Record<string, unknown>
-  try {
-    // TODO getting the path from the CLI
-    const packageJsonPath = resolve(join(process.cwd(), "package.json"))
-    packJson = await readJson(packageJsonPath)
-  } catch (err) {
-    logger.error("Failed to load package.json, maybe your cwd is wrong:", err)
-    process.exit(1)
-  }
-
-  const configFile = packJson["cmake-ts"]
-  if (configFile === undefined) {
-    logger.error("Package.json does not have cmake-ts key defined!")
-    process.exit(1)
+  const configFile = await getConfigFile()
+  if (configFile instanceof Error) {
+    logger.error(configFile)
+    return 1
   }
 
   // set the missing options to their default value
@@ -175,5 +165,5 @@ main()
   })
   .catch((err: Error) => {
     console.log("Generic error occured", err)
-    process.exit(1)
+    return 1
   })
