@@ -28,6 +28,76 @@ describe("parseArgs", () => {
     vi.unstubAllGlobals()
   })
 
+  describe("build command", () => {
+    it("should parse build command correctly", () => {
+      const result = parseArgs([...commonArgs, "build"])!
+      expect(result.command.type).toEqual("build")
+    })
+
+    it("should parse build command with a single config correctly", () => {
+      const result = parseArgs([...commonArgs, "build", "--configs", "debug"])!
+      expect(result.command.type).toEqual("build")
+      expect((result.command as BuildCommand).options.configs).toEqual(["debug"])
+    })
+
+    it("should parse build command with multiple configs correctly", () => {
+      const result = parseArgs([...commonArgs, "build", "--configs", "debug", "release"])!
+      expect(result.command.type).toEqual("build")
+      expect((result.command as BuildCommand).options.configs).toEqual(["debug", "release"])
+    })
+
+    it("should parse build command with shorthand -c flag correctly", () => {
+      const result = parseArgs([...commonArgs, "build", "-c", "debug"])!
+      expect(result.command.type).toEqual("build")
+      expect((result.command as BuildCommand).options.configs).toEqual(["debug"])
+    })
+
+    it("should parse build command with platform-specific configs correctly", () => {
+      const result = parseArgs([...commonArgs, "build", "--configs", "win32-x64-debug"])!
+      expect(result.command.type).toEqual("build")
+      expect((result.command as BuildCommand).options.configs).toEqual(["win32-x64-debug"])
+    })
+
+    it("should parse build command with runtime-specific configs correctly", () => {
+      const result = parseArgs([...commonArgs, "build", "--configs", "electron-release"])!
+      expect(result.command.type).toEqual("build")
+      expect((result.command as BuildCommand).options.configs).toEqual(["electron-release"])
+    })
+
+    it("should parse build command with complex config combinations correctly", () => {
+      const result = parseArgs([
+        ...commonArgs,
+        "build",
+        "--configs",
+        "darwin-arm64-node-release",
+        "linux-x64-electron-debug",
+        "win32-arm64",
+      ])!
+      expect(result.command.type).toEqual("build")
+      expect((result.command as BuildCommand).options.configs).toEqual([
+        "darwin-arm64-node-release",
+        "linux-x64-electron-debug",
+        "win32-arm64",
+      ])
+    })
+
+    it("should parse build command with named configs correctly", () => {
+      const result = parseArgs([...commonArgs, "build", "--configs", "named-all"])!
+      expect(result.command.type).toEqual("build")
+      expect((result.command as BuildCommand).options.configs).toEqual(["named-all"])
+    })
+
+    it("should parse build command with debug flag correctly", () => {
+      const spy = vi.spyOn(console, "debug")
+      const result = parseArgs([...commonArgs, "build", "--debug", "--configs", "release"])!
+
+      expect(result.command.type).toEqual("build")
+      expect(result.debug).toEqual(true)
+      expect((result.command as BuildCommand).options.configs).toEqual(["release"])
+      expect(spy).toHaveBeenCalled()
+    })
+  })
+
   describe("debug mode", () => {
     it("should parse debug flag correctly", () => {
       const spy = vi.spyOn(console, "debug")

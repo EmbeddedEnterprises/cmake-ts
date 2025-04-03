@@ -28,21 +28,25 @@ export type BuildCommandOptions = {
    *
    *  If no config is provided, it will build for the current runtime on the current system with the Release build type
    *
-   * The default configs are combinations of `<Runtime>`, `<BuildType>`, and `<System>`.
+   * The default configs are combinations of `<Runtime>`, `<BuildType>`, `<Platform>`, and `<Architecture>`.
    *
    *  - `<Runtime>`: the runtime to use
    *
-   *    e.g.: `node`, `node-22`, `electron`, `electron-22`
+   *    e.g.: `node`, `electron`, `iojs`
    *
    *  - `<BuildType>`: the cmake build type (optimization level)
    *
    *    e.g.: `debug`, `release`, or `relwithdebinfo`
    *
-   *  - `<System>`: the target platform triplet
+   *  - `<Platform>`: the target platform
    *
-   *    e.g.: `x86_64-pc-windows-msvc`, `x86_64-unknown-linux-gnu`, `arm64-apple-darwin`
+   *    e.g.: `win32`, `linux`, `darwin`, `aix`, `android`, `freebsd`, `haiku`, `openbsd`, `sunos`, `cygwin`, `netbsd`
    *
-   *   Any combination of `<BuildType>`, `<Runtime>`, and `<System>` is valid. Some examples:
+   *  - `<Architecture>`: the target architecture
+   *
+   *    e.g.: `x64`, `arm64`, `ia32`, `arm`, `loong64`, `mips`, `mipsel`, `ppc`, `ppc64`, `riscv64`, `s390`, `s390x`
+   *
+   *   Any combination of `<BuildType>`, `<Runtime>`, `<Platform>`, and `<Architecture>` is valid. Some examples:
    *
    *    - `release`
    *    - `debug`
@@ -51,14 +55,14 @@ export type BuildCommandOptions = {
    *    - `node-debug`
    *    - `electron-release`
    *    - `electron-debug`
-   *    - `x86_64-pc-windows-msvc`
-   *    - `x86_64-pc-windows-msvc-debug`
-   *    - `x86_64-unknown-linux-gnu-debug`
-   *    - `x86_64-unknown-linux-gnu-node-debug`
-   *    - `x86_64-unknown-linux-gnu-electron-release`
-   *    - `arm64-apple-darwin-node-release`
-   *    - `arm64-apple-darwin-node-22-release`
-   *    - `arm64-apple-darwin-electron-relwithdebinfo`
+   *    - `win32-x64`
+   *    - `win32-x64-debug`
+   *    - `linux-x64-debug`
+   *    - `linux-x64-node-debug`
+   *    - `linux-x64-electron-release`
+   *    - `darwin-x64-node-release`
+   *    - `darwin-arm64-node-release`
+   *    - `darwin-arm64-electron-relwithdebinfo`
    *
    * You can also define your own configs in the config file (package.json).
    *

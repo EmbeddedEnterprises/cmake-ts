@@ -17,8 +17,8 @@ export type BuildConfiguration = {
 
   // Runtime
 
-  /** The runtime that is used by the runtime (e.g. node, electron, etc.) */
-  runtime: string
+  /** The runtime that is used by the runtime (e.g. node, electron, iojs, etc.) */
+  runtime: "node" | "electron" | "iojs"
   /** node abstraction API to use (e.g. nan or node-addon-api) */
   nodeAPI?: string
   /** The version of the runtime that is used by the runtime. */
@@ -62,9 +62,9 @@ export type BuildConfiguration = {
 
   /** The toolchain file to use. */
   toolchainFile?: string
-  /** cmake options */
+  /** (alias) cmake options */
   CMakeOptions: { name: string; value: string }[]
-  /** cmake options (alias) */
+  /** cmake options */
   cmakeOptions: { name: string; value: string }[]
   /** list of additional definitions to fixup node quirks for some specific versions */
   additionalDefines: string[]
@@ -183,12 +183,68 @@ export async function parseBuildConfigs(
   }
 
   // parse the remaining config names to extract the runtime, build type, and system
-  // eslint-disable-next-line no-unreachable-loop
   for (const configName of givenConfigNames) {
-    const _parts = configName.split("-")
-    // TODO
-    throw new Error(`Unsupported config name: ${configName}`)
+    const config = await parseBuiltInConfigs(configName)
+    configsToBuild.push(await addMissingBuildConfigurationFields(config, configFile))
   }
 
   return configsToBuild
 }
+
+function parseBuiltInConfigs(configName: string) {
+  const parts = configName.split("-")
+
+  let os: BuildConfiguration["os"] | undefined
+  let arch: BuildConfiguration["arch"] | undefined
+  let runtime: BuildConfiguration["runtime"] | undefined
+  let buildType: BuildConfiguration["buildType"] | undefined
+
+  for (const part of parts) {
+    if (platforms.has(part as BuildConfiguration["os"])) {
+      os = part as BuildConfiguration["os"]
+    } else if (architectures.has(part as BuildConfiguration["arch"])) {
+      arch = part as BuildConfiguration["arch"]
+    } else if (runtimes.has(part as BuildConfiguration["runtime"])) {
+      runtime = part as BuildConfiguration["runtime"]
+    } else if (buildTypes.has(part as BuildConfiguration["buildType"])) {
+      buildType = part as BuildConfiguration["buildType"]
+    } else {
+      throw new Error(`Invalid config part in ${configName}: ${part}`)
+    }
+  }
+
+  return { os, arch, runtime, buildType }
+}
+
+const platforms = new Set<NodeJS.Platform>([
+  "aix",
+  "android",
+  "darwin",
+  "freebsd",
+  "haiku",
+  "linux",
+  "openbsd",
+  "sunos",
+  "win32",
+  "cygwin",
+  "netbsd",
+])
+
+const architectures = new Set<NodeJS.Architecture>([
+  "arm",
+  "arm64",
+  "ia32",
+  "loong64",
+  "mips",
+  "mipsel",
+  "ppc",
+  "ppc64",
+  "riscv64",
+  "s390",
+  "s390x",
+  "x64",
+])
+
+const buildTypes = new Set<BuildConfiguration["buildType"]>(["release", "debug", "relwithdebinfo"])
+
+const runtimes = new Set<BuildConfiguration["runtime"]>(["node", "electron", "iojs"])
