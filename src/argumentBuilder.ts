@@ -103,11 +103,6 @@ export class ArgumentBuilder {
         retVal.push([j.name, j.value.replace(/\$ROOT\$/g, resolve(this.config.packageDirectory))])
       }
     }
-    if (this.config.CMakeOptions.length !== 0) {
-      for (const j of this.config.CMakeOptions) {
-        retVal.push([j.name, j.value.replace(/\$ROOT\$/g, resolve(this.config.packageDirectory))])
-      }
-    }
     return retVal
   }
 }
