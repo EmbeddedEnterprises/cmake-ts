@@ -5,10 +5,10 @@ import { copy, ensureDir, pathExists, readFile, readJson, remove, writeFile } fr
 import { parseArgs } from "./args.js"
 import { ArgumentBuilder } from "./argumentBuilder.js"
 import { type BuildConfigurations, parseBuildConfigs } from "./lib.js"
+import { Logger } from "./logger.js"
 import { applyOverrides } from "./override.js"
 import { RuntimeDistribution } from "./runtimeDistribution.js"
 import { run } from "./util.js"
-import { Logger } from "./logger.js"
 
 async function main(): Promise<number> {
   const opts = parseArgs()
@@ -78,7 +78,7 @@ async function main(): Promise<number> {
       logger.debug("[ DONE ]")
 
       logger.debug("> Building directories... ")
-      
+
       const stagingDir = resolve(
         join(
           config.stagingDirectory,

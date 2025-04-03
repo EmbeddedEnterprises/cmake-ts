@@ -65,7 +65,7 @@ export type BuildConfiguration = {
   /** (alias) cmake options */
   CMakeOptions: { name: string; value: string }[]
   /** cmake options */
-  cmakeOptions: { name: string; value: string }[]
+  cmakeOptions?: { name: string; value: string }[]
   /** list of additional definitions to fixup node quirks for some specific versions */
   additionalDefines: string[]
   /** which cmake generator to use */
@@ -123,6 +123,7 @@ async function addMissingBuildConfigurationFields(
   config.dev ??= globalConfig.dev ?? false
 
   // Paths
+  config.addonSubdirectory ??= globalConfig.addonSubdirectory ?? ""
   config.packageDirectory ??= globalConfig.packageDirectory ?? process.cwd()
   config.projectName ??= globalConfig.projectName ?? "addon"
   config.targetDirectory ??= globalConfig.targetDirectory ?? "build"
@@ -207,7 +208,7 @@ function parseBuiltInConfigs(configName: string) {
     } else if (runtimes.has(part as BuildConfiguration["runtime"])) {
       runtime = part as BuildConfiguration["runtime"]
     } else if (buildTypes.has(part as BuildConfiguration["buildType"])) {
-      buildType = part as BuildConfiguration["buildType"]
+      buildType = buildTypes.get(part as BuildConfiguration["buildType"])
     } else {
       throw new Error(`Invalid config part in ${configName}: ${part}`)
     }
@@ -245,6 +246,10 @@ const architectures = new Set<NodeJS.Architecture>([
   "x64",
 ])
 
-const buildTypes = new Set<BuildConfiguration["buildType"]>(["release", "debug", "relwithdebinfo"])
+const buildTypes = new Map<BuildConfiguration["buildType"], BuildConfiguration["buildType"]>([
+  ["release", "Release"],
+  ["debug", "Debug"],
+  ["relwithdebinfo", "RelWithDebInfo"],
+])
 
 const runtimes = new Set<BuildConfiguration["runtime"]>(["node", "electron", "iojs"])

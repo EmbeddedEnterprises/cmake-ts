@@ -2,21 +2,22 @@ import { execFileSync } from "child_process"
 import path, { join } from "path"
 import { fileURLToPath } from "url"
 import { isCI } from "ci-info"
-import { existsSync, readJson, remove } from "fs-extra"
+import { existsSync, readJson, realpath, remove } from "fs-extra"
 import { beforeAll, beforeEach, expect, suite, test } from "vitest"
+import which from "which"
 import type { BuildConfiguration } from "../src/lib.js"
 import { HOME_DIRECTORY } from "../src/urlRegistry.js"
 
 const dirname = typeof __dirname === "string" ? __dirname : path.dirname(fileURLToPath(import.meta.url))
 const root = path.dirname(dirname)
 
-suite("zeromq", { timeout: 300_000 }, (tests) => {
+suite("zeromq", { timeout: 300_000 }, async (tests) => {
   if (isCI) {
     tests.skip("Skipping zeromq test on CI")
     return
   }
 
-  const zeromqPath = join(root, "node_modules/zeromq")
+  const zeromqPath = await realpath(join(root, "node_modules/zeromq"))
   expect(existsSync(zeromqPath), `Zeromq path ${zeromqPath} does not exist`).toBe(true)
 
   beforeAll(() => {
@@ -55,6 +56,7 @@ suite("zeromq", { timeout: 300_000 }, (tests) => {
       const manifest = (await readJson(manifestPath)) as Record<string, string>
 
       const configKey = JSON.parse(Object.keys(manifest)[0]) as BuildConfiguration
+      const configValue = manifest[JSON.stringify(configKey)]
 
       const expectedConfig: BuildConfiguration = {
         name: "",
@@ -63,16 +65,15 @@ suite("zeromq", { timeout: 300_000 }, (tests) => {
         arch: process.arch,
         runtime: "node",
         runtimeVersion: process.versions.node,
-        toolchainFile: undefined,
         buildType: "Release",
         packageDirectory: zeromqPath,
-        projectName: "zeromq",
-        targetDirectory: join(zeromqPath, "build"),
-        stagingDirectory: join(zeromqPath, "staging"),
-        cmakeToUse: "cmake",
+        projectName: "addon",
+        nodeAPI: "node-addon-api",
+        targetDirectory: await realpath(join(zeromqPath, "build")),
+        stagingDirectory: await realpath(join(zeromqPath, "staging")),
+        cmakeToUse: await which("cmake"),
         generatorToUse: "Ninja",
-        generatorBinary: "ninja",
-        cmakeOptions: [],
+        generatorBinary: await which("ninja"),
         CMakeOptions: [],
         addonSubdirectory: "",
         additionalDefines: [],
@@ -80,9 +81,8 @@ suite("zeromq", { timeout: 300_000 }, (tests) => {
         libc: configKey.libc,
       }
 
-      expect(manifest).toEqual({
-        [JSON.stringify(expectedConfig)]: addonPath,
-      })
+      expect(configKey).toEqual(expectedConfig)
+      expect(configValue).toEqual(addonPath)
 
       // check if the addon.node file exists
       const addonNodePath = join(zeromqPath, "build", addonPath)

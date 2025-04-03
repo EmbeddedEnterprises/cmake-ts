@@ -233,18 +233,9 @@ export function parseArgs(args?: string[]): Options {
     ...program.opts<GlobalOptions>(),
   }
 
-  // debug options
-  if (opts.debug) {
-    console.debug("opts", JSON.stringify(opts, null, 2))
-  }
-
-  // Handle help command
-  if (opts.help) {
-    program.outputHelp()
-    return {
-      command: { type: "help" },
-      debug: opts.debug,
-      help: opts.help,
+  const debugOpts = () => {
+    if (opts.debug) {
+      console.debug("args", JSON.stringify(opts, null, 2))
     }
   }
 
@@ -254,6 +245,7 @@ export function parseArgs(args?: string[]): Options {
 
     addLegacyOptions(buildOpts, opts)
 
+    debugOpts()
     return {
       command: {
         type: "build",
@@ -264,6 +256,19 @@ export function parseArgs(args?: string[]): Options {
     }
   }
 
+  // Handle help command
+  if (opts.help) {
+    program.outputHelp()
+
+    debugOpts()
+    return {
+      command: { type: "help" },
+      debug: opts.debug,
+      help: opts.help,
+    }
+  }
+
+  debugOpts()
   return opts
 }
 

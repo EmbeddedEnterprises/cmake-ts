@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { parseArgs, type BuildCommand } from "../src/args.js"
+import { type BuildCommand, parseArgs } from "../src/args.js"
 
 describe("parseArgs", () => {
   const originalArgv = process.argv
@@ -105,7 +105,7 @@ describe("parseArgs", () => {
       const result = parseArgs([...commonArgs, "build", "--debug"])!
       expect(result.debug).toEqual(true)
       expect(spy).toHaveBeenCalledWith(
-        "opts",
+        "args",
         JSON.stringify(
           {
             command: {
