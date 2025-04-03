@@ -4,6 +4,7 @@ on:
     branches:
       - master
   pull_request:
+  workflow_dispatch:
 
 jobs:
   Test:
@@ -15,18 +16,10 @@ jobs:
           - ubuntu-latest
           - macos-13
           - windows-latest
-        node_version:
-          - 20
-          - 22
         cpp_arch:
           - x64
         include:
           - os: macos-14 # arm
-            node-version: 16
-            cpp_arch: arm64
-
-          - os: macos-14 # arm
-            node-version: 22
             cpp_arch: arm64
     steps:
       - uses: actions/checkout@v4
@@ -35,20 +28,19 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node_version }}
+          node-version-file: .nvmrc
 
       - uses: pnpm/action-setup@v4
 
-      # - name: Setup Cpp
-      #   if: ${{ matrix.native }}
-      #   uses: aminya/setup-cpp@v1
-      #   with:
-      #     vcvarsall: true
-      #     cmake: true
-      #     ninja: true
-      #     python: true
-      #     vcpkg: ee2d2a100103e0f3613c60655dcf15be7d5157b8
-      #     architecture: ${{ matrix.cpp_arch }}
+      - name: Setup Cpp
+        uses: aminya/setup-cpp@v1
+        with:
+          vcvarsall: true
+          cmake: true
+          ninja: true
+          python: true
+          vcpkg: 608d1dbcd6969679f82b1ca6b89d58939c9b228e
+          architecture: ${{ matrix.cpp_arch }}
 
       - name: Install dependencies
         run: pnpm install
@@ -61,3 +53,11 @@ jobs:
 
       - name: Tests
         run: pnpm test
+
+      - name: Setup Node 12
+        uses: actions/setup-node@v4
+        with:
+          node-version: 12
+
+      - name: Smoke test Node 12
+        run: node ./build/main.js --help

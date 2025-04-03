@@ -102,7 +102,7 @@
     "@biomejs/biome": "^1.9.4",
     "prettier": "^3.5.3",
     "prettier-config-atomic": "^4.0.0",
-    "zeromq": "^6.3.0",
+    "zeromq": "^6.4.1",
     "ci-info": "^4.2.0",
     "fast-glob": "^3.3.2",
     "fs-extra": "^10",

@@ -1,7 +1,6 @@
 import { execFileSync } from "child_process"
 import path, { join } from "path"
 import { fileURLToPath } from "url"
-import { isCI } from "ci-info"
 import { existsSync, readJson, realpath, remove } from "fs-extra"
 import { beforeAll, beforeEach, expect, suite, test } from "vitest"
 import which from "which"
@@ -11,12 +10,7 @@ import { HOME_DIRECTORY } from "../src/urlRegistry.js"
 const dirname = typeof __dirname === "string" ? __dirname : path.dirname(fileURLToPath(import.meta.url))
 const root = path.dirname(dirname)
 
-suite("zeromq", { timeout: 300_000 }, async (tests) => {
-  if (isCI) {
-    tests.skip("Skipping zeromq test on CI")
-    return
-  }
-
+suite("zeromq", { timeout: 300_000 }, async () => {
   const zeromqPath = await realpath(join(root, "node_modules/zeromq"))
   expect(existsSync(zeromqPath), `Zeromq path ${zeromqPath} does not exist`).toBe(true)
 
