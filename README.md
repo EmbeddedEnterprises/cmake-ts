@@ -12,7 +12,7 @@ See [zeromq.js](https://github.com/zeromq/zeromq.js) for an real-world example o
 
 ## Getting Started
 
-Create your `CMakeLists.txt` file based on [example](https://github.com/zeromq/zeromq.js/blob/master/CMakeLists.txt) and run the following command to build your project.
+Create your `CMakeLists.txt` file based on [the example](/example/CMakeLists.txt) and run the following command to build your project.
 
 ```bash
 cmake-ts build
