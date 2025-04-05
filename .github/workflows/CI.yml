@@ -32,12 +32,22 @@ jobs:
 
       - uses: pnpm/action-setup@v4
 
+      - name: Setup Home Directory
+        id: home
+        shell: bash
+        run: |
+          if [[ ${{ runner.os }} == "Windows" ]]; then
+            echo "HOME=$USERPROFILE" >> $GITHUB_OUTPUT
+          else
+            echo "HOME=$HOME" >> $GITHUB_OUTPUT
+          fi
+
       - name: Cache vcpkg/pnpm
         uses: actions/cache@v4
         with:
           path: |
-            ${{ env.HOME || env.USERPROFILE }}/.pnpm-store
-            ${{ env.HOME || env.USERPROFILE }}/vcpkg
+            ${{ steps.home.outputs.HOME }}/.pnpm-store
+            ${{ steps.home.outputs.HOME }}/vcpkg
           key: ${{ matrix.os }}-${{ matrix.cpp_arch }}-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
           restore-keys: |
             ${{ matrix.os }}-${{ matrix.cpp_arch }}-
