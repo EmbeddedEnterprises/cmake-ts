@@ -28,7 +28,11 @@ export function parseArgs(args?: string[]): Options {
     })
     .description("A CMake-based build system for native NodeJS and Electron addons.")
     .usage("[build or help] [options]")
-    .option("--debug", "Enable debug logging", debugDefault)
+    .option(
+      "--logger <level>",
+      "Set the log level (trace, debug, info, warn, error, off)",
+      debugDefault ? "debug" : "info",
+    )
     .showHelpAfterError(false)
     .showSuggestionAfterError(true)
 
@@ -158,11 +162,10 @@ export function parseArgs(args?: string[]): Options {
     ...program.opts<GlobalOptions>(),
   }
 
+  logger.setLevel(opts.logger)
+
   const debugOpts = () => {
-    if (opts.debug) {
-      logger.setLevel("debug")
-      logger.debug("args", JSON.stringify(opts, null, 2))
-    }
+    logger.debug("args", JSON.stringify(opts, null, 2))
   }
 
   // Handle build command
@@ -176,8 +179,8 @@ export function parseArgs(args?: string[]): Options {
         type: "build",
         options: buildOpts,
       },
-      debug: opts.debug,
       help: opts.help,
+      logger: opts.logger,
     }
   }
 

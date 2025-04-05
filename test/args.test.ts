@@ -90,10 +90,10 @@ describe("parseArgs", () => {
 
     it("should parse build command with debug flag correctly", () => {
       const spy = vi.spyOn(console, "debug")
-      const result = parseArgs([...commonArgs, "build", "--debug", "--configs", "release"])!
+      const result = parseArgs([...commonArgs, "build", "--logger", "debug", "--configs", "release"])!
 
       expect(result.command.type).toEqual("build")
-      expect(result.debug).toEqual(true)
+      expect(result.logger).toEqual("debug")
       expect((result.command as BuildCommand).options.configs).toEqual(["release"])
       expect(spy).toHaveBeenCalled()
     })
@@ -103,8 +103,8 @@ describe("parseArgs", () => {
     it("should parse debug flag correctly", () => {
       const spy = vi.spyOn(console, "debug")
 
-      const result = parseArgs([...commonArgs, "build", "--debug"])!
-      expect(result.debug).toEqual(true)
+      const result = parseArgs([...commonArgs, "build", "--logger", "debug"])!
+      expect(result.logger).toEqual("debug")
       expect(spy).toHaveBeenCalledWith(
         "\x1b[34m[DEBUG cmake-ts]\x1b[0m",
         "args",
@@ -117,7 +117,7 @@ describe("parseArgs", () => {
             nativeonly: false,
             osonly: false,
             devOsOnly: false,
-            debug: true,
+            logger: "debug",
           },
           null,
           2,

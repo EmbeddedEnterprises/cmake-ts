@@ -12,9 +12,21 @@ class Logger {
    * info - 2
    * warn - 1
    * error - 0
+   * off - -1
    */
-  setLevel(level: "debug" | "info" | "warn" | "error") {
-    this.level = level === "debug" ? 3 : level === "info" ? 2 : level === "warn" ? 1 : 0
+  setLevel(level: "trace" | "debug" | "info" | "warn" | "error" | "off") {
+    this.level =
+      level === "trace"
+        ? 4
+        : level === "debug"
+          ? 3
+          : level === "info"
+            ? 2
+            : level === "warn"
+              ? 1
+              : level === "error"
+                ? 0
+                : -1
   }
 
   error(...args: unknown[]) {

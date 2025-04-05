@@ -103,8 +103,11 @@ export type Command = BuildCommand | HelpCommand | { type: "error" | "none" }
  * Global options are options that are available for all commands provided by the user as --option
  */
 export type GlobalOptions = {
-  /** Enable debug logging */
-  debug: boolean
+  /**
+   * Set the log level
+   * Default: "info"
+   */
+  logger: "trace" | "debug" | "info" | "warn" | "error" | "off"
 
   /** Show help */
   help: boolean
