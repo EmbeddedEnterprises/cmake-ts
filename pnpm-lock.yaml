@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  zeromq:
+    hash: 903536eb6641c63beeb74bde0dfbad20e8e8de90ea678a8835c9df4f582ab723
+    path: patches/zeromq.patch
+
 importers:
 
   .:
@@ -127,7 +132,7 @@ importers:
         version: 2.0.2
       zeromq:
         specifier: ^6.4.1
-        version: 6.4.1
+        version: 6.4.1(patch_hash=903536eb6641c63beeb74bde0dfbad20e8e8de90ea678a8835c9df4f582ab723)
 
 packages:
 
@@ -6815,7 +6820,7 @@ snapshots:
 
   yoctocolors@2.1.1: {}
 
-  zeromq@6.4.1:
+  zeromq@6.4.1(patch_hash=903536eb6641c63beeb74bde0dfbad20e8e8de90ea678a8835c9df4f582ab723):
     dependencies:
       cmake-ts: 0.6.0
       node-addon-api: 8.3.1

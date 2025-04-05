@@ -121,6 +121,9 @@
   "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/package.json",
   "pnpm": {
     "onlyBuiltDependencies": ["@biomejs/biome", "core-js", "esbuild"],
-    "ignoredBuiltDependencies": ["zeromq"]
+    "ignoredBuiltDependencies": ["zeromq"],
+    "patchedDependencies": {
+      "zeromq": "patches/zeromq.patch"
+    }
   }
 }
