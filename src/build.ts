@@ -91,13 +91,14 @@ export async function buildConfig(config: BuildConfiguration, opts: Options) {
   const appliedOverrides = applyOverrides(config)
   logger.debug(`[ DONE, ${appliedOverrides} applied ]`)
 
-  logger.info(`--------------- CONFIG SUMMARY ---------------
-Name: ${config.name ? config.name : "N/A"}
+  logger.info(`----------------------------------------------
+${config.name ? `Name: ${config.name}` : ""}
 OS/Arch: ${config.os} ${config.arch}
 Runtime: ${config.runtime} ${config.runtimeVersion}
 Target ABI: ${dist.abi()}
-Toolchain File: ${config.toolchainFile}
-Custom CMake options: ${config.CMakeOptions.length === 0 ? "no" : "yes"}
+Target libc: ${config.libc}
+${config.toolchainFile !== undefined ? `Toolchain File: ${config.toolchainFile}` : ""}
+${config.CMakeOptions.length > 0 ? `Extra CMake options: ${config.CMakeOptions.join(" ")}` : ""}
 Staging area: ${stagingDir}
 Target directory: ${targetDir}
 Build Type: ${config.buildType}
@@ -151,6 +152,4 @@ Build Type: ${config.buildType}
   // add the new entry to the manifest
   manifest[JSON.stringify(config)] = relative(config.targetDirectory, addonPath)
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2))
-
-  logger.debug("----------------- END CONFIG -----------------")
 }
