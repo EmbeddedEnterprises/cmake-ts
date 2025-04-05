@@ -1,5 +1,5 @@
 import * as cp from "child_process"
-import { type PathLike, type StatOptions, Stats, stat as rawStat } from "fs-extra"
+import { type PathLike, type StatOptions, type Stats, type StatsBase, stat as rawStat } from "fs-extra"
 import splitargs from "splitargs2"
 import which from "which"
 import { logger } from "./logger.js"
@@ -126,13 +126,31 @@ export function run(command: string, cwd: string = process.cwd(), silent: boolea
   })
 }
 
+type FunctionalStats = Pick<
+  StatsBase<never>,
+  "isFile" | "isDirectory" | "isBlockDevice" | "isCharacterDevice" | "isSymbolicLink" | "isFIFO" | "isSocket"
+>
+
 /** Exception safe version of stat */
-export async function stat(path: PathLike, options?: StatOptions & { bigint: false }): Promise<Stats> {
+export async function stat(
+  path: PathLike,
+  options?: StatOptions & { bigint: false },
+): Promise<Stats | FunctionalStats> {
   try {
     return await rawStat(path, options)
   } catch {
-    // Returns an empty Stats which gives false/undefined for the methods.
-    // @ts-expect-error allow private constructor of Stat
-    return new Stats()
+    return new NoStats()
   }
 }
+
+/* eslint-disable class-methods-use-this */
+class NoStats implements FunctionalStats {
+  isFile = () => false
+  isDirectory = () => false
+  isBlockDevice = () => false
+  isCharacterDevice = () => false
+  isSymbolicLink = () => false
+  isFIFO = () => false
+  isSocket = () => false
+}
+/* eslint-enable class-methods-use-this */
