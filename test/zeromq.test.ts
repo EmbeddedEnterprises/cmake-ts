@@ -38,7 +38,7 @@ suite("zeromq", { timeout: 300_000 }, async () => {
     test(`cmake-ts ${bundle} nativeonly`, async () => {
       const cmakeTsPath = join(root, `build/main.${bundle === "legacy" ? "js" : "mjs"}`)
 
-      await execa(process.execPath, ["--enable-source-maps", cmakeTsPath, "nativeonly", "--debug"], {
+      await execa(process.execPath, ["--enable-source-maps", cmakeTsPath, "nativeonly", "--logger", "debug"], {
         stdio: "inherit",
         cwd: zeromqPath,
       })

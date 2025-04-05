@@ -1,4 +1,5 @@
 import { join as joinPath, normalize as normalizePath, sep as pathSeparator } from "path"
+import { logger } from "../logger.js"
 import { stat } from "../util.js"
 
 export async function searchPackage(projectRoot: string, packageName: string): Promise<string | null> {
@@ -9,7 +10,7 @@ export async function searchPackage(projectRoot: string, packageName: string): P
   const packagePath = joinPath(projectRoot, "node_modules", packageName)
   const hasHeader = await dirHasFile(packagePath, packageName === "node-addon-api" ? "napi.h" : `${packageName}.h`)
   if (hasHeader) {
-    console.log(`Found package "${packageName}" at path ${packagePath}!`)
+    logger.debug(`Found package "${packageName}" at path ${packagePath}!`)
     return packagePath
   }
   return searchPackage(goUp(projectRoot), packageName)

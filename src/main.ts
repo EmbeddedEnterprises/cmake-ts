@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { parseArgs } from "./args.js"
-import { build } from "./lib.js"
+import { build, logger } from "./lib.js"
 
 function main(): Promise<number> {
   const opts = parseArgs()
@@ -13,6 +13,6 @@ main()
     process.exit(exitCode)
   })
   .catch((err: Error) => {
-    console.error(err)
+    logger.error(err)
     return 1
   })

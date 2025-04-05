@@ -2,6 +2,7 @@ import * as cp from "child_process"
 import { type PathLike, type StatOptions, Stats, stat as rawStat } from "fs-extra"
 import splitargs from "splitargs2"
 import which from "which"
+import { logger } from "./logger.js"
 
 export function getEnvVar(name: string) {
   const value = process.env[name]
@@ -29,7 +30,7 @@ export async function getCmakeGenerator(
 
   const archString = arch === "x64" ? "Win64" : arch === "x86" ? "" : null
   if (archString === null) {
-    console.error("Failed to find valid VS gen, using native. Good Luck.")
+    logger.error("Failed to find valid VS gen, using native. Good Luck.")
     return {
       generator: "native",
       binary: undefined,
@@ -57,7 +58,7 @@ export async function getCmakeGenerator(
 
     // eslint-disable-next-line optimize-regex/optimize-regex
     if (genParts[0].match(/Visual\s+Studio\s+\d+\s+\d+(\s+\[arch\])?/)) {
-      console.log("Found generator: ", genParts[0])
+      logger.debug("Found generator: ", genParts[0])
       // The first entry is usually the latest entry
       useVSGen = genParts[0]
       break

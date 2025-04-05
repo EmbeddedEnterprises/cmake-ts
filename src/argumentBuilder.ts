@@ -1,5 +1,6 @@
 import { join, resolve } from "path"
 import type { BuildConfiguration } from "./config.js"
+import { logger } from "./logger.js"
 import { getNodeApiInclude } from "./nodeAPIInclude/index.js"
 import type { RuntimeDistribution } from "./runtimeDistribution.js"
 import { getPathsForConfig } from "./urlRegistry.js"
@@ -22,7 +23,7 @@ export class ArgumentBuilder {
       }
       baseCommand += generatorString
     }
-    console.log(baseCommand)
+    logger.debug(baseCommand)
     return baseCommand
   }
 
@@ -65,13 +66,13 @@ export class ArgumentBuilder {
 
     // Search nodeAPI if installed and required
     if (this.config.nodeAPI?.includes("nan") === true) {
-      console.warn(
-        `WARNING: specified nodeAPI ${this.config.nodeAPI} seems to be nan - The usage of nan is discouraged due to subtle and hard-to-fix ABI issues! Consider using node-addon-api / N-API instead!`,
+      logger.warn(
+        `Specified nodeAPI ${this.config.nodeAPI} seems to be nan - The usage of nan is discouraged due to subtle and hard-to-fix ABI issues! Consider using node-addon-api / N-API instead!`,
       )
     }
     if (this.config.nodeAPI === undefined) {
-      console.warn(
-        'WARNING: nodeAPI was not specified. The default changed from "nan" to "node-addon-api" in v0.3.0! Please make sure this is intended.',
+      logger.warn(
+        'NodeAPI was not specified. The default changed from "nan" to "node-addon-api" in v0.3.0! Please make sure this is intended.',
       )
     }
     const nodeApiInclude = await getNodeApiInclude(
@@ -79,7 +80,7 @@ export class ArgumentBuilder {
       this.config.nodeAPI ?? "node-addon-api",
     )
     if (this.config.nodeAPI !== undefined && nodeApiInclude === null) {
-      console.log(`WARNING: nodeAPI was specified, but module "${this.config.nodeAPI}" could not be found!`)
+      logger.warn(`NodeAPI was specified, but module "${this.config.nodeAPI}" could not be found!`)
     }
     if (nodeApiInclude !== null) {
       includes.push(nodeApiInclude)

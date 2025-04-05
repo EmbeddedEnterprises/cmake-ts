@@ -2,7 +2,7 @@ import { join, relative, resolve } from "path"
 import { copy, ensureDir, pathExists, readFile, remove, writeFile } from "fs-extra"
 import { ArgumentBuilder } from "./argumentBuilder.js"
 import { type BuildConfiguration, type Options, getConfigFile, parseBuildConfigs } from "./config.js"
-import { Logger } from "./logger.js"
+import { logger } from "./logger.js"
 import { applyOverrides } from "./override.js"
 import { RuntimeDistribution } from "./runtimeDistribution.js"
 import { run } from "./util.js"
@@ -24,8 +24,6 @@ export async function build(opts: Options) {
     return 0
   }
 
-  const logger = new Logger(opts.debug)
-
   const configFile = await getConfigFile()
   if (configFile instanceof Error) {
     logger.error(configFile)
@@ -41,7 +39,7 @@ export async function build(opts: Options) {
   for (const config of configsToBuild) {
     try {
       // eslint-disable-next-line no-await-in-loop
-      await buildConfig(config, opts, logger)
+      await buildConfig(config, opts)
     } catch (err) {
       logger.error("Error building config", config.name, err)
       return 1
@@ -51,7 +49,7 @@ export async function build(opts: Options) {
   return 0
 }
 
-export async function buildConfig(config: BuildConfiguration, opts: Options, logger: Logger) {
+export async function buildConfig(config: BuildConfiguration, opts: Options) {
   logger.debug("config", JSON.stringify(config, null, 2))
 
   config.targetDirectory = resolve(join(config.packageDirectory, config.targetDirectory))
@@ -93,13 +91,14 @@ export async function buildConfig(config: BuildConfiguration, opts: Options, log
   const appliedOverrides = applyOverrides(config)
   logger.debug(`[ DONE, ${appliedOverrides} applied ]`)
 
-  logger.info(`--------------- CONFIG SUMMARY ---------------
-Name: ${config.name ? config.name : "N/A"}
+  logger.info(`----------------------------------------------
+${config.name ? `Name: ${config.name}` : ""}
 OS/Arch: ${config.os} ${config.arch}
 Runtime: ${config.runtime} ${config.runtimeVersion}
 Target ABI: ${dist.abi()}
-Toolchain File: ${config.toolchainFile}
-Custom CMake options: ${config.CMakeOptions.length === 0 ? "no" : "yes"}
+Target libc: ${config.libc}
+${config.toolchainFile !== undefined ? `Toolchain File: ${config.toolchainFile}` : ""}
+${config.CMakeOptions.length > 0 ? `Extra CMake options: ${config.CMakeOptions.join(" ")}` : ""}
 Staging area: ${stagingDir}
 Target directory: ${targetDir}
 Build Type: ${config.buildType}
@@ -153,6 +152,4 @@ Build Type: ${config.buildType}
   // add the new entry to the manifest
   manifest[JSON.stringify(config)] = relative(config.targetDirectory, addonPath)
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2))
-
-  logger.debug("----------------- END CONFIG -----------------")
 }

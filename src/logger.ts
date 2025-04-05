@@ -1,23 +1,67 @@
 /* eslint-disable class-methods-use-this */
 
-export class Logger {
-  constructor(private readonly showDebug: boolean) {}
+class Logger {
+  private level: number = 2
 
-  debug(...args: unknown[]) {
-    if (this.showDebug) {
-      console.debug(...args)
+  /**
+   * Set the log level
+   * @param level - The log level
+   *
+   * trace - 4
+   * debug - 3
+   * info - 2
+   * warn - 1
+   * error - 0
+   * off - -1
+   */
+  setLevel(level: "trace" | "debug" | "info" | "warn" | "error" | "off") {
+    this.level =
+      level === "trace"
+        ? 4
+        : level === "debug"
+          ? 3
+          : level === "info"
+            ? 2
+            : level === "warn"
+              ? 1
+              : level === "error"
+                ? 0
+                : -1
+  }
+
+  error(...args: unknown[]) {
+    if (this.level >= 0) {
+      console.error("\x1b[31m[ERROR cmake-ts]\x1b[0m", ...args)
+    }
+  }
+
+  warn(...args: unknown[]) {
+    if (this.level >= 1) {
+      console.warn("\x1b[33m[WARN cmake-ts]\x1b[0m", ...args)
     }
   }
 
   info(...args: unknown[]) {
-    console.info(...args)
+    if (this.level >= 2) {
+      console.info("\x1b[32m[INFO cmake-ts]\x1b[0m", ...args)
+    }
   }
 
-  warn(...args: unknown[]) {
-    console.warn(...args)
+  log(...args: unknown[]) {
+    return this.info(...args)
   }
 
-  error(...args: unknown[]) {
-    console.error(...args)
+  debug(...args: unknown[]) {
+    if (this.level >= 3) {
+      console.debug("\x1b[34m[DEBUG cmake-ts]\x1b[0m", ...args)
+    }
+  }
+
+  trace(...args: unknown[]) {
+    if (this.level >= 4) {
+      console.trace("\x1b[34m[TRACE cmake-ts]\x1b[0m", ...args)
+    }
   }
 }
+
+export const logger = new Logger()
