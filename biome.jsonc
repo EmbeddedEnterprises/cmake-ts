@@ -6,10 +6,10 @@
       "**/.pnpm-store/**",
       "**/dist/**",
       "**/build/**",
-      "**/.*cache/",
+      "**/.*cache/**",
       "**/.turbo/**",
-      "coverage/",
-      "**/coverage/"
+      "coverage/**",
+      "**/coverage/**"
     ],
     "ignoreUnknown": true
   },
