@@ -156,6 +156,8 @@ export type BuildConfiguration = {
   os: typeof process.platform
   /** The architecture that is used by the runtime (e.g. x64, arm64, etc.) */
   arch: typeof process.arch
+  /** Whether the build is cross-compiling. */
+  cross?: boolean
 
   // Runtime
 
@@ -272,7 +274,7 @@ export async function parseBuildConfigs(
 
   // parse the remaining config names to extract the runtime, build type, and system
   for (const configName of givenConfigNames) {
-    const config = await parseBuiltInConfigs(configName)
+    const config = parseBuiltInConfigs(configName)
     configsToBuild.push(await addMissingBuildConfigurationFields(config, configFile))
   }
 
@@ -294,6 +296,8 @@ async function addMissingBuildConfigurationFields(
 
   config.os ??= globalConfig.os ?? process.platform
   config.arch ??= globalConfig.arch ?? process.arch
+  config.cross ??=
+    globalConfig.cross ?? (process.arch !== config.arch || process.env.npm_config_target_arch !== config.arch)
 
   // Runtime
 
@@ -337,6 +341,7 @@ async function addMissingBuildConfigurationFields(
 function parseBuiltInConfigs(configName: string) {
   const parts = configName.split("-")
 
+  let cross = false
   let os: BuildConfiguration["os"] | undefined
   let arch: BuildConfiguration["arch"] | undefined
   let runtime: BuildConfiguration["runtime"] | undefined
@@ -351,12 +356,14 @@ function parseBuiltInConfigs(configName: string) {
       runtime = part as BuildConfiguration["runtime"]
     } else if (buildTypes.has(part as BuildConfiguration["buildType"])) {
       buildType = buildTypes.get(part as BuildConfiguration["buildType"])
+    } else if (part === "cross") {
+      cross = true
     } else {
       throw new Error(`Invalid config part in ${configName}: ${part}`)
     }
   }
 
-  return { os, arch, runtime, buildType }
+  return { os, arch, runtime, buildType, cross }
 }
 
 const platforms = new Set<NodeJS.Platform>([
