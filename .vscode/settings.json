@@ -16,5 +16,6 @@
   },
   "[markdown]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "dependi.npm.lockFileEnabled": true
 }
