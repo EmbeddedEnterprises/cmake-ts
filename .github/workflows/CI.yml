@@ -36,9 +36,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            ./node_modules
-            ~/.pnpm-store
-            ~/vcpkg
+            ${{ env.HOME || env.USERPROFILE }}/.pnpm-store
+            ${{ env.HOME || env.USERPROFILE }}/vcpkg
           key: ${{ matrix.os }}-${{ matrix.cpp_arch }}-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
           restore-keys: |
             ${{ matrix.os }}-${{ matrix.cpp_arch }}-
