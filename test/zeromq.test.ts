@@ -75,7 +75,13 @@ suite("zeromq", { timeout: 300_000 }, async () => {
       }
 
       expect(configKey.abi).toBeDefined()
-      const addonPath = join(process.platform, process.arch, "node", configKey.abi!.toString(), "addon.node")
+      const addonPath = join(
+        process.platform,
+        process.arch,
+        "node",
+        `${configKey.libc}-${configKey.abi}-${configKey.buildType}`,
+        "addon.node",
+      )
 
       expect(configKey).toEqual(expectedConfig)
       expect(configValue).toEqual(addonPath)

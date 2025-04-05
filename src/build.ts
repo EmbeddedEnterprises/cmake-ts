@@ -79,12 +79,16 @@ export async function buildConfig(config: BuildConfiguration, opts: Options) {
 
   logger.debug("> Building directories... ")
 
-  const stagingDir = resolve(
-    join(config.stagingDirectory, config.os, config.arch, config.runtime, `${dist.abi()}`, config.addonSubdirectory),
+  const subDirectory = join(
+    config.os,
+    config.arch,
+    config.runtime,
+    `${config.libc}-${dist.abi()}-${config.buildType}`,
+    config.addonSubdirectory,
   )
-  const targetDir = resolve(
-    join(config.targetDirectory, config.os, config.arch, config.runtime, `${dist.abi()}`, config.addonSubdirectory),
-  )
+
+  const stagingDir = resolve(join(config.stagingDirectory, subDirectory))
+  const targetDir = resolve(join(config.targetDirectory, subDirectory))
   logger.debug("[ DONE ]")
 
   logger.debug("> Applying overrides... ")
