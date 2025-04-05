@@ -43,8 +43,6 @@ suite("zeromq", { timeout: 300_000 }, async () => {
         cwd: zeromqPath,
       })
 
-      const addonPath = `${process.platform}/${process.arch}/node/131/addon.node`
-
       // check manifest file
       const manifestPath = join(zeromqPath, "build/manifest.json")
       expect(existsSync(manifestPath), `Manifest file ${manifestPath} does not exist`).toBe(true)
@@ -75,6 +73,8 @@ suite("zeromq", { timeout: 300_000 }, async () => {
         abi: configKey.abi,
         libc: configKey.libc,
       }
+
+      const addonPath = `${process.platform}/${process.arch}/node/${configKey.abi}/addon.node`
 
       expect(configKey).toEqual(expectedConfig)
       expect(configValue).toEqual(addonPath)
