@@ -106,6 +106,10 @@ export class ArgumentBuilder {
       logger.info(`Cross-compiling for ${cmakeOs}/${cmakeArch}`)
 
       retVal.push(["CMAKE_SYSTEM_PROCESSOR", cmakeArch], ["CMAKE_SYSTEM_NAME", cmakeOs])
+
+      if (cmakeOs === "Darwin") {
+        retVal.push(["CMAKE_OSX_ARCHITECTURES", cmakeArch])
+      }
     }
 
     if (this.config.CMakeOptions.length !== 0) {
