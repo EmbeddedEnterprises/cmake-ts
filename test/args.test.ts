@@ -36,7 +36,7 @@ describe("parseArgs", () => {
     })
 
     it("should parse build command with a single config correctly", () => {
-      const result = parseArgs([...commonArgs, "build", "--configs", "debug"])!
+      const result = parseArgs([...commonArgs, "build", "--config", "debug"])!
       expect(result.command.type).toEqual("build")
       expect((result.command as BuildCommand).options.configs).toEqual(["debug"])
     })
@@ -45,12 +45,6 @@ describe("parseArgs", () => {
       const result = parseArgs([...commonArgs, "build", "--configs", "debug", "release"])!
       expect(result.command.type).toEqual("build")
       expect((result.command as BuildCommand).options.configs).toEqual(["debug", "release"])
-    })
-
-    it("should parse build command with shorthand -c flag correctly", () => {
-      const result = parseArgs([...commonArgs, "build", "-c", "debug"])!
-      expect(result.command.type).toEqual("build")
-      expect((result.command as BuildCommand).options.configs).toEqual(["debug"])
     })
 
     it("should parse build command with platform-specific configs correctly", () => {

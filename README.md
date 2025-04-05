@@ -28,7 +28,7 @@ Usage: cmake-ts build [options]
 Build the project
 
 Options:
-  -c, --configs <configs...>
+  --config, --configs <configs...>
       Named config(s) to build, which could be from default configs or the ones defined in the config file (package.json)
 
        If no config is provided, it will build for the current runtime on the current system with the Release build type
@@ -41,7 +41,7 @@ Options:
 
        - `<BuildType>`: the cmake build type (optimization level)
 
-         e.g.: `debug`, `release`, or `relwithdebinfo`
+         e.g.: `debug`, `release`, `relwithdebinfo`, or `minsizerel`
 
        - `<Platform>`: the target platform
 
@@ -84,7 +84,7 @@ Options:
 
        The configs can be combined with `,` or multiple `--configs` flags. They will be merged together.
    (default: [])
-  -h, --help                  display help for command
+  -h, --help                        display help for command
 ```
 
 ## Configuration File

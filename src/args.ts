@@ -41,7 +41,7 @@ export function parseArgs(args?: string[]): Options {
     .command("build")
     .description("Build the project")
     .option(
-      "-c, --configs <configs...>",
+      "--config, --configs <configs...>",
       `
     Named config(s) to build, which could be from default configs or the ones defined in the config file (package.json)
    
@@ -55,7 +55,7 @@ export function parseArgs(args?: string[]): Options {
    
      - \`<BuildType>\`: the cmake build type (optimization level)
    
-       e.g.: \`debug\`, \`release\`, or \`relwithdebinfo\`
+       e.g.: \`debug\`, \`release\`, \`relwithdebinfo\`, or \`minsizerel\`
    
      - \`<Platform>\`: the target platform
    
@@ -96,7 +96,7 @@ export function parseArgs(args?: string[]): Options {
        - \`named-all\`: build all the configs in the config file
    
    
-     The configs can be combined with \`,\` or multiple \`--configs\` flags. They will be merged together.
+     The configs can be combined with \`,\` or multiple \`--config\` flags. They will be merged together.
 `,
       [],
     )
