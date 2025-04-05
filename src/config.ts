@@ -176,7 +176,7 @@ export type BuildConfiguration = {
   // Optimization levels
 
   /** Release, Debug, or RelWithDebInfo build */
-  buildType: string
+  buildType: "Release" | "Debug" | "RelWithDebInfo"
   /** Whether the build is a development build. */
   dev: boolean
 
@@ -388,7 +388,7 @@ const architectures = new Set<NodeJS.Architecture>([
   "x64",
 ])
 
-const buildTypes = new Map<BuildConfiguration["buildType"], BuildConfiguration["buildType"]>([
+const buildTypes = new Map<string, BuildConfiguration["buildType"]>([
   ["release", "Release"],
   ["debug", "Debug"],
   ["relwithdebinfo", "RelWithDebInfo"],

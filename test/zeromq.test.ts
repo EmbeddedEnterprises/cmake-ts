@@ -59,11 +59,11 @@ suite("zeromq", { timeout: 300_000 }, async () => {
         runtime: "node",
         runtimeVersion: process.versions.node,
         buildType: "Release",
-        packageDirectory: zeromqPath,
+        packageDirectory: "",
         projectName: "addon",
         nodeAPI: "node-addon-api",
-        targetDirectory: await realpath(join(zeromqPath, "build")),
-        stagingDirectory: await realpath(join(zeromqPath, "staging")),
+        targetDirectory: "build",
+        stagingDirectory: "staging",
         cmakeToUse: await which("cmake"),
         generatorToUse: "Ninja",
         generatorBinary: await which("ninja"),
@@ -75,7 +75,13 @@ suite("zeromq", { timeout: 300_000 }, async () => {
       }
 
       expect(configKey.abi).toBeDefined()
-      const addonPath = join(process.platform, process.arch, "node", configKey.abi!.toString(), "addon.node")
+      const addonPath = join(
+        process.platform,
+        process.arch,
+        "node",
+        `${configKey.libc}-${configKey.abi}-${configKey.buildType}`,
+        "addon.node",
+      )
 
       expect(configKey).toEqual(expectedConfig)
       expect(configValue).toEqual(addonPath)

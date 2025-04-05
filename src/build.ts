@@ -79,12 +79,16 @@ export async function buildConfig(config: BuildConfiguration, opts: Options) {
 
   logger.debug("> Building directories... ")
 
-  const stagingDir = resolve(
-    join(config.stagingDirectory, config.os, config.arch, config.runtime, `${dist.abi()}`, config.addonSubdirectory),
+  const subDirectory = join(
+    config.os,
+    config.arch,
+    config.runtime,
+    `${config.libc}-${dist.abi()}-${config.buildType}`,
+    config.addonSubdirectory,
   )
-  const targetDir = resolve(
-    join(config.targetDirectory, config.os, config.arch, config.runtime, `${dist.abi()}`, config.addonSubdirectory),
-  )
+
+  const stagingDir = resolve(join(config.stagingDirectory, subDirectory))
+  const targetDir = resolve(join(config.targetDirectory, subDirectory))
   logger.debug("[ DONE ]")
 
   logger.debug("> Applying overrides... ")
@@ -150,6 +154,18 @@ Build Type: ${config.buildType}
     manifest = JSON.parse(manifestContent)
   }
   // add the new entry to the manifest
-  manifest[JSON.stringify(config)] = relative(config.targetDirectory, addonPath)
+  manifest[serializeConfig(config, config.packageDirectory)] = relative(config.targetDirectory, addonPath)
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2))
+}
+
+function serializeConfig(config: BuildConfiguration, rootDir: string) {
+  // replace absolute paths with relative paths
+  const serialized = JSON.stringify(config, (_key, value) => {
+    if (typeof value === "string" && value.startsWith(rootDir)) {
+      return relative(rootDir, value)
+    }
+    return value
+  })
+
+  return serialized
 }
