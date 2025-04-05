@@ -154,6 +154,18 @@ Build Type: ${config.buildType}
     manifest = JSON.parse(manifestContent)
   }
   // add the new entry to the manifest
-  manifest[JSON.stringify(config)] = relative(config.targetDirectory, addonPath)
+  manifest[serializeConfig(config, config.packageDirectory)] = relative(config.targetDirectory, addonPath)
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2))
+}
+
+function serializeConfig(config: BuildConfiguration, rootDir: string) {
+  // replace absolute paths with relative paths
+  const serialized = JSON.stringify(config, (_key, value) => {
+    if (typeof value === "string" && value.startsWith(rootDir)) {
+      return relative(rootDir, value)
+    }
+    return value
+  })
+
+  return serialized
 }
