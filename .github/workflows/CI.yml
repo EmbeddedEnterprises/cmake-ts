@@ -65,9 +65,11 @@ jobs:
         run: pnpm test
 
       - name: Setup Node 12
+        if: matrix.os != 'macos-14'
         uses: actions/setup-node@v4
         with:
           node-version: 12
 
       - name: Smoke test Node 12
+        if: matrix.os != 'macos-14'
         run: node ./build/main.js --help
