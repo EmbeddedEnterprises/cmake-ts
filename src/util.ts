@@ -58,7 +58,7 @@ export async function getCmakeGenerator(
 
     // eslint-disable-next-line optimize-regex/optimize-regex
     if (genParts[0].match(/Visual\s+Studio\s+\d+\s+\d+(\s+\[arch\])?/)) {
-      logger.log("Found generator: ", genParts[0])
+      logger.debug("Found generator: ", genParts[0])
       // The first entry is usually the latest entry
       useVSGen = genParts[0]
       break

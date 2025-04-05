@@ -10,7 +10,7 @@ export async function searchPackage(projectRoot: string, packageName: string): P
   const packagePath = joinPath(projectRoot, "node_modules", packageName)
   const hasHeader = await dirHasFile(packagePath, packageName === "node-addon-api" ? "napi.h" : `${packageName}.h`)
   if (hasHeader) {
-    logger.log(`Found package "${packageName}" at path ${packagePath}!`)
+    logger.debug(`Found package "${packageName}" at path ${packagePath}!`)
     return packagePath
   }
   return searchPackage(goUp(projectRoot), packageName)

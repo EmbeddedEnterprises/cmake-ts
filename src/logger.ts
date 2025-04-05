@@ -41,7 +41,7 @@ class Logger {
 
   debug(...args: unknown[]) {
     if (this.level >= 3) {
-      console.debug("\x1b[34m[DEBUG cmake-ts]\x1b[0m", ...args, { level: this.level })
+      console.debug("\x1b[34m[DEBUG cmake-ts]\x1b[0m", ...args)
     }
   }
 

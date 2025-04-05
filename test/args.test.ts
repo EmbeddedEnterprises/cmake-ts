@@ -106,6 +106,7 @@ describe("parseArgs", () => {
       const result = parseArgs([...commonArgs, "build", "--debug"])!
       expect(result.debug).toEqual(true)
       expect(spy).toHaveBeenCalledWith(
+        "\x1b[34m[DEBUG cmake-ts]\x1b[0m",
         "args",
         JSON.stringify(
           {
