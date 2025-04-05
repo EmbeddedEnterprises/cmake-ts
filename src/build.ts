@@ -102,11 +102,11 @@ OS/Arch: ${config.os} ${config.arch}
 Runtime: ${config.runtime} ${config.runtimeVersion}
 Target ABI: ${dist.abi()}
 Target libc: ${config.libc}
-${config.toolchainFile !== undefined ? `Toolchain File: ${config.toolchainFile}` : ""}
-${config.CMakeOptions.length > 0 ? `Extra CMake options: ${config.CMakeOptions.join(" ")}` : ""}
 Staging area: ${stagingDir}
 Target directory: ${targetDir}
 Build Type: ${config.buildType}
+${config.toolchainFile !== undefined ? `Toolchain File: ${config.toolchainFile}` : ""}
+${config.CMakeOptions.length > 0 ? `Extra CMake options: ${config.CMakeOptions.join(" ")}` : ""}
 ----------------------------------------------`)
 
   // Create target directory

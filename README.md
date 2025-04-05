@@ -69,6 +69,12 @@ Options:
          - `darwin-arm64-node-release`
          - `darwin-arm64-electron-relwithdebinfo`
 
+      To explicitly indicate cross-compilation, prefix the config name with \`cross-\`:
+
+       - \`cross-win32-ia32-node-release\`
+       - \`cross-linux-arm64-node-release\`
+       - \`cross-darwin-x64-electron-relwithdebinfo\`
+
       You can also define your own configs in the config file (package.json).
 
        - `<ConfigName>`: the name of the config

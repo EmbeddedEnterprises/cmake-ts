@@ -45,8 +45,15 @@ async function download(url: string, opts: DownloadOptions) {
       timeout: opts.timeout ?? -1,
     })
 
-    downloader.on("error", (err) => {
-      throw err
+    // Create a promise that will reject if an error occurs
+    const downloadPromise = new Promise<void>((resolve, reject) => {
+      downloader.on("error", (err) => {
+        reject(err)
+      })
+
+      downloader.on("end", () => {
+        resolve()
+      })
     })
 
     const result: DownloadResult = {
@@ -54,7 +61,8 @@ async function download(url: string, opts: DownloadOptions) {
       hash: undefined,
     }
 
-    await downloader.start()
+    // Start the download and wait for it to complete or error
+    await Promise.all([downloader.start(), downloadPromise])
 
     // calculate hash after download is complete
     result.hash = opts.hashType !== undefined ? await calculateHash(filePath, opts.hashType) : undefined

@@ -48,6 +48,41 @@ suite("zeromq", { timeout: 300_000 }, async () => {
   test("cmake-ts legacy nativeonly --logger debug", async () => {
     await testZeromqBuild("legacy", zeromqPath, "nativeonly", "--logger", "debug")
   })
+
+  test("cmake-ts cross-compile cross-linux-arm64", async (t) => {
+    if (process.platform !== "linux" || process.arch !== "x64") {
+      t.skip()
+    }
+    await testZeromqBuild("modern", zeromqPath, "build", "--configs", "cross-linux-arm64", "--logger", "debug")
+  })
+
+  test("cmake-ts cross-compile cross-win32-ia32", async (t) => {
+    if (process.platform !== "win32" || process.arch !== "x64") {
+      t.skip()
+    }
+    await testZeromqBuild("modern", zeromqPath, "build", "--configs", "cross-win32-ia32", "--logger", "debug")
+  })
+
+  test("cmake-ts cross-compile cross-win32-arm64", async (t) => {
+    if (process.platform !== "win32" || process.arch !== "x64") {
+      t.skip()
+    }
+    await testZeromqBuild("modern", zeromqPath, "build", "--configs", "cross-win32-arm64", "--logger", "debug")
+  })
+
+  test("cmake-ts cross-compile cross-darwin-x64", async (t) => {
+    if (process.platform !== "darwin" || process.arch !== "arm64") {
+      t.skip()
+    }
+    await testZeromqBuild("modern", zeromqPath, "build", "--configs", "cross-darwin-x64", "--logger", "debug")
+  })
+
+  test("cmake-ts cross-compile cross-darwin-arm64", async (t) => {
+    if (process.platform !== "darwin" || process.arch !== "x64") {
+      t.skip()
+    }
+    await testZeromqBuild("modern", zeromqPath, "build", "--configs", "cross-darwin-arm64", "--logger", "debug")
+  })
 })
 
 async function testZeromqBuild(bundle: string, zeromqPath: string, ...args: string[]) {
@@ -66,15 +101,20 @@ async function testZeromqBuild(bundle: string, zeromqPath: string, ...args: stri
   const configKey = JSON.parse(Object.keys(manifest)[0]) as BuildConfiguration
   const configValue = manifest[JSON.stringify(configKey)]
 
+  const crossConfig = args.find((arg) => arg.includes("cross"))
+  const os = (crossConfig?.split("-")[1] as NodeJS.Platform | undefined) ?? process.platform
+  const arch = (crossConfig?.split("-")[2] as NodeJS.Architecture | undefined) ?? process.arch
+
   const expectedConfig: BuildConfiguration = {
     name: "",
     dev: false,
-    os: process.platform,
-    arch: process.arch,
+    os,
+    arch,
     runtime: "node",
     runtimeVersion: process.versions.node,
-    buildType: args.includes("Debug") ? "Debug" : "Release",
+    buildType: args.includes("Debug") || args.some((arg) => arg.includes("-debug")) ? "Debug" : "Release",
     packageDirectory: "",
+    cross: crossConfig !== undefined,
     projectName: "addon",
     nodeAPI: "node-addon-api",
     targetDirectory: "build",
@@ -91,10 +131,10 @@ async function testZeromqBuild(bundle: string, zeromqPath: string, ...args: stri
 
   expect(configKey.abi).toBeDefined()
   const addonPath = join(
-    process.platform,
-    process.arch,
+    expectedConfig.os,
+    expectedConfig.arch,
     "node",
-    `${configKey.libc}-${configKey.abi}-${configKey.buildType}`,
+    `${expectedConfig.libc}-${expectedConfig.abi}-${expectedConfig.buildType}`,
     "addon.node",
   )
 
