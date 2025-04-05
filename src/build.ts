@@ -11,9 +11,10 @@ import { run } from "./util.js"
  * Build the project via cmake-ts
  *
  * @param opts - The options to use for the build
+ * @param givenLogger - The logger to use for the build
  * @returns The exit code of the build
  */
-export async function build(opts: Options) {
+export async function build(opts: Options, givenLogger?: Logger) {
   if (opts.command.type === "error") {
     return 1
   }
@@ -24,7 +25,7 @@ export async function build(opts: Options) {
     return 0
   }
 
-  const logger = new Logger(opts.debug)
+  const logger = givenLogger ?? new Logger(opts.debug)
 
   const configFile = await getConfigFile()
   if (configFile instanceof Error) {

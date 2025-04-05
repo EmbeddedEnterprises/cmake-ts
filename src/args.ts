@@ -1,5 +1,6 @@
 import { Command as Commander } from "commander"
 import type { BuildCommandOptions, DeprecatedGlobalOptions, GlobalOptions, Options } from "./config.js"
+import { Logger } from "./logger.js"
 import { getEnvVar } from "./util.js"
 
 /**
@@ -7,7 +8,9 @@ import { getEnvVar } from "./util.js"
  *
  * @returns The options parsed from the command line arguments.
  */
-export function parseArgs(args?: string[]): Options {
+export function parseArgs(args?: string[], givenLogger?: Logger): Options {
+  const logger = givenLogger ?? new Logger()
+
   const program = new Commander("cmake-ts")
 
   // Debug flag can be set via environment variable
@@ -159,14 +162,15 @@ export function parseArgs(args?: string[]): Options {
 
   const debugOpts = () => {
     if (opts.debug) {
-      console.debug("args", JSON.stringify(opts, null, 2))
+      logger.showDebug = true
+      logger.debug("args", JSON.stringify(opts, null, 2))
     }
   }
 
   // Handle build command
   const buildOpts = buildCommand.opts<BuildCommandOptions>()
   if (opts.command.type === "build") {
-    addLegacyOptions(buildOpts, opts)
+    addLegacyOptions(buildOpts, opts, logger)
 
     debugOpts()
     return {
@@ -186,26 +190,36 @@ export function parseArgs(args?: string[]): Options {
 /**
  * Parse the legacy options and add them to the build options
  */
-function addLegacyOptions(buildOptions: BuildCommandOptions, opts: DeprecatedGlobalOptions) {
+function addLegacyOptions(buildOptions: BuildCommandOptions, opts: DeprecatedGlobalOptions, logger: Logger) {
   if (opts.namedConfigs !== undefined) {
     // Handle legacy named-configs option
     buildOptions.configs = opts.namedConfigs.flatMap((c) => c.split(","))
+
+    logger.warn("The --named-configs option is deprecated. Use --configs instead.")
   }
 
   // Handle legacy mode flags by converting them to appropriate configs
   if (opts.nativeonly) {
     buildOptions.configs.push("release")
+
+    logger.warn("The --nativeonly option is deprecated. Use --configs release instead.")
   }
 
   if (opts.osonly) {
     buildOptions.configs.push("named-os")
+
+    logger.warn("The --osonly option is deprecated. Use --configs named-os instead.")
   }
 
   if (opts.devOsOnly) {
     buildOptions.configs.push("named-os-dev")
+
+    logger.warn("The --dev-os-only option is deprecated. Use --configs named-os-dev instead.")
   }
 
   if (opts.all) {
     buildOptions.configs.push("named-all")
+
+    logger.warn("The --all option is deprecated. Use --configs named-all instead.")
   }
 }

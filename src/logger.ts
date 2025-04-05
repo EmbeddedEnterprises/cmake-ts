@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 
 export class Logger {
-  constructor(private readonly showDebug: boolean) {}
+  constructor(public showDebug: boolean = false) {}
 
   debug(...args: unknown[]) {
     if (this.showDebug) {
