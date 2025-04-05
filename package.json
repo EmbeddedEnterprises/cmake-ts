@@ -102,7 +102,8 @@
     "@biomejs/biome": "^1.9.4",
     "prettier": "^3.5.3",
     "prettier-config-atomic": "^4.0.0",
-    "zeromq": "^6.3.0",
+    "execa": "^9.5.2",
+    "zeromq": "^6.4.1",
     "ci-info": "^4.2.0",
     "fast-glob": "^3.3.2",
     "fs-extra": "^10",
@@ -120,6 +121,9 @@
   "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/package.json",
   "pnpm": {
     "onlyBuiltDependencies": ["@biomejs/biome", "core-js", "esbuild"],
-    "ignoredBuiltDependencies": ["zeromq"]
+    "ignoredBuiltDependencies": ["zeromq"],
+    "patchedDependencies": {
+      "zeromq": "patches/zeromq.patch"
+    }
   }
 }
