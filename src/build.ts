@@ -2,7 +2,7 @@ import { join, relative, resolve } from "path"
 import { copy, ensureDir, pathExists, readFile, remove, writeFile } from "fs-extra"
 import { ArgumentBuilder } from "./argumentBuilder.js"
 import { type BuildConfiguration, type Options, getConfigFile, parseBuildConfigs } from "./config.js"
-import { Logger } from "./logger.js"
+import { logger } from "./logger.js"
 import { applyOverrides } from "./override.js"
 import { RuntimeDistribution } from "./runtimeDistribution.js"
 import { run } from "./util.js"
@@ -11,10 +11,9 @@ import { run } from "./util.js"
  * Build the project via cmake-ts
  *
  * @param opts - The options to use for the build
- * @param givenLogger - The logger to use for the build
  * @returns The exit code of the build
  */
-export async function build(opts: Options, givenLogger?: Logger) {
+export async function build(opts: Options) {
   if (opts.command.type === "error") {
     return 1
   }
@@ -24,8 +23,6 @@ export async function build(opts: Options, givenLogger?: Logger) {
   if (opts.help) {
     return 0
   }
-
-  const logger = givenLogger ?? new Logger(opts.debug)
 
   const configFile = await getConfigFile()
   if (configFile instanceof Error) {
@@ -42,7 +39,7 @@ export async function build(opts: Options, givenLogger?: Logger) {
   for (const config of configsToBuild) {
     try {
       // eslint-disable-next-line no-await-in-loop
-      await buildConfig(config, opts, logger)
+      await buildConfig(config, opts)
     } catch (err) {
       logger.error("Error building config", config.name, err)
       return 1
@@ -52,7 +49,7 @@ export async function build(opts: Options, givenLogger?: Logger) {
   return 0
 }
 
-export async function buildConfig(config: BuildConfiguration, opts: Options, logger: Logger) {
+export async function buildConfig(config: BuildConfiguration, opts: Options) {
   logger.debug("config", JSON.stringify(config, null, 2))
 
   config.targetDirectory = resolve(join(config.packageDirectory, config.targetDirectory))

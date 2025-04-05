@@ -1,6 +1,6 @@
 import { Command as Commander } from "commander"
 import type { BuildCommandOptions, DeprecatedGlobalOptions, GlobalOptions, Options } from "./config.js"
-import { Logger } from "./logger.js"
+import { logger } from "./logger.js"
 import { getEnvVar } from "./util.js"
 
 /**
@@ -8,9 +8,7 @@ import { getEnvVar } from "./util.js"
  *
  * @returns The options parsed from the command line arguments.
  */
-export function parseArgs(args?: string[], givenLogger?: Logger): Options {
-  const logger = givenLogger ?? new Logger()
-
+export function parseArgs(args?: string[]): Options {
   const program = new Commander("cmake-ts")
 
   // Debug flag can be set via environment variable
@@ -24,7 +22,7 @@ export function parseArgs(args?: string[], givenLogger?: Logger): Options {
   program
     .exitOverride((err) => {
       if (err.exitCode !== 0 && err.code !== "commander.help") {
-        console.error(err)
+        logger.error(err)
         commandOptions.command.type = "error"
       }
     })
@@ -162,7 +160,7 @@ export function parseArgs(args?: string[], givenLogger?: Logger): Options {
 
   const debugOpts = () => {
     if (opts.debug) {
-      logger.showDebug = true
+      logger.setLevel("debug")
       logger.debug("args", JSON.stringify(opts, null, 2))
     }
   }
@@ -170,7 +168,7 @@ export function parseArgs(args?: string[], givenLogger?: Logger): Options {
   // Handle build command
   const buildOpts = buildCommand.opts<BuildCommandOptions>()
   if (opts.command.type === "build") {
-    addLegacyOptions(buildOpts, opts, logger)
+    addLegacyOptions(buildOpts, opts)
 
     debugOpts()
     return {
@@ -190,7 +188,7 @@ export function parseArgs(args?: string[], givenLogger?: Logger): Options {
 /**
  * Parse the legacy options and add them to the build options
  */
-function addLegacyOptions(buildOptions: BuildCommandOptions, opts: DeprecatedGlobalOptions, logger: Logger) {
+function addLegacyOptions(buildOptions: BuildCommandOptions, opts: DeprecatedGlobalOptions) {
   if (opts.namedConfigs !== undefined) {
     // Handle legacy named-configs option
     buildOptions.configs = opts.namedConfigs.flatMap((c) => c.split(","))

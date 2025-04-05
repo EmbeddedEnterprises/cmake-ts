@@ -1,14 +1,11 @@
 #!/usr/bin/env node
 
 import { parseArgs } from "./args.js"
-import { build } from "./lib.js"
-import { Logger } from "./logger.js"
+import { build, logger } from "./lib.js"
 
 function main(): Promise<number> {
-  const logger = new Logger(false)
-
   const opts = parseArgs()
-  return build(opts, logger)
+  return build(opts)
 }
 
 main()
@@ -16,6 +13,6 @@ main()
     process.exit(exitCode)
   })
   .catch((err: Error) => {
-    console.error(err)
+    logger.error(err)
     return 1
   })
