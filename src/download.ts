@@ -50,7 +50,7 @@ async function download(url: string, opts: DownloadOptions) {
       downloader.on("error", (err) => {
         reject(err)
       })
-      
+
       downloader.on("end", () => {
         resolve()
       })
