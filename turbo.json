@@ -1,6 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalEnv": ["OS", "RUNNER_OS", "BUILD_ANALYSIS"],
+  "cacheDir": ".cache/turbo",
   "tasks": {
     "build.tsc": {
       "outputs": []
