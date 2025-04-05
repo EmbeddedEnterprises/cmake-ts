@@ -250,7 +250,7 @@ export async function parseBuildConfigs(
 
   const configsToBuild: BuildConfiguration[] = []
 
-  // if no named configs are provided, build for the current runtime on the current system with the default configuration
+  // if no named configs are provided, build for the current runtime/system
   if (givenConfigNames.size === 0) {
     configsToBuild.push(await addMissingBuildConfigurationFields({}, configFile))
     return configsToBuild
@@ -297,7 +297,11 @@ async function addMissingBuildConfigurationFields(
   config.os ??= globalConfig.os ?? process.platform
   config.arch ??= globalConfig.arch ?? process.arch
   config.cross ??=
-    globalConfig.cross ?? (process.arch !== config.arch || process.env.npm_config_target_arch !== config.arch)
+    globalConfig.cross ??
+    (process.platform !== config.os ||
+      (process.env.npm_config_target_os !== undefined && process.env.npm_config_target_os !== config.os) ||
+      process.arch !== config.arch ||
+      (process.env.npm_config_target_arch !== undefined && process.env.npm_config_target_arch !== config.arch))
 
   // Runtime
 
