@@ -32,7 +32,8 @@ export async function build(opts: Options) {
 
   // set the missing options to their default value
   const configsToBuild = await parseBuildConfigs(opts, configFile)
-  if (configsToBuild === undefined) {
+  if (configsToBuild === null) {
+    logger.error("No configs to build")
     return 1
   }
 

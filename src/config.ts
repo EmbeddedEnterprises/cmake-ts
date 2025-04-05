@@ -38,7 +38,7 @@ export type BuildCommandOptions = {
    *
    *  - `<BuildType>`: the cmake build type (optimization level)
    *
-   *    e.g.: `debug`, `release`, or `relwithdebinfo`
+   *    e.g.: `debug`, `release`, `relwithdebinfo`, `minsizerel`
    *
    *  - `<Platform>`: the target platform
    *
@@ -176,7 +176,7 @@ export type BuildConfiguration = {
   // Optimization levels
 
   /** Release, Debug, or RelWithDebInfo build */
-  buildType: "Release" | "Debug" | "RelWithDebInfo"
+  buildType: "Release" | "Debug" | "RelWithDebInfo" | "MinSizeRel"
   /** Whether the build is a development build. */
   dev: boolean
 
@@ -239,9 +239,9 @@ export type OverrideConfig = {
 export async function parseBuildConfigs(
   opts: Options,
   configFile: Partial<BuildConfigurations>,
-): Promise<BuildConfiguration[] | undefined> {
+): Promise<BuildConfiguration[] | null> {
   if (opts.command.type !== "build") {
-    return undefined
+    return null
   }
 
   const givenConfigNames = new Set(opts.command.options.configs)
@@ -251,7 +251,7 @@ export async function parseBuildConfigs(
   // if no named configs are provided, build for the current runtime on the current system with the default configuration
   if (givenConfigNames.size === 0) {
     configsToBuild.push(await addMissingBuildConfigurationFields({}, configFile))
-    return
+    return configsToBuild
   }
 
   // check if the given config names are a subset of the config names in the config file
@@ -390,8 +390,13 @@ const architectures = new Set<NodeJS.Architecture>([
 
 const buildTypes = new Map<string, BuildConfiguration["buildType"]>([
   ["release", "Release"],
+  ["Release", "Release"],
   ["debug", "Debug"],
+  ["Debug", "Debug"],
   ["relwithdebinfo", "RelWithDebInfo"],
+  ["RelWithDebInfo", "RelWithDebInfo"],
+  ["minsizerel", "MinSizeRel"],
+  ["MinSizeRel", "MinSizeRel"],
 ])
 
 const runtimes = new Set<BuildConfiguration["runtime"]>(["node", "electron", "iojs"])
