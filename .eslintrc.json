@@ -11,6 +11,12 @@
         "@typescript-eslint/no-useless-constructor": "error",
         "node/shebang": "off"
       }
+    },
+    {
+      "files": ["**/*.test.ts"],
+      "rules": {
+        "import/no-extraneous-dependencies": "off"
+      }
     }
   ]
 }
