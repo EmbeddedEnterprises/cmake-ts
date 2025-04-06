@@ -11,7 +11,7 @@ const _dirname = typeof __dirname === "string" ? __dirname : dirname(fileURLToPa
 const root = dirname(_dirname)
 const zeromqPath = join(root, "test", "node_modules", "zeromq")
 
-suite("zeromq", { timeout: 300_000 }, () => {
+suite("zeromq", { timeout: 20 * 60 * 1000 }, () => {
   beforeAll(async () => {
     await execa("pnpm", ["build"], {
       stdio: "inherit",

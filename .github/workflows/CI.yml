@@ -64,6 +64,7 @@ jobs:
       - name: Setup Cpp
         uses: aminya/setup-cpp@v1
         with:
+          vcvarsall: true
           cmake: true
           ninja: true
           python: true
