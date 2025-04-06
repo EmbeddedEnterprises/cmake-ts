@@ -7,3 +7,4 @@ stats.html
 coverage/
 .turbo/
 .cache/
+.DS_Store
