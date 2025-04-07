@@ -1,10 +1,10 @@
 build
 node_modules
 *.tgz
-package-lock.json
 stats.html
 .eslintcache
 .tmp/
 coverage/
 .turbo/
 .cache/
+.DS_Store

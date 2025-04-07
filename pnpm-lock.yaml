@@ -4,11 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-patchedDependencies:
-  zeromq:
-    hash: 903536eb6641c63beeb74bde0dfbad20e8e8de90ea678a8835c9df4f582ab723
-    path: patches/zeromq.patch
-
 importers:
 
   .:
@@ -130,9 +125,6 @@ importers:
       which:
         specifier: ^2
         version: 2.0.2
-      zeromq:
-        specifier: 6.4.1
-        version: 6.4.1(patch_hash=903536eb6641c63beeb74bde0dfbad20e8e8de90ea678a8835c9df4f582ab723)
 
 packages:
 
@@ -1087,10 +1079,6 @@ packages:
   cliui@8.0.1:
     resolution: {integrity: sha512-BSeNnyus75C4//NQ9gQt1/csTXyo/8Sb+afLAkzAptFuMsod9HFokGNudZpi/oQV73hnVK+sR+5PVRMd+Dr7YQ==}
     engines: {node: '>=12'}
-
-  cmake-ts@0.6.0:
-    resolution: {integrity: sha512-2QlKs1Cc8yjCKxWx/HJw0rwvqkoPetC3CA64RIqQOikOyqtZo/dlRHp17Kpss24GrOSCr3PsQ9kAlXHgev3qqQ==}
-    hasBin: true
 
   coffeescript@1.12.7:
     resolution: {integrity: sha512-pLXHFxQMPklVoEekowk8b3erNynC+DVJzChxS/LCBBgR6/8AJkHivkm//zbowcfc7BTCAjryuhx6gPqPRfsFoA==}
@@ -2335,10 +2323,6 @@ packages:
   nice-try@1.0.5:
     resolution: {integrity: sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==}
 
-  node-addon-api@8.3.1:
-    resolution: {integrity: sha512-lytcDEdxKjGJPTLEfW4mYMigRezMlyJY8W4wxJK8zE533Jlb8L8dRuObJFWg2P+AuOIxoCgKF+2Oq4d4Zd0OUA==}
-    engines: {node: ^18 || ^20 || >= 21}
-
   node-downloader-helper@2.1.9:
     resolution: {integrity: sha512-FSvAol2Z8UP191sZtsUZwHIN0eGoGue3uEXGdWIH5228e9KH1YHXT7fN8Oa33UGf+FbqGTQg3sJfrRGzmVCaJA==}
     engines: {node: '>=14.18'}
@@ -3281,10 +3265,6 @@ packages:
   yoctocolors@2.1.1:
     resolution: {integrity: sha512-GQHQqAopRhwU8Kt1DDM8NjibDXHC8eoh1erhGAJPEyveY9qqVeXvVikNKrDz69sHowPMorbPUrH/mx8c50eiBQ==}
     engines: {node: '>=18'}
-
-  zeromq@6.4.1:
-    resolution: {integrity: sha512-e9CHngR7wH7Cv7k1ASfYh/k8DurBD1Myx28EyAEiWKhqyhGy30lP3M6NBNN2gb6WmVqNq+KJGEJXO7vTvFW2bA==}
-    engines: {node: '>= 12'}
 
 snapshots:
 
@@ -4268,8 +4248,6 @@ snapshots:
       string-width: 4.2.3
       strip-ansi: 6.0.1
       wrap-ansi: 7.0.0
-
-  cmake-ts@0.6.0: {}
 
   coffeescript@1.12.7:
     optional: true
@@ -5843,8 +5821,6 @@ snapshots:
 
   nice-try@1.0.5: {}
 
-  node-addon-api@8.3.1: {}
-
   node-downloader-helper@2.1.9: {}
 
   node-releases@2.0.19: {}
@@ -6878,8 +6854,3 @@ snapshots:
   yocto-queue@0.1.0: {}
 
   yoctocolors@2.1.1: {}
-
-  zeromq@6.4.1(patch_hash=903536eb6641c63beeb74bde0dfbad20e8e8de90ea678a8835c9df4f582ab723):
-    dependencies:
-      cmake-ts: 0.6.0
-      node-addon-api: 8.3.1

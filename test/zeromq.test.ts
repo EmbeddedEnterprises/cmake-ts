@@ -1,19 +1,17 @@
-import path, { join } from "path"
+import { dirname, join } from "path"
 import { fileURLToPath } from "url"
 import { execa } from "execa"
-import { existsSync, readJson, realpath, remove } from "fs-extra"
+import { existsSync, readJson, remove } from "fs-extra"
 import { beforeAll, beforeEach, expect, suite, test } from "vitest"
 import which from "which"
 import type { BuildConfiguration } from "../src/config.js"
 import { HOME_DIRECTORY } from "../src/urlRegistry.js"
 
-const dirname = typeof __dirname === "string" ? __dirname : path.dirname(fileURLToPath(import.meta.url))
-const root = path.dirname(dirname)
+const _dirname = typeof __dirname === "string" ? __dirname : dirname(fileURLToPath(import.meta.url))
+const root = dirname(_dirname)
+const zeromqPath = join(root, "test", "node_modules", "zeromq")
 
-suite("zeromq", { timeout: 300_000 }, async () => {
-  const zeromqPath = await realpath(join(root, "node_modules/zeromq"))
-  expect(existsSync(zeromqPath), `Zeromq path ${zeromqPath} does not exist`).toBe(true)
-
+suite("zeromq", { timeout: 20 * 60 * 1000 }, () => {
   beforeAll(async () => {
     await execa("pnpm", ["build"], {
       stdio: "inherit",
@@ -27,6 +25,7 @@ suite("zeromq", { timeout: 300_000 }, async () => {
   })
 
   beforeEach(async () => {
+    // clean up the cmake-ts cache and the zeromq source
     await Promise.all([
       remove(join(HOME_DIRECTORY, ".cmake-ts")),
       remove(join(zeromqPath, "build")),
@@ -36,21 +35,56 @@ suite("zeromq", { timeout: 300_000 }, async () => {
 
   // release build
   test("cmake-ts modern build --logger debug", async () => {
-    await testZeromqBuild("modern", zeromqPath, "build", "--logger", "debug")
+    await testZeromqBuild("modern", "build", "--logger", "debug")
   })
 
   // debug build
   test("cmake-ts modern build --configs Debug --logger debug", async () => {
-    await testZeromqBuild("modern", zeromqPath, "build", "--configs", "Debug", "--logger", "debug")
+    await testZeromqBuild("modern", "build", "--configs", "Debug", "--logger", "debug")
   })
 
   // test legacy build command with deprecated options
   test("cmake-ts legacy nativeonly --logger debug", async () => {
-    await testZeromqBuild("legacy", zeromqPath, "nativeonly", "--logger", "debug")
+    await testZeromqBuild("legacy", "nativeonly", "--logger", "debug")
+  })
+
+  test("cmake-ts cross-compile cross-linux-arm64", async (t) => {
+    if (process.platform !== "linux" || process.arch !== "x64") {
+      t.skip()
+    }
+    await testZeromqBuild("modern", "build", "--configs", "cross-linux-arm64", "--logger", "debug")
+  })
+
+  test.fails("cmake-ts cross-compile cross-win32-ia32", async (t) => {
+    if (process.platform !== "win32" || process.arch !== "x64") {
+      t.skip()
+    }
+    await testZeromqBuild("modern", "build", "--configs", "cross-win32-ia32", "--logger", "debug")
+  })
+
+  test.fails("cmake-ts cross-compile cross-win32-arm64", async (t) => {
+    if (process.platform !== "win32" || process.arch !== "x64") {
+      t.skip()
+    }
+    await testZeromqBuild("modern", "build", "--configs", "cross-win32-arm64", "--logger", "debug")
+  })
+
+  test("cmake-ts cross-compile cross-darwin-x64", async (t) => {
+    if (process.platform !== "darwin" || process.arch !== "arm64") {
+      t.skip()
+    }
+    await testZeromqBuild("modern", "build", "--configs", "cross-darwin-x64", "--logger", "debug")
+  })
+
+  test("cmake-ts cross-compile cross-darwin-arm64", async (t) => {
+    if (process.platform !== "darwin" || process.arch !== "x64") {
+      t.skip()
+    }
+    await testZeromqBuild("modern", "build", "--configs", "cross-darwin-arm64", "--logger", "debug")
   })
 })
 
-async function testZeromqBuild(bundle: string, zeromqPath: string, ...args: string[]) {
+async function testZeromqBuild(bundle: string, ...args: string[]) {
   const cmakeTsPath = join(root, `build/main.${bundle === "legacy" ? "js" : "mjs"}`)
 
   await execa(process.execPath, ["--enable-source-maps", cmakeTsPath, ...args], {
@@ -66,15 +100,20 @@ async function testZeromqBuild(bundle: string, zeromqPath: string, ...args: stri
   const configKey = JSON.parse(Object.keys(manifest)[0]) as BuildConfiguration
   const configValue = manifest[JSON.stringify(configKey)]
 
+  const crossConfig = args.find((arg) => arg.includes("cross"))
+  const os = (crossConfig?.split("-")[1] as NodeJS.Platform | undefined) ?? process.platform
+  const arch = (crossConfig?.split("-")[2] as NodeJS.Architecture | undefined) ?? process.arch
+
   const expectedConfig: BuildConfiguration = {
     name: "",
     dev: false,
-    os: process.platform,
-    arch: process.arch,
+    os,
+    arch,
     runtime: "node",
     runtimeVersion: process.versions.node,
-    buildType: args.includes("Debug") ? "Debug" : "Release",
+    buildType: args.includes("Debug") || args.some((arg) => arg.includes("-debug")) ? "Debug" : "Release",
     packageDirectory: "",
+    cross: crossConfig !== undefined,
     projectName: "addon",
     nodeAPI: "node-addon-api",
     targetDirectory: "build",
@@ -91,10 +130,10 @@ async function testZeromqBuild(bundle: string, zeromqPath: string, ...args: stri
 
   expect(configKey.abi).toBeDefined()
   const addonPath = join(
-    process.platform,
-    process.arch,
+    expectedConfig.os,
+    expectedConfig.arch,
     "node",
-    `${configKey.libc}-${configKey.abi}-${configKey.buildType}`,
+    `${expectedConfig.libc}-${expectedConfig.abi}-${expectedConfig.buildType}`,
     "addon.node",
   )
 

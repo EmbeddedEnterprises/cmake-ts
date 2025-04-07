@@ -115,7 +115,7 @@ export class RuntimeDistribution {
 
     this.config.abi = version
 
-    this.config.libc = await detectLibc()
+    this.config.libc = await detectLibc(this.config)
 
     return Promise.resolve()
   }
@@ -196,15 +196,18 @@ export class RuntimeDistribution {
   }
 }
 
-async function detectLibc() {
-  if (process.platform === "linux") {
+async function detectLibc(config: BuildConfiguration) {
+  if (config.libc !== undefined) {
+    return config.libc
+  }
+  if (config.os === "linux") {
     if (await pathExists("/etc/alpine-release")) {
       return "musl"
     }
     return "glibc"
-  } else if (process.platform === "darwin") {
+  } else if (config.os === "darwin") {
     return "libc"
-  } else if (process.platform === "win32") {
+  } else if (config.os === "win32") {
     return "msvc"
   }
   return "unknown"

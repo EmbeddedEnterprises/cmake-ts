@@ -59,8 +59,9 @@
     "build.legacy-main": "vite build --mode legacy-main",
     "build.modern-main": "vite build --mode modern-main",
     "build": "turbo run build.tsc build.tsc.lib build.legacy-main build.modern-main",
-    "test": "cross-env NODE_OPTIONS=--enable-source-maps pnpx vitest --watch false",
-    "coverage": "pnpm test --coverage"
+    "test.install": "cd test && npm i && cd ..",
+    "test": "run-s test.install && cross-env NODE_OPTIONS=--enable-source-maps pnpx vitest --watch false",
+    "coverage": "run-s test.install && cross-env NODE_OPTIONS=--enable-source-maps pnpx vitest --coverage --watch false"
   },
   "files": ["build/**/*", "src/**/*", "./*.mts", "./tsconfig.json"],
   "repository": {
@@ -103,7 +104,6 @@
     "prettier": "3.5.3",
     "prettier-config-atomic": "4.0.0",
     "execa": "9.5.2",
-    "zeromq": "6.4.1",
     "ci-info": "4.2.0",
     "fast-glob": "3.3.3",
     "fs-extra": "^10",
@@ -120,10 +120,6 @@
   "packageManager": "pnpm@10.7.1",
   "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/package.json",
   "pnpm": {
-    "onlyBuiltDependencies": ["@biomejs/biome", "core-js", "esbuild"],
-    "ignoredBuiltDependencies": ["zeromq"],
-    "patchedDependencies": {
-      "zeromq": "patches/zeromq.patch"
-    }
+    "onlyBuiltDependencies": ["@biomejs/biome", "core-js", "esbuild"]
   }
 }

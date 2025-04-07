@@ -99,11 +99,104 @@ export class ArgumentBuilder {
     // push additional overrides
     retVal.push(["CMAKE_JS_DEFINES", this.config.additionalDefines.join(";")])
 
+    // Pass the architecture to cmake if the host architecture is not the same as the target architecture
+    if (this.config.cross === true) {
+      const cmakeArch = getCMakeArchitecture(this.config.arch, this.config.os)
+      const cmakeOs = getCMakeSystemName(this.config.os)
+      logger.info(`Cross-compiling for ${cmakeOs}/${cmakeArch}`)
+
+      retVal.push(["CMAKE_SYSTEM_PROCESSOR", cmakeArch], ["CMAKE_SYSTEM_NAME", cmakeOs])
+
+      if (cmakeOs === "Darwin") {
+        retVal.push(["CMAKE_OSX_ARCHITECTURES", cmakeArch])
+      }
+    }
+
     if (this.config.CMakeOptions.length !== 0) {
       for (const j of this.config.CMakeOptions) {
         retVal.push([j.name, j.value.replace(/\$ROOT\$/g, resolve(this.config.packageDirectory))])
       }
     }
     return retVal
+  }
+}
+
+/**
+ * Get the architecture for cmake
+ * @param arch - The architecture of the target
+ * @param os - The operating system of the target
+ * @returns The architecture for cmake
+ *
+ * @note Based on https://stackoverflow.com/a/70498851/7910299
+ */
+function getCMakeArchitecture(arch: NodeJS.Architecture, os: NodeJS.Platform) {
+  if (os === "win32") {
+    switch (arch) {
+      case "x64":
+        return "AMD64"
+      case "ia32":
+        return "X86"
+      case "arm64":
+        return "ARM64"
+      default:
+        return arch.toUpperCase()
+    }
+  } else if (os === "darwin") {
+    switch (arch) {
+      case "arm64":
+        return "arm64"
+      case "x64":
+        return "x86_64"
+      case "ppc64":
+      case "ppc":
+        return "powerpc"
+      default:
+        return arch
+    }
+  } else {
+    switch (arch) {
+      case "arm64":
+        return "aarch64"
+      case "x64":
+        return "x86_64"
+      case "ia32":
+        return "i386"
+      default:
+        return arch
+    }
+  }
+}
+
+/**
+ * Get the system name for cmake
+ * @param os - The operating system of the target
+ * @returns The system name for cmake
+ *
+ * @note Based on https://cmake.org/cmake/help/latest/variable/CMAKE_SYSTEM_NAME.html
+ */
+function getCMakeSystemName(os: NodeJS.Platform) {
+  switch (os) {
+    case "win32":
+      return "Windows"
+    case "darwin":
+      return "Darwin"
+    case "linux":
+      return "Linux"
+    case "android":
+      return "Android"
+    case "openbsd":
+      return "OpenBSD"
+    case "freebsd":
+      return "FreeBSD"
+    case "netbsd":
+      return "NetBSD"
+    case "cygwin":
+      return "CYGWIN"
+    case "aix":
+      return "AIX"
+    case "sunos":
+      return "SunOS"
+    default:
+      return os.toUpperCase()
   }
 }
