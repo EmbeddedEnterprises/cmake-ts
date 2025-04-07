@@ -117,6 +117,9 @@ export class ArgumentBuilder {
         const targetArch = getMsvcArch(this.config.arch)
         const msvcArch = hostArch === targetArch ? hostArch : `${hostArch}_${targetArch}`
         setupMSVCDevCmd(msvcArch)
+
+        // set the CMake generator platform to the target architecture
+        retVal.push(["CMAKE_GENERATOR_PLATFORM", cmakeArch])
       }
     }
 

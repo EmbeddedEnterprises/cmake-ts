@@ -1,7 +1,7 @@
 import { join, resolve } from "path"
 import { readJson } from "fs-extra"
 import which from "which"
-import { getCmakeGenerator } from "./util.js"
+import { getCmakeGenerator } from "./generator.js"
 
 /**
  * The options of cmake-ts that includes the command to run and the global options
@@ -335,7 +335,7 @@ async function addMissingBuildConfigurationFields(
 
   config.cmakeToUse ??= globalConfig.cmakeToUse ?? (await which("cmake", { nothrow: true })) ?? "cmake"
 
-  const { generator, binary } = await getCmakeGenerator(config.cmakeToUse, process.arch)
+  const { generator, binary } = await getCmakeGenerator(config.cmakeToUse, config.arch)
   config.generatorToUse ??= globalConfig.generatorToUse ?? generator
   config.generatorBinary ??= globalConfig.generatorBinary ?? binary
 
