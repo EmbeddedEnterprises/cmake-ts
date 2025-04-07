@@ -4,6 +4,7 @@ import { logger } from "./logger.js"
 import { getNodeApiInclude } from "./nodeAPIInclude/index.js"
 import type { RuntimeDistribution } from "./runtimeDistribution.js"
 import { getPathsForConfig } from "./urlRegistry.js"
+import { getMsvcArch, setupMSVCDevCmd } from "./vcvarsall.js"
 
 export class ArgumentBuilder {
   constructor(
@@ -110,6 +111,13 @@ export class ArgumentBuilder {
       if (cmakeOs === "Darwin") {
         retVal.push(["CMAKE_OSX_ARCHITECTURES", cmakeArch])
       }
+
+      if (this.config.os === "win32") {
+        const hostArch = getMsvcArch(this.config.arch)
+        const targetArch = getMsvcArch(this.config.arch)
+        const msvcArch = hostArch === targetArch ? hostArch : `${hostArch}-${targetArch}`
+        setupMSVCDevCmd(msvcArch)
+      }
     }
 
     if (this.config.CMakeOptions.length !== 0) {
@@ -130,42 +138,36 @@ export class ArgumentBuilder {
  * @note Based on https://stackoverflow.com/a/70498851/7910299
  */
 function getCMakeArchitecture(arch: NodeJS.Architecture, os: NodeJS.Platform) {
-  if (os === "win32") {
-    switch (arch) {
-      case "x64":
-        return "AMD64"
-      case "ia32":
-        return "X86"
-      case "arm64":
-        return "ARM64"
-      default:
-        return arch.toUpperCase()
-    }
-  } else if (os === "darwin") {
-    switch (arch) {
-      case "arm64":
-        return "arm64"
-      case "x64":
-        return "x86_64"
-      case "ppc64":
-      case "ppc":
-        return "powerpc"
-      default:
-        return arch
-    }
-  } else {
-    switch (arch) {
-      case "arm64":
-        return "aarch64"
-      case "x64":
-        return "x86_64"
-      case "ia32":
-        return "i386"
-      default:
-        return arch
-    }
-  }
+  return os in cmakeArchMap && arch in cmakeArchMap[os]
+    ? cmakeArchMap[os][arch]
+    : os === "win32"
+      ? arch.toUpperCase()
+      : arch
 }
+
+const cmakeArchMap: Record<string, Record<string, string>> = {
+  win32: {
+    arm64: "arm64",
+    x64: "AMD64",
+    ia32: "X86",
+  },
+  darwin: {
+    arm64: "arm64",
+    x64: "x86_64",
+    ppc64: "powerpc64",
+    ppc: "powerpc",
+  },
+  linux: {
+    arm64: "aarch64",
+    x64: "x86_64",
+    ia32: "i386",
+    arm: "arm",
+    loong64: "loong64",
+    mips: "mips",
+    mipsel: "mipsel",
+    ppc64: "ppc64",
+  },
+} as const
 
 /**
  * Get the system name for cmake
@@ -174,29 +176,20 @@ function getCMakeArchitecture(arch: NodeJS.Architecture, os: NodeJS.Platform) {
  *
  * @note Based on https://cmake.org/cmake/help/latest/variable/CMAKE_SYSTEM_NAME.html
  */
-function getCMakeSystemName(os: NodeJS.Platform) {
-  switch (os) {
-    case "win32":
-      return "Windows"
-    case "darwin":
-      return "Darwin"
-    case "linux":
-      return "Linux"
-    case "android":
-      return "Android"
-    case "openbsd":
-      return "OpenBSD"
-    case "freebsd":
-      return "FreeBSD"
-    case "netbsd":
-      return "NetBSD"
-    case "cygwin":
-      return "CYGWIN"
-    case "aix":
-      return "AIX"
-    case "sunos":
-      return "SunOS"
-    default:
-      return os.toUpperCase()
-  }
+function getCMakeSystemName(os: string) {
+  return os in cmakeSystemNameMap ? cmakeSystemNameMap[os as NodeJS.Platform] : os.toUpperCase()
 }
+
+const cmakeSystemNameMap = {
+  win32: "Windows",
+  darwin: "Darwin",
+  linux: "Linux",
+  android: "Android",
+  openbsd: "OpenBSD",
+  freebsd: "FreeBSD",
+  netbsd: "NetBSD",
+  cygwin: "CYGWIN",
+  aix: "AIX",
+  sunos: "SunOS",
+  haiku: "Haiku",
+} as const
