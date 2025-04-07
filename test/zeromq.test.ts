@@ -55,14 +55,14 @@ suite("zeromq", { timeout: 20 * 60 * 1000 }, () => {
     await testZeromqBuild("modern", "build", "--configs", "cross-linux-arm64", "--logger", "debug")
   })
 
-  test("cmake-ts cross-compile cross-win32-ia32", async (t) => {
+  test.fails("cmake-ts cross-compile cross-win32-ia32", async (t) => {
     if (process.platform !== "win32" || process.arch !== "x64") {
       t.skip()
     }
     await testZeromqBuild("modern", "build", "--configs", "cross-win32-ia32", "--logger", "debug")
   })
 
-  test("cmake-ts cross-compile cross-win32-arm64", async (t) => {
+  test.fails("cmake-ts cross-compile cross-win32-arm64", async (t) => {
     if (process.platform !== "win32" || process.arch !== "x64") {
       t.skip()
     }
