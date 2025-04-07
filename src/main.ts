@@ -73,12 +73,18 @@ async function main(): Promise<void> {
     console.log("[ DONE ]")
 
     process.stdout.write("> Building directories... ")
-    const stagingDir = resolve(
-      join(configs.stagingDirectory, config.os, config.arch, config.runtime, `${dist.abi()}`, config.addonSubdirectory),
+
+    const subDirectory = join(
+      config.os,
+      config.arch,
+      config.runtime,
+      `${config.libc}-${dist.abi()}-${configs.buildType}`,
+      config.addonSubdirectory,
     )
-    const targetDir = resolve(
-      join(configs.targetDirectory, config.os, config.arch, config.runtime, `${dist.abi()}`, config.addonSubdirectory),
-    )
+
+    const stagingDir = resolve(join(configs.stagingDirectory, subDirectory))
+    const targetDir = resolve(join(configs.targetDirectory, subDirectory))
+
     console.log("[ DONE ]")
 
     process.stdout.write("> Applying overrides... ")

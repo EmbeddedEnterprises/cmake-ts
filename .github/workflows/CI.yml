@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - backport/*
   pull_request:
 
 jobs:
