@@ -151,7 +151,6 @@ export function getMsvcArch(arch: string): string {
  */
 export function setupMSVCDevCmd(arch: string, vsversion?: string) {
   if (process.platform !== "win32") {
-    logger.info("This is not a Windows virtual environment, bye!")
     return
   }
   const msvcArch = getMsvcArch(arch)
@@ -211,7 +210,7 @@ export function setupMSVCDevCmd(arch: string, vsversion?: string) {
     const old_value = old_env_vars[name]
     // For new variables "old_value === undefined".
     if (new_value !== old_value) {
-      logger.info(`Setting ${name}`)
+      logger.debug(`Setting env var ${name}=${new_value}`)
       // Special case for a bunch of PATH-like variables: vcvarsall.bat
       // just prepends its stuff without checking if its already there.
       // This makes repeated invocations of this action fail after some

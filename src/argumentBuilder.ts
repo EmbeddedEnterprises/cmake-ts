@@ -115,7 +115,7 @@ export class ArgumentBuilder {
       if (this.config.os === "win32") {
         const hostArch = getMsvcArch(this.config.arch)
         const targetArch = getMsvcArch(this.config.arch)
-        const msvcArch = hostArch === targetArch ? hostArch : `${hostArch}-${targetArch}`
+        const msvcArch = hostArch === targetArch ? hostArch : `${hostArch}_${targetArch}`
         setupMSVCDevCmd(msvcArch)
       }
     }
