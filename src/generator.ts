@@ -1,8 +1,8 @@
+import memoizee from "memoizee"
 import which from "which"
+import { getCMakeArchitecture } from "./argumentBuilder.js"
 import { logger } from "./logger.js"
 import { execCapture } from "./util.js"
-import memoizee from "memoizee"
-import { getCMakeArchitecture } from "./argumentBuilder.js"
 
 export const getCmakeGenerator = memoizee(
   async (
@@ -47,8 +47,14 @@ export const getCmakeGenerator = memoizee(
         if (matchedGeneratorLine !== undefined) {
           const [_line, parsedGenerator, archBracket] = matchedGeneratorLine
           const useArchSwitch = (archBracket as string | undefined) === undefined
-          const generator = useArchSwitch ? parsedGenerator : `${parsedGenerator} ${arch === "x64" ? "Win64" : arch === "ia32" ? "Win32" : ""}`
-          const generatorFlags = useArchSwitch ? ["-A", getCMakeArchitecture(arch, os)] : undefined;
+          const archString = arch === "x64" ? " Win64" : arch === "ia32" ? " Win32" : ""
+          if (archString === "") {
+            logger.warn(
+              `Unsupported architecture: ${arch} for generator ${parsedGenerator}. Using without arch specification.`,
+            )
+          }
+          const generator = useArchSwitch ? parsedGenerator : `${parsedGenerator}${archString}`
+          const generatorFlags = useArchSwitch ? ["-A", getCMakeArchitecture(arch, os)] : undefined
 
           logger.debug(`Using generator: ${generator} ${generatorFlags} for ${os} ${arch}`)
           return {

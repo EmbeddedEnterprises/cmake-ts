@@ -153,7 +153,11 @@ export function setupMSVCDevCmd(arch: string, vsversion?: string) {
   if (process.platform !== "win32") {
     return
   }
-  const msvcArch = getMsvcArch(arch)
+  const hostArch = getMsvcArch(process.arch)
+  const targetArch = getMsvcArch(arch)
+  const msvcArch = hostArch === targetArch ? targetArch : `${hostArch}_${targetArch}`
+  logger.debug(`Setting up MSVC for ${msvcArch}`)
+  console.group()
 
   // Add standard location of "vswhere" to PATH, in case it's not there.
   process.env.PATH += delimiter + VSWHERE_PATH
@@ -221,4 +225,5 @@ export function setupMSVCDevCmd(arch: string, vsversion?: string) {
       process.env[name] = new_value
     }
   }
+  console.groupEnd()
 }

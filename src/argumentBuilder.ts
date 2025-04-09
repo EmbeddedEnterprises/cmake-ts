@@ -18,7 +18,7 @@ export class ArgumentBuilder {
     baseCommand += ` ${defines.map((d) => `-D${d[0]}="${d[1]}"`).join(" ")}`
     if (this.config.generatorToUse !== "native") {
       baseCommand += ` -G"${this.config.generatorToUse}"`
-      if (this.config.generatorFlags !== undefined) {
+      if (this.config.generatorFlags !== undefined && defines.some((d) => d[0] === "CMAKE_GENERATOR_PLATFORM")) {
         baseCommand += ` ${this.config.generatorFlags.map((f) => `"${f}"`).join(" ")}`
       }
     }
@@ -111,13 +111,15 @@ export class ArgumentBuilder {
       }
 
       if (this.config.os === "win32") {
-        const hostArch = getMsvcArch(this.config.arch)
-        const targetArch = getMsvcArch(this.config.arch)
-        const msvcArch = hostArch === targetArch ? hostArch : `${hostArch}_${targetArch}`
-        setupMSVCDevCmd(msvcArch)
-
-        // set the CMake generator platform to the target architecture
-        retVal.push(["CMAKE_GENERATOR_PLATFORM", cmakeArch])
+        try {
+          setupMSVCDevCmd(this.config.arch)
+        } catch (e) {
+          logger.warn(
+            `Failed to setup MSVC variables for ${this.config.arch}: ${e}. Using CMake generator platform instead.`,
+          )
+          // set the CMake generator platform to the target architecture
+          retVal.push(["CMAKE_GENERATOR_PLATFORM", cmakeArch])
+        }
       }
     }
 
