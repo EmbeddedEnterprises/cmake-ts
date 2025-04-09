@@ -130,7 +130,6 @@ Target directory: ${targetDir}
     : join(stagingDir, `${config.projectName}.node`)
   await copy(sourceAddonPath, addonPath)
 
-
   logger.debug("Adding the built config to the manifest file...")
 
   // read the manifest if it exists

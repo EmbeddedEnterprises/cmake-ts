@@ -42,6 +42,7 @@ export function run(command: string, cwd: string = process.cwd(), silent: boolea
     const child = cp.spawn(name, args, {
       stdio: silent ? "ignore" : "inherit",
       cwd,
+      env: process.env,
     })
     let ended = false
     child.on("error", (e) => {
