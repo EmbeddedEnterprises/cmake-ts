@@ -4,7 +4,7 @@ import { logger } from "./logger.js"
 import { getNodeApiInclude } from "./nodeAPIInclude/index.js"
 import type { RuntimeDistribution } from "./runtimeDistribution.js"
 import { getPathsForConfig } from "./urlRegistry.js"
-import { getMsvcArch, setupMSVCDevCmd } from "./vcvarsall.js"
+import { setupMSVCDevCmd } from "./vcvarsall.js"
 
 export class ArgumentBuilder {
   constructor(
@@ -12,7 +12,7 @@ export class ArgumentBuilder {
     private rtd: RuntimeDistribution,
   ) {}
 
-  async buildCmakeCommandLine(): Promise<string> {
+  async configureCommand(): Promise<string> {
     let baseCommand = `"${this.config.cmakeToUse}" "${this.config.packageDirectory}" --no-warn-unused-cli`
     const defines = await this.buildDefines()
     baseCommand += ` ${defines.map((d) => `-D${d[0]}="${d[1]}"`).join(" ")}`
@@ -26,8 +26,8 @@ export class ArgumentBuilder {
     return baseCommand
   }
 
-  buildGeneratorCommandLine(stagingDir: string): string {
-    return `"${this.config.cmakeToUse}" --build "${stagingDir}" --config "${this.config.buildType}"`
+  buildCommand(stagingDir: string): string {
+    return `"${this.config.cmakeToUse}" --build "${stagingDir}" --config "${this.config.buildType}" --parallel`
   }
 
   async buildDefines(): Promise<[string, string][]> {

@@ -64,7 +64,6 @@ export async function buildConfig(config: BuildConfiguration, opts: Options) {
     logger.debug("[ CLEARED ]")
   }
   await ensureDir(config.stagingDirectory)
-  logger.debug("[ DONE ]")
 
   const dist = new RuntimeDistribution(config)
   logger.debug("---------------- BEGIN CONFIG ----------------")
@@ -72,11 +71,9 @@ export async function buildConfig(config: BuildConfiguration, opts: Options) {
   // Download files
   logger.debug("> Distribution File Download... ")
   await dist.ensureDownloaded()
-  logger.debug("[ DONE ]")
 
   logger.debug("> Determining ABI... ")
   await dist.determineABI()
-  logger.debug("[ DONE ]")
 
   logger.debug("> Building directories... ")
 
@@ -90,11 +87,9 @@ export async function buildConfig(config: BuildConfiguration, opts: Options) {
 
   const stagingDir = resolve(join(config.stagingDirectory, subDirectory))
   const targetDir = resolve(join(config.targetDirectory, subDirectory))
-  logger.debug("[ DONE ]")
 
-  logger.debug("> Applying overrides... ")
-  const appliedOverrides = applyOverrides(config)
-  logger.debug(`[ DONE, ${appliedOverrides} applied ]`)
+  logger.debug("> Applying overrides if needed... ")
+  applyOverrides(config)
 
   logger.info(`----------------------------------------------
 ${config.name}
@@ -109,24 +104,21 @@ Target directory: ${targetDir}
   // Create target directory
   logger.debug("> Setting up config specific staging directory... ")
   await ensureDir(stagingDir)
-  logger.debug("[ DONE ]")
 
   // Build CMake command line
   const argBuilder = new ArgumentBuilder(config, dist)
   logger.debug("> Building CMake command line... ")
-  const cmdline = await argBuilder.buildCmakeCommandLine()
+  const cmdline = await argBuilder.configureCommand()
 
   // Invoke CMake
   logger.debug(`> Configure: ${cmdline}`)
   // TODO: Capture stdout/stderr and display only when having an error
   await run(cmdline, stagingDir, false)
-  logger.debug("[ DONE ]")
 
   // Actually build the software
-  const buildcmdline = argBuilder.buildGeneratorCommandLine(stagingDir)
+  const buildcmdline = argBuilder.buildCommand(stagingDir)
   logger.debug(`> Build ${config.generatorBinary} ${buildcmdline}`)
   await run(buildcmdline, stagingDir, false)
-  logger.debug("[ DONE ]")
 
   // Copy back the previously built binary
   logger.debug(`> Copying ${config.projectName}.node to target directory... `)
@@ -138,7 +130,6 @@ Target directory: ${targetDir}
     : join(stagingDir, `${config.projectName}.node`)
   await copy(sourceAddonPath, addonPath)
 
-  logger.debug("[ DONE ]")
 
   logger.debug("Adding the built config to the manifest file...")
 
