@@ -1,76 +1,74 @@
 import which from "which"
 import { logger } from "./logger.js"
 import { execCapture } from "./util.js"
+import memoizee from "memoizee"
+import { getCMakeArchitecture } from "./argumentBuilder.js"
 
-export async function getCmakeGenerator(
-  cmake: string,
-  arch: string,
-): Promise<{
-  generator: string | undefined
-  binary: string | undefined
-}> {
-  // use ninja if available
-  if (process.platform !== "win32") {
-    const ninja = await which("ninja", { nothrow: true })
-    if (ninja !== null) {
-      return {
-        generator: "Ninja",
-        binary: ninja,
+export const getCmakeGenerator = memoizee(
+  async (
+    cmake: string,
+    os: NodeJS.Platform,
+    arch: NodeJS.Architecture,
+  ): Promise<{
+    generator?: string
+    generatorFlags?: string[]
+    binary?: string
+  }> => {
+    // use ninja if available
+    if (os !== "win32") {
+      const ninja = await which("ninja", { nothrow: true })
+      if (ninja !== null) {
+        logger.debug(`Using generator: Ninja for ${os} ${arch}`)
+        return {
+          generator: "Ninja",
+          binary: ninja,
+        }
       }
     }
-  }
 
-  // use the MSVC generator on Windows
-  if (process.platform === "win32" && ["x64", "x86"].includes(arch)) {
-    try {
-      const archString = arch === "x64" ? "Win64" : arch === "x86" ? "" : <never>undefined
+    // find the MSVC generator on Windows and see if an arch switch is needed
+    if (os === "win32") {
+      try {
+        const cmakeG = await execCapture(`"${cmake}" -G`)
+        const hasCR = cmakeG.includes("\r\n")
+        const output = hasCR ? cmakeG.split("\r\n") : cmakeG.split("\n")
 
-      const generators = await execCapture(`"${cmake}" -G`)
-      logger.debug(generators)
-      const hasCR = generators.includes("\r\n")
-      const output = hasCR ? generators.split("\r\n") : generators.split("\n")
-      let found = false
-      let useVSGen = ""
-
-      for (const line of output) {
-        if (!found && line.trim() === "Generators") {
-          found = true
-          continue
+        // Find the first Visual Studio generator (marked with * or not)
+        let matchedGeneratorLine: RegExpMatchArray | undefined = undefined
+        for (const line of output) {
+          const match = line.match(/^\s*(?:\* )?(Visual\s+Studio\s+\d+\s+\d+)(\s+\[arch])?\s*=.*$/)
+          if (match !== null) {
+            matchedGeneratorLine = match
+            break
+          }
         }
-        const genParts = line.split("=")
-        if (genParts.length <= 1) {
-          // Some descriptions are multi-line
-          continue
-        }
-        /** Current MSVS compiler selected in Windows generally is prefixed with "* " */
-        genParts[0] = genParts[0].replace(/^(\* )/, "").trim()
 
-        // eslint-disable-next-line optimize-regex/optimize-regex
-        if (genParts[0].match(/Visual\s+Studio\s+\d+\s+\d+(\s+\[arch\])?/)) {
-          // The first entry is usually the latest entry
-          useVSGen = genParts[0]
-          break
+        // if found a match, use the generator
+        if (matchedGeneratorLine !== undefined) {
+          const [_line, parsedGenerator, archBracket] = matchedGeneratorLine
+          const useArchSwitch = (archBracket as string | undefined) === undefined
+          const generator = useArchSwitch ? parsedGenerator : `${parsedGenerator} ${arch === "x64" ? "Win64" : arch === "ia32" ? "Win32" : ""}`
+          const generatorFlags = useArchSwitch ? ["-A", getCMakeArchitecture(arch, os)] : undefined;
+
+          logger.debug(`Using generator: ${generator} ${generatorFlags} for ${os} ${arch}`)
+          return {
+            generator,
+            generatorFlags,
+            binary: undefined,
+          }
         }
+      } catch (e) {
+        logger.warn("Failed to find valid VS gen, using native.")
+        // fall back to native
       }
-      const useSwitch = !useVSGen.match(/.*\[arch]/)
-      if (useSwitch) {
-        useVSGen += " -A" // essentially using this as a flag
-      } else {
-        useVSGen = useVSGen.replace("[arch]", archString).trim()
-      }
-      logger.debug("Using generator: ", useVSGen)
-      return {
-        generator: useVSGen,
-        binary: undefined,
-      }
-    } catch (e) {
-      logger.warn("Failed to find valid VS gen, using native.")
-      // fall back to native
     }
-  }
 
-  return {
-    generator: "native",
-    binary: undefined,
-  }
-}
+    // use native generator
+    logger.debug(`Using generator: native for ${os} ${arch}`)
+    return {
+      generator: "native",
+      binary: undefined,
+    }
+  },
+  { promise: true },
+)

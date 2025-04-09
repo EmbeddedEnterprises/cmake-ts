@@ -214,6 +214,8 @@ export type BuildConfiguration = {
   additionalDefines: string[]
   /** which cmake generator to use */
   generatorToUse: string
+  /** which cmake generator flags to use */
+  generatorFlags?: string[]
 }
 
 export type BuildConfigurations = {
@@ -335,8 +337,9 @@ async function addMissingBuildConfigurationFields(
 
   config.cmakeToUse ??= globalConfig.cmakeToUse ?? (await which("cmake", { nothrow: true })) ?? "cmake"
 
-  const { generator, binary } = await getCmakeGenerator(config.cmakeToUse, config.arch)
+  const { generator, generatorFlags, binary } = await getCmakeGenerator(config.cmakeToUse, config.os, config.arch)
   config.generatorToUse ??= globalConfig.generatorToUse ?? generator
+  config.generatorFlags ??= globalConfig.generatorFlags ?? generatorFlags
   config.generatorBinary ??= globalConfig.generatorBinary ?? binary
 
   return config as BuildConfiguration

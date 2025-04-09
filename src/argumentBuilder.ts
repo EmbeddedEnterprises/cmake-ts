@@ -17,12 +17,10 @@ export class ArgumentBuilder {
     const defines = await this.buildDefines()
     baseCommand += ` ${defines.map((d) => `-D${d[0]}="${d[1]}"`).join(" ")}`
     if (this.config.generatorToUse !== "native") {
-      let generatorString = ` -G"${this.config.generatorToUse}"`
-      if (generatorString.match(/Visual\s+Studio\s+\d+\s+\d+\s-A/)) {
-        generatorString = generatorString.replace(/\s-A/, "")
-        generatorString += ` -A ${this.config.arch}`
+      baseCommand += ` -G"${this.config.generatorToUse}"`
+      if (this.config.generatorFlags !== undefined) {
+        baseCommand += ` ${this.config.generatorFlags.map((f) => `"${f}"`).join(" ")}`
       }
-      baseCommand += generatorString
     }
     logger.debug(baseCommand)
     return baseCommand
@@ -140,7 +138,7 @@ export class ArgumentBuilder {
  *
  * @note Based on https://stackoverflow.com/a/70498851/7910299
  */
-function getCMakeArchitecture(arch: NodeJS.Architecture, os: NodeJS.Platform) {
+export function getCMakeArchitecture(arch: NodeJS.Architecture, os: NodeJS.Platform) {
   return os in cmakeArchMap && arch in cmakeArchMap[os]
     ? cmakeArchMap[os][arch]
     : os === "win32"

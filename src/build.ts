@@ -97,16 +97,13 @@ export async function buildConfig(config: BuildConfiguration, opts: Options) {
   logger.debug(`[ DONE, ${appliedOverrides} applied ]`)
 
   logger.info(`----------------------------------------------
-${config.name ? `Name: ${config.name}` : ""}
-OS/Arch: ${config.os} ${config.arch}
-Runtime: ${config.runtime} ${config.runtimeVersion}
-Target ABI: ${dist.abi()}
-Target libc: ${config.libc}
-Staging area: ${stagingDir}
+${config.name}
+${config.os} ${config.arch} ${config.libc}
+${config.runtime} ${config.runtimeVersion} runtime with ABI ${dist.abi()}
+${config.generatorToUse} ${config.generatorFlags?.join(" ")} generator with build type ${config.buildType} ${config.toolchainFile !== undefined ? `and toolchain ${config.toolchainFile}` : ""}
+${config.CMakeOptions.join(" ")}
+Staging directory: ${stagingDir}
 Target directory: ${targetDir}
-Build Type: ${config.buildType}
-${config.toolchainFile !== undefined ? `Toolchain File: ${config.toolchainFile}` : ""}
-${config.CMakeOptions.length > 0 ? `Extra CMake options: ${config.CMakeOptions.join(" ")}` : ""}
 ----------------------------------------------`)
 
   // Create target directory
@@ -118,18 +115,16 @@ ${config.CMakeOptions.length > 0 ? `Extra CMake options: ${config.CMakeOptions.j
   const argBuilder = new ArgumentBuilder(config, dist)
   logger.debug("> Building CMake command line... ")
   const cmdline = await argBuilder.buildCmakeCommandLine()
-  const buildcmdline = argBuilder.buildGeneratorCommandLine(stagingDir)
-  logger.debug(`====> configure: ${cmdline}
-====> build:     ${buildcmdline}`)
 
   // Invoke CMake
-  logger.debug("> Invoking CMake... ")
+  logger.debug(`> Configure: ${cmdline}`)
   // TODO: Capture stdout/stderr and display only when having an error
   await run(cmdline, stagingDir, false)
   logger.debug("[ DONE ]")
 
   // Actually build the software
-  logger.debug(`> Invoking ${config.generatorBinary}... `)
+  const buildcmdline = argBuilder.buildGeneratorCommandLine(stagingDir)
+  logger.debug(`> Build ${config.generatorBinary} ${buildcmdline}`)
   await run(buildcmdline, stagingDir, false)
   logger.debug("[ DONE ]")
 

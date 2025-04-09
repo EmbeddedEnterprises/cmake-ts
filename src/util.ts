@@ -10,6 +10,10 @@ export function getEnvVar(name: string) {
   return undefined
 }
 
+/**
+ * Capture the output of a command
+ * @note this ignores the running errors
+ */
 export function execCapture(command: string): Promise<string> {
   return new Promise((resolve) => {
     cp.exec(command, (_, stdout, stderr) => {
