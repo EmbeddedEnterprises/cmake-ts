@@ -11,30 +11,31 @@ import { run } from "./util.js"
  * Build the project via cmake-ts
  *
  * @param opts - The options to use for the build
- * @returns The exit code of the build
+ * @returns The configurations that were built or null if there was an error
  */
-export async function build(opts: Options) {
+export async function build(opts: Options): Promise<BuildConfiguration[] | null> {
   if (opts.command.type === "error") {
-    return 1
+    logger.error("The given options are invalid")
+    return null
   }
   if (opts.command.type === "none") {
-    return 0
+    return []
   }
   if (opts.help) {
-    return 0
+    return []
   }
 
   const configFile = await getConfigFile()
   if (configFile instanceof Error) {
     logger.error(configFile)
-    return 1
+    return null
   }
 
   // set the missing options to their default value
   const configsToBuild = await parseBuildConfigs(opts, configFile)
   if (configsToBuild === null) {
     logger.error("No configs to build")
-    return 1
+    return null
   }
 
   for (const config of configsToBuild) {
@@ -43,11 +44,11 @@ export async function build(opts: Options) {
       await buildConfig(config, opts)
     } catch (err) {
       logger.error("Error building config", config.name, err)
-      return 1
+      return null
     }
   }
 
-  return 0
+  return configsToBuild
 }
 
 export async function buildConfig(config: BuildConfiguration, opts: Options) {
