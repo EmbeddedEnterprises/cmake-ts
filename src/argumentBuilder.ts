@@ -18,7 +18,7 @@ export class ArgumentBuilder {
     baseCommand += ` ${defines.map((d) => `-D${d[0]}="${d[1]}"`).join(" ")}`
     if (this.config.generatorToUse !== "native") {
       baseCommand += ` -G"${this.config.generatorToUse}"`
-      if (this.config.generatorFlags !== undefined && defines.some((d) => d[0] === "CMAKE_GENERATOR_PLATFORM")) {
+      if (this.config.generatorFlags !== undefined) {
         baseCommand += ` ${this.config.generatorFlags.map((f) => `"${f}"`).join(" ")}`
       }
     }
@@ -115,11 +115,11 @@ export class ArgumentBuilder {
           setupMSVCDevCmd(this.config.arch)
         } catch (e) {
           logger.warn(
-            `Failed to setup MSVC variables for ${this.config.arch}: ${e}. Using CMake generator platform instead.`,
+            `Failed to setup MSVC variables for ${this.config.arch}: ${e}. Relying on CMake generator platform.`,
           )
-          // set the CMake generator platform to the target architecture
-          retVal.push(["CMAKE_GENERATOR_PLATFORM", cmakeArch])
         }
+        // set the CMake generator platform to the target architecture
+        retVal.push(["CMAKE_GENERATOR_PLATFORM", cmakeArch])
       }
     }
 
