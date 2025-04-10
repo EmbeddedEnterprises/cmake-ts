@@ -1,6 +1,5 @@
 import * as cp from "child_process"
 import { type PathLike, type StatOptions, type Stats, type StatsBase, stat as rawStat } from "fs-extra"
-import splitargs from "splitargs2"
 
 export function getEnvVar(name: string) {
   const value = process.env[name]
@@ -22,24 +21,14 @@ export function execCapture(command: string): Promise<string> {
   })
 }
 
-export function exec(command: string): Promise<string> {
+export function runProgram(
+  program: string,
+  args: string[],
+  cwd: string = process.cwd(),
+  silent: boolean = false,
+): Promise<void> {
   return new Promise((resolve, reject) => {
-    cp.exec(command, (err, stdout, stderr) => {
-      if (err) {
-        reject(new Error(`${err.message}\n${stdout || stderr}`))
-      } else {
-        resolve(stdout)
-      }
-    })
-  })
-}
-
-export function run(command: string, cwd: string = process.cwd(), silent: boolean = false): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const args = splitargs(command)
-    const name = args[0]
-    args.splice(0, 1)
-    const child = cp.spawn(name, args, {
+    const child = cp.spawn(program, args, {
       stdio: silent ? "ignore" : "inherit",
       cwd,
       env: process.env,

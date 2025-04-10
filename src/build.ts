@@ -5,7 +5,7 @@ import { type BuildConfiguration, type Options, getConfigFile, parseBuildConfigs
 import { logger } from "./logger.js"
 import { applyOverrides } from "./override.js"
 import { RuntimeDistribution } from "./runtimeDistribution.js"
-import { run } from "./util.js"
+import { runProgram } from "./util.js"
 
 /**
  * Build the project via cmake-ts
@@ -106,20 +106,17 @@ Target directory: ${targetDir}
   logger.debug("> Setting up config specific staging directory... ")
   await ensureDir(stagingDir)
 
-  // Build CMake command line
   const argBuilder = new ArgumentBuilder(config, dist)
-  logger.debug("> Building CMake command line... ")
-  const cmdline = await argBuilder.configureCommand()
 
   // Invoke CMake
-  logger.debug(`> Configure: ${cmdline}`)
-  // TODO: Capture stdout/stderr and display only when having an error
-  await run(cmdline, stagingDir, false)
+  const [configureCmd, configureArgs] = await argBuilder.configureCommand()
+  logger.debug(`> Configure: ${configureCmd} ${configureArgs.map((a) => `"${a}"`).join(" ")}`)
+  await runProgram(configureCmd, configureArgs, stagingDir)
 
   // Actually build the software
-  const buildcmdline = argBuilder.buildCommand(stagingDir)
-  logger.debug(`> Build ${config.generatorBinary} ${buildcmdline}`)
-  await run(buildcmdline, stagingDir, false)
+  const [buildCmd, buildArgs] = argBuilder.buildCommand(stagingDir)
+  logger.debug(`> Build ${config.generatorBinary} ${buildArgs.map((a) => `"${a}"`).join(" ")}`)
+  await runProgram(buildCmd, buildArgs, stagingDir)
 
   // Copy back the previously built binary
   logger.debug(`> Copying ${config.projectName}.node to target directory... `)

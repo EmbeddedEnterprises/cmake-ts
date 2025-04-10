@@ -4,9 +4,9 @@ import { existsSync, readJson } from "fs-extra"
 import { assert, expect } from "vitest"
 import which from "which"
 import { parseArgs } from "../src/args.js"
+import { getCMakeArchitecture } from "../src/argumentBuilder.js"
 import { build } from "../src/build.js"
 import type { BuildConfiguration } from "../src/config.js"
-import { getCMakeArchitecture } from "../src/argumentBuilder.js"
 
 /**
  * The context of the test

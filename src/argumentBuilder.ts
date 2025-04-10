@@ -12,22 +12,23 @@ export class ArgumentBuilder {
     private rtd: RuntimeDistribution,
   ) {}
 
-  async configureCommand(): Promise<string> {
-    let baseCommand = `"${this.config.cmakeToUse}" "${this.config.packageDirectory}" --no-warn-unused-cli`
+  async configureCommand(): Promise<[string, string[]]> {
+    const args = [this.config.packageDirectory, "--no-warn-unused-cli"]
     const defines = await this.buildDefines()
-    baseCommand += ` ${defines.map((d) => `-D${d[0]}="${d[1]}"`).join(" ")}`
+    for (const [name, value] of defines) {
+      args.push(`-D${name}=${value}`)
+    }
     if (this.config.generatorToUse !== "native") {
-      baseCommand += ` -G"${this.config.generatorToUse}"`
+      args.push("-G", this.config.generatorToUse)
       if (this.config.generatorFlags !== undefined) {
-        baseCommand += ` ${this.config.generatorFlags.map((f) => `"${f}"`).join(" ")}`
+        args.push(...this.config.generatorFlags)
       }
     }
-    logger.debug(baseCommand)
-    return baseCommand
+    return [this.config.cmakeToUse, args]
   }
 
-  buildCommand(stagingDir: string): string {
-    return `"${this.config.cmakeToUse}" --build "${stagingDir}" --config "${this.config.buildType}" --parallel`
+  buildCommand(stagingDir: string): [string, string[]] {
+    return [this.config.cmakeToUse, ["--build", stagingDir, "--config", this.config.buildType, "--parallel"]]
   }
 
   async buildDefines(): Promise<[string, string][]> {
