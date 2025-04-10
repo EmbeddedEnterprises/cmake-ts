@@ -9,3 +9,4 @@ coverage/
 .cache/
 .DS_Store
 html/
+*.tsbuildinfo

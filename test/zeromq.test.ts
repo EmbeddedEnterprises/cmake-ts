@@ -2,7 +2,7 @@ import { dirname, join } from "path"
 import { fileURLToPath } from "url"
 import { execa } from "execa"
 import { remove } from "fs-extra"
-import { beforeAll, beforeEach, suite, test } from "vitest"
+import { beforeAll, suite, test } from "vitest"
 import { HOME_DIRECTORY } from "../src/urlRegistry.js"
 import { testZeromqBuild } from "./zeromq.js"
 
@@ -10,7 +10,7 @@ const _dirname = typeof __dirname === "string" ? __dirname : dirname(fileURLToPa
 const root = dirname(_dirname)
 const zeromqPath = join(root, "test", "node_modules", "zeromq")
 
-suite("zeromq", { timeout: 20 * 60 * 1000 }, () => {
+suite.concurrent("zeromq", { timeout: 20 * 60 * 1000 }, () => {
   beforeAll(async () => {
     await execa("pnpm", ["build"], {
       stdio: "inherit",
@@ -21,10 +21,7 @@ suite("zeromq", { timeout: 20 * 60 * 1000 }, () => {
       shell: true,
     })
     console.log("Build completed")
-  })
 
-  beforeEach(async () => {
-    // clean up the cmake-ts cache and the zeromq source
     await Promise.all([
       remove(join(HOME_DIRECTORY, ".cmake-ts")),
       remove(join(zeromqPath, "build")),
@@ -34,7 +31,19 @@ suite("zeromq", { timeout: 20 * 60 * 1000 }, () => {
 
   // release build
   test("cmake-ts modern build --logger debug", async () => {
-    await testZeromqBuild({ root, zeromqPath, bundle: "modern", args: ["build", "--logger", "debug"] })
+    await testZeromqBuild({ root, zeromqPath, bundle: "modern-main", args: ["build", "--logger", "debug"] })
+
+    test("cmake-ts cross-compile cross-darwin-x64", async (t) => {
+      if (process.platform !== "darwin" || process.arch !== "arm64") {
+        t.skip()
+      }
+      await testZeromqBuild({
+        root,
+        zeromqPath,
+        bundle: "modern-main",
+        args: ["build", "--configs", "cross-darwin-x64", "--logger", "debug"],
+      })
+    })
   })
 
   // debug build
@@ -42,14 +51,14 @@ suite("zeromq", { timeout: 20 * 60 * 1000 }, () => {
     await testZeromqBuild({
       root,
       zeromqPath,
-      bundle: "modern",
+      bundle: "modern-main",
       args: ["build", "--configs", "Debug", "--logger", "debug"],
     })
-  })
 
-  // test legacy build command with deprecated options
-  test("cmake-ts legacy nativeonly --logger debug", async () => {
-    await testZeromqBuild({ root, zeromqPath, bundle: "legacy", args: ["nativeonly", "--logger", "debug"] })
+    // test legacy build command with deprecated options
+    test("cmake-ts legacy nativeonly --logger debug", async () => {
+      await testZeromqBuild({ root, zeromqPath, bundle: "legacy-main", args: ["nativeonly", "--logger", "debug"] })
+    })
   })
 
   test("cmake-ts cross-compile cross-linux-arm64", async (t) => {
@@ -59,7 +68,7 @@ suite("zeromq", { timeout: 20 * 60 * 1000 }, () => {
     await testZeromqBuild({
       root,
       zeromqPath,
-      bundle: "modern",
+      bundle: "modern-main",
       args: ["build", "--configs", "cross-linux-arm64", "--logger", "debug"],
     })
   })
@@ -71,7 +80,7 @@ suite("zeromq", { timeout: 20 * 60 * 1000 }, () => {
     await testZeromqBuild({
       root,
       zeromqPath,
-      bundle: "modern",
+      bundle: "modern-main",
       args: ["build", "--configs", "cross-win32-ia32", "--logger", "debug"],
     })
   })
@@ -83,20 +92,8 @@ suite("zeromq", { timeout: 20 * 60 * 1000 }, () => {
     await testZeromqBuild({
       root,
       zeromqPath,
-      bundle: "modern",
+      bundle: "modern-main",
       args: ["build", "--configs", "cross-win32-arm64", "--logger", "debug"],
-    })
-  })
-
-  test("cmake-ts cross-compile cross-darwin-x64", async (t) => {
-    if (process.platform !== "darwin" || process.arch !== "arm64") {
-      t.skip()
-    }
-    await testZeromqBuild({
-      root,
-      zeromqPath,
-      bundle: "modern",
-      args: ["build", "--configs", "cross-darwin-x64", "--logger", "debug"],
     })
   })
 
@@ -107,7 +104,7 @@ suite("zeromq", { timeout: 20 * 60 * 1000 }, () => {
     await testZeromqBuild({
       root,
       zeromqPath,
-      bundle: "modern",
+      bundle: "modern-main",
       args: ["build", "--configs", "cross-darwin-arm64", "--logger", "debug"],
     })
   })
