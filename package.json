@@ -58,7 +58,9 @@
     "build.tsc.lib": "tsc --pretty --project ./src/tsconfig.json && shx cp -r ./src/*.d.mts ./build/",
     "build.legacy-main": "vite build --mode legacy-main",
     "build.modern-main": "vite build --mode modern-main",
-    "build": "turbo run build.tsc build.tsc.lib build.legacy-main build.modern-main",
+    "build.legacy-library": "vite build --mode legacy-library",
+    "build.modern-library": "vite build --mode modern-library",
+    "build": "turbo run build.tsc build.tsc.lib build.legacy-main build.modern-main build.legacy-library build.modern-library",
     "test.install": "cd test && npm i && cd ..",
     "test": "run-s test.install && cross-env NODE_OPTIONS=--enable-source-maps pnpx vitest --watch false",
     "coverage": "run-s test.install && cross-env NODE_OPTIONS=--enable-source-maps pnpx vitest --coverage --watch false"
