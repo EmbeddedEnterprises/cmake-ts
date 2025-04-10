@@ -3,9 +3,9 @@ import { execa } from "execa"
 import { existsSync, readJson } from "fs-extra"
 import { assert, expect } from "vitest"
 import which from "which"
-import type { BuildConfiguration } from "../src/config.js"
-import { build } from "../src/build.js"
 import { parseArgs } from "../src/args.js"
+import { build } from "../src/build.js"
+import type { BuildConfiguration } from "../src/config.js"
 
 /**
  * The context of the test
@@ -120,7 +120,7 @@ async function testZeromqBuildResults(config: BuildConfiguration, ctx: Ctx) {
     projectName: "addon",
     nodeAPI: "node-addon-api",
     targetDirectory: "build",
-    stagingDirectory: "staging",
+    stagingDirectory: cross ? "cross-staging" : "staging",
     cmakeToUse: await which("cmake"),
     generatorToUse: "Ninja",
     generatorBinary: await which("ninja"),

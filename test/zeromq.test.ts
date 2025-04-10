@@ -26,38 +26,43 @@ suite.concurrent("zeromq", { timeout: 20 * 60 * 1000 }, () => {
       remove(join(HOME_DIRECTORY, ".cmake-ts")),
       remove(join(zeromqPath, "build")),
       remove(join(zeromqPath, "staging")),
+      remove(join(zeromqPath, "cross-staging")),
     ])
   })
 
   // release build
-  test("cmake-ts modern build --logger debug", async () => {
-    await testZeromqBuild({ root, zeromqPath, bundle: "modern-main", args: ["build", "--logger", "debug"] })
-
-    test("cmake-ts cross-compile cross-darwin-x64", async (t) => {
-      if (process.platform !== "darwin" || process.arch !== "arm64") {
-        t.skip()
-      }
-      await testZeromqBuild({
-        root,
-        zeromqPath,
-        bundle: "modern-main",
-        args: ["build", "--configs", "cross-darwin-x64", "--logger", "debug"],
-      })
+  suite("release", () => {
+    test("cmake-ts modern build --logger debug", async () => {
+      await testZeromqBuild({ root, zeromqPath, bundle: "modern-main", args: ["build", "--logger", "debug"] })
     })
   })
 
   // debug build
-  test("cmake-ts modern build --configs Debug --logger debug", async () => {
-    await testZeromqBuild({
-      root,
-      zeromqPath,
-      bundle: "modern-main",
-      args: ["build", "--configs", "Debug", "--logger", "debug"],
+  suite("debug", () => {
+    test("cmake-ts modern build --configs Debug --logger debug", async () => {
+      await testZeromqBuild({
+        root,
+        zeromqPath,
+        bundle: "modern-main",
+        args: ["build", "--configs", "Debug", "--logger", "debug"],
+      })
     })
 
     // test legacy build command with deprecated options
     test("cmake-ts legacy nativeonly --logger debug", async () => {
       await testZeromqBuild({ root, zeromqPath, bundle: "legacy-main", args: ["nativeonly", "--logger", "debug"] })
+    })
+  })
+
+  test("cmake-ts cross-compile cross-darwin-x64", async (t) => {
+    if (process.platform !== "darwin" || process.arch !== "arm64") {
+      t.skip()
+    }
+    await testZeromqBuild({
+      root,
+      zeromqPath,
+      bundle: "modern-main",
+      args: ["build", "--configs", "cross-darwin-x64", "--staging-directory", "cross-staging", "--logger", "debug"],
     })
   })
 
@@ -69,7 +74,7 @@ suite.concurrent("zeromq", { timeout: 20 * 60 * 1000 }, () => {
       root,
       zeromqPath,
       bundle: "modern-main",
-      args: ["build", "--configs", "cross-linux-arm64", "--logger", "debug"],
+      args: ["build", "--configs", "cross-linux-arm64", "--staging-directory", "cross-staging", "--logger", "debug"],
     })
   })
 
@@ -81,7 +86,7 @@ suite.concurrent("zeromq", { timeout: 20 * 60 * 1000 }, () => {
       root,
       zeromqPath,
       bundle: "modern-main",
-      args: ["build", "--configs", "cross-win32-ia32", "--logger", "debug"],
+      args: ["build", "--configs", "cross-win32-ia32", "--staging-directory", "cross-staging", "--logger", "debug"],
     })
   })
 
@@ -93,7 +98,7 @@ suite.concurrent("zeromq", { timeout: 20 * 60 * 1000 }, () => {
       root,
       zeromqPath,
       bundle: "modern-main",
-      args: ["build", "--configs", "cross-win32-arm64", "--logger", "debug"],
+      args: ["build", "--configs", "cross-win32-arm64", "--staging-directory", "cross-staging", "--logger", "debug"],
     })
   })
 
@@ -105,7 +110,7 @@ suite.concurrent("zeromq", { timeout: 20 * 60 * 1000 }, () => {
       root,
       zeromqPath,
       bundle: "modern-main",
-      args: ["build", "--configs", "cross-darwin-arm64", "--logger", "debug"],
+      args: ["build", "--configs", "cross-darwin-arm64", "--staging-directory", "cross-staging", "--logger", "debug"],
     })
   })
 })

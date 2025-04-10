@@ -1,6 +1,6 @@
 {
   "extends": "eslint-config-atomic",
-  "ignorePatterns": ["build/", "dist/", "node_modules/", "coverage/", "stats.html", ".cache/", ".turbo/"],
+  "ignorePatterns": ["build/", "dist/", "node_modules/", "coverage/", "stats.html", ".cache/", ".turbo/", "html/"],
   "overrides": [
     {
       "files": ["**/*.ts"],
