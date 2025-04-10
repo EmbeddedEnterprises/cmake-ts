@@ -1,5 +1,6 @@
 import { dirname, join } from "path"
 import { fileURLToPath } from "url"
+import { isCI } from "ci-info"
 import { execa } from "execa"
 import { remove } from "fs-extra"
 import { beforeAll, suite, test } from "vitest"
@@ -10,7 +11,9 @@ const _dirname = typeof __dirname === "string" ? __dirname : dirname(fileURLToPa
 const root = dirname(_dirname)
 const zeromqPath = join(root, "test", "node_modules", "zeromq")
 
-suite.concurrent("zeromq", { timeout: 20 * 60 * 1000 }, () => {
+const suiteFn = isCI ? suite : suite.concurrent
+
+suiteFn("zeromq", { timeout: 20 * 60 * 1000 }, () => {
   beforeAll(async () => {
     await execa("pnpm", ["build"], {
       stdio: "inherit",
