@@ -6,6 +6,7 @@ import which from "which"
 import { parseArgs } from "../src/args.js"
 import { build } from "../src/build.js"
 import type { BuildConfiguration } from "../src/config.js"
+import { getCMakeArchitecture } from "../src/argumentBuilder.js"
 
 /**
  * The context of the test
@@ -122,8 +123,9 @@ async function testZeromqBuildResults(config: BuildConfiguration, ctx: Ctx) {
     targetDirectory: "build",
     stagingDirectory: cross ? "cross-staging" : "staging",
     cmakeToUse: await which("cmake"),
-    generatorToUse: "Ninja",
-    generatorBinary: await which("ninja"),
+    generatorToUse: os === "win32" ? "Visual Studio 17 2022" : "Ninja",
+    generatorBinary: os === "win32" ? undefined : await which("ninja"),
+    generatorFlags: os === "win32" ? ["-A", getCMakeArchitecture(arch, os)] : undefined,
     CMakeOptions: [],
     addonSubdirectory: "",
     additionalDefines: [],

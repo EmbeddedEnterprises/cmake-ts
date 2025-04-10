@@ -213,7 +213,7 @@ export type BuildConfiguration = {
   /** which cmake instance to use */
   cmakeToUse: string
   /** cmake generator binary. */
-  generatorBinary: string
+  generatorBinary?: string
 
   // Cmake options
 
