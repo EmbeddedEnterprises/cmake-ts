@@ -6,11 +6,14 @@
     "build.tsc": {
       "outputs": []
     },
+    "build.tsc.lib": {
+      "outputs": ["build/**/*.d.ts"]
+    },
     "build.legacy-main": {
-      "outputs": ["build/main.js", "build/main.js.map"]
+      "outputs": ["build/main.js", "build/main.js.map", "build/lib.js", "build/lib.js.map"]
     },
     "build.modern-main": {
-      "outputs": ["build/main.mjs", "build/main.mjs.map"]
+      "outputs": ["build/main.mjs", "build/main.mjs.map", "build/lib.mjs", "build/lib.mjs.map"]
     },
     "lint.eslint": {},
     "lint.biome": {
