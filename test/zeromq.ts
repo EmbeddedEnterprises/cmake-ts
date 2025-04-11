@@ -4,7 +4,6 @@ import { existsSync, readJson } from "fs-extra"
 import { assert, expect } from "vitest"
 import which from "which"
 import { parseArgs } from "../src/args.js"
-import { getCMakeArchitecture } from "../src/argumentBuilder.js"
 import { build } from "../src/build.js"
 import type { BuildConfiguration } from "../src/config.js"
 
@@ -123,9 +122,8 @@ async function testZeromqBuildResults(config: BuildConfiguration, ctx: Ctx) {
     targetDirectory: "build",
     stagingDirectory: cross ? "cross-staging" : "staging",
     cmakeToUse: await which("cmake"),
-    generatorToUse: os === "win32" ? "Visual Studio 17 2022" : "Ninja",
-    generatorBinary: os === "win32" ? undefined : await which("ninja"),
-    generatorFlags: os === "win32" ? ["-A", getCMakeArchitecture(arch, os)] : undefined,
+    generatorToUse: "Ninja",
+    generatorBinary: await which("ninja"),
     CMakeOptions: [],
     addonSubdirectory: "",
     additionalDefines: [],

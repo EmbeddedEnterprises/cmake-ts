@@ -119,8 +119,10 @@ export class ArgumentBuilder {
             `Failed to setup MSVC variables for ${this.config.arch}: ${e}. Relying on CMake generator platform.`,
           )
         }
-        // set the CMake generator platform to the target architecture
-        retVal.push(["CMAKE_GENERATOR_PLATFORM", cmakeArch])
+        if (this.config.generatorToUse.includes("Visual Studio")) {
+          // set the CMake generator platform to the target architecture
+          retVal.push(["CMAKE_GENERATOR_PLATFORM", cmakeArch])
+        }
       }
     }
 
