@@ -15,14 +15,12 @@ export const getCmakeGenerator = memoizee(
     binary?: string
   }> => {
     // use ninja if available
-    if (os !== "win32") {
-      const ninja = await which("ninja", { nothrow: true })
-      if (ninja !== null) {
-        logger.debug(`Using generator: Ninja for ${os} ${arch}`)
-        return {
-          generator: "Ninja",
-          binary: ninja,
-        }
+    const ninja = await which("ninja", { nothrow: true })
+    if (ninja !== null) {
+      logger.debug(`Using generator: Ninja for ${os} ${arch}`)
+      return {
+        generator: "Ninja",
+        binary: ninja,
       }
     }
 
