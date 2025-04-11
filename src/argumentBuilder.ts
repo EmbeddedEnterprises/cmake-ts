@@ -112,16 +112,20 @@ export class ArgumentBuilder {
       }
 
       if (this.config.os === "win32") {
+        const isVisualStudio = this.config.generatorToUse.includes("Visual Studio")
         try {
           setupMSVCDevCmd(this.config.arch)
+          if (isVisualStudio) {
+            logger.debug("Removing the generator flags in favour of the vcvarsall.bat script")
+            this.config.generatorFlags = undefined
+          }
         } catch (e) {
-          logger.warn(
-            `Failed to setup MSVC variables for ${this.config.arch}: ${e}. Relying on CMake generator platform.`,
-          )
-        }
-        if (this.config.generatorToUse.includes("Visual Studio")) {
-          // set the CMake generator platform to the target architecture
-          retVal.push(["CMAKE_GENERATOR_PLATFORM", cmakeArch])
+          logger.warn(`Failed to setup MSVC variables for ${this.config.arch}: ${e}.`)
+          if (isVisualStudio) {
+            logger.debug("Setting the CMake generator platform to the target architecture")
+            // set the CMake generator platform to the target architecture
+            retVal.push(["CMAKE_GENERATOR_PLATFORM", cmakeArch])
+          }
         }
       }
     }

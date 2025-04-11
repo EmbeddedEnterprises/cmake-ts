@@ -92,6 +92,10 @@ export async function buildConfig(config: BuildConfiguration, opts: Options) {
   logger.debug("> Applying overrides if needed... ")
   applyOverrides(config)
 
+  const argBuilder = new ArgumentBuilder(config, dist)
+  const [configureCmd, configureArgs] = await argBuilder.configureCommand()
+  const [buildCmd, buildArgs] = argBuilder.buildCommand(stagingDir)
+
   logger.info(`----------------------------------------------
 ${config.name}
 ${config.os} ${config.arch} ${config.libc}
@@ -106,15 +110,11 @@ Target directory: ${targetDir}
   logger.debug("> Setting up config specific staging directory... ")
   await ensureDir(stagingDir)
 
-  const argBuilder = new ArgumentBuilder(config, dist)
-
   // Invoke CMake
-  const [configureCmd, configureArgs] = await argBuilder.configureCommand()
   logger.debug(`> Configure: ${configureCmd} ${configureArgs.map((a) => `"${a}"`).join(" ")}`)
   await runProgram(configureCmd, configureArgs, stagingDir)
 
   // Actually build the software
-  const [buildCmd, buildArgs] = argBuilder.buildCommand(stagingDir)
   logger.debug(`> Build ${config.generatorBinary} ${buildArgs.map((a) => `"${a}"`).join(" ")}`)
   await runProgram(buildCmd, buildArgs, stagingDir)
 
