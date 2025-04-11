@@ -4,6 +4,7 @@ import { logger } from "./logger.js"
 import { getNodeApiInclude } from "./nodeAPIInclude/index.js"
 import type { RuntimeDistribution } from "./runtimeDistribution.js"
 import { getPathsForConfig } from "./urlRegistry.js"
+import { setupMSVCDevCmd } from "./vcvarsall.js"
 
 export class ArgumentBuilder {
   constructor(
@@ -11,24 +12,23 @@ export class ArgumentBuilder {
     private rtd: RuntimeDistribution,
   ) {}
 
-  async buildCmakeCommandLine(): Promise<string> {
-    let baseCommand = `"${this.config.cmakeToUse}" "${this.config.packageDirectory}" --no-warn-unused-cli`
+  async configureCommand(): Promise<[string, string[]]> {
+    const args = [this.config.packageDirectory, "--no-warn-unused-cli"]
     const defines = await this.buildDefines()
-    baseCommand += ` ${defines.map((d) => `-D${d[0]}="${d[1]}"`).join(" ")}`
-    if (this.config.generatorToUse !== "native") {
-      let generatorString = ` -G"${this.config.generatorToUse}"`
-      if (generatorString.match(/Visual\s+Studio\s+\d+\s+\d+\s-A/)) {
-        generatorString = generatorString.replace(/\s-A/, "")
-        generatorString += ` -A ${this.config.arch}`
-      }
-      baseCommand += generatorString
+    for (const [name, value] of defines) {
+      args.push(`-D${name}=${value}`)
     }
-    logger.debug(baseCommand)
-    return baseCommand
+    if (this.config.generatorToUse !== "native") {
+      args.push("-G", this.config.generatorToUse)
+      if (this.config.generatorFlags !== undefined) {
+        args.push(...this.config.generatorFlags)
+      }
+    }
+    return [this.config.cmakeToUse, args]
   }
 
-  buildGeneratorCommandLine(stagingDir: string): string {
-    return `"${this.config.cmakeToUse}" --build "${stagingDir}" --config "${this.config.buildType}"`
+  buildCommand(stagingDir: string): [string, string[]] {
+    return [this.config.cmakeToUse, ["--build", stagingDir, "--config", this.config.buildType, "--parallel"]]
   }
 
   async buildDefines(): Promise<[string, string][]> {
@@ -110,6 +110,24 @@ export class ArgumentBuilder {
       if (cmakeOs === "Darwin") {
         retVal.push(["CMAKE_OSX_ARCHITECTURES", cmakeArch])
       }
+
+      if (this.config.os === "win32") {
+        const isVisualStudio = this.config.generatorToUse.includes("Visual Studio")
+        try {
+          setupMSVCDevCmd(this.config.arch)
+          if (isVisualStudio) {
+            logger.debug("Removing the generator flags in favour of the vcvarsall.bat script")
+            this.config.generatorFlags = undefined
+          }
+        } catch (e) {
+          logger.warn(`Failed to setup MSVC variables for ${this.config.arch}: ${e}.`)
+          if (isVisualStudio) {
+            logger.debug("Setting the CMake generator platform to the target architecture")
+            // set the CMake generator platform to the target architecture
+            retVal.push(["CMAKE_GENERATOR_PLATFORM", cmakeArch])
+          }
+        }
+      }
     }
 
     if (this.config.CMakeOptions.length !== 0) {
@@ -129,43 +147,37 @@ export class ArgumentBuilder {
  *
  * @note Based on https://stackoverflow.com/a/70498851/7910299
  */
-function getCMakeArchitecture(arch: NodeJS.Architecture, os: NodeJS.Platform) {
-  if (os === "win32") {
-    switch (arch) {
-      case "x64":
-        return "AMD64"
-      case "ia32":
-        return "X86"
-      case "arm64":
-        return "ARM64"
-      default:
-        return arch.toUpperCase()
-    }
-  } else if (os === "darwin") {
-    switch (arch) {
-      case "arm64":
-        return "arm64"
-      case "x64":
-        return "x86_64"
-      case "ppc64":
-      case "ppc":
-        return "powerpc"
-      default:
-        return arch
-    }
-  } else {
-    switch (arch) {
-      case "arm64":
-        return "aarch64"
-      case "x64":
-        return "x86_64"
-      case "ia32":
-        return "i386"
-      default:
-        return arch
-    }
-  }
+export function getCMakeArchitecture(arch: NodeJS.Architecture, os: NodeJS.Platform) {
+  return os in cmakeArchMap && arch in cmakeArchMap[os]
+    ? cmakeArchMap[os][arch]
+    : os === "win32"
+      ? arch.toUpperCase()
+      : arch
 }
+
+const cmakeArchMap: Record<string, Record<string, string>> = {
+  win32: {
+    arm64: "arm64",
+    x64: "AMD64",
+    ia32: "X86",
+  },
+  darwin: {
+    arm64: "arm64",
+    x64: "x86_64",
+    ppc64: "powerpc64",
+    ppc: "powerpc",
+  },
+  linux: {
+    arm64: "aarch64",
+    x64: "x86_64",
+    ia32: "i386",
+    arm: "arm",
+    loong64: "loong64",
+    mips: "mips",
+    mipsel: "mipsel",
+    ppc64: "ppc64",
+  },
+} as const
 
 /**
  * Get the system name for cmake
@@ -174,29 +186,20 @@ function getCMakeArchitecture(arch: NodeJS.Architecture, os: NodeJS.Platform) {
  *
  * @note Based on https://cmake.org/cmake/help/latest/variable/CMAKE_SYSTEM_NAME.html
  */
-function getCMakeSystemName(os: NodeJS.Platform) {
-  switch (os) {
-    case "win32":
-      return "Windows"
-    case "darwin":
-      return "Darwin"
-    case "linux":
-      return "Linux"
-    case "android":
-      return "Android"
-    case "openbsd":
-      return "OpenBSD"
-    case "freebsd":
-      return "FreeBSD"
-    case "netbsd":
-      return "NetBSD"
-    case "cygwin":
-      return "CYGWIN"
-    case "aix":
-      return "AIX"
-    case "sunos":
-      return "SunOS"
-    default:
-      return os.toUpperCase()
-  }
+function getCMakeSystemName(os: string) {
+  return os in cmakeSystemNameMap ? cmakeSystemNameMap[os as NodeJS.Platform] : os.toUpperCase()
 }
+
+const cmakeSystemNameMap = {
+  win32: "Windows",
+  darwin: "Darwin",
+  linux: "Linux",
+  android: "Android",
+  openbsd: "OpenBSD",
+  freebsd: "FreeBSD",
+  netbsd: "NetBSD",
+  cygwin: "CYGWIN",
+  aix: "AIX",
+  sunos: "SunOS",
+  haiku: "Haiku",
+} as const

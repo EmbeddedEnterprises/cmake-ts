@@ -8,3 +8,5 @@ coverage/
 .turbo/
 .cache/
 .DS_Store
+html/
+*.tsbuildinfo

@@ -5,36 +5,37 @@ import { type BuildConfiguration, type Options, getConfigFile, parseBuildConfigs
 import { logger } from "./logger.js"
 import { applyOverrides } from "./override.js"
 import { RuntimeDistribution } from "./runtimeDistribution.js"
-import { run } from "./util.js"
+import { runProgram } from "./util.js"
 
 /**
  * Build the project via cmake-ts
  *
  * @param opts - The options to use for the build
- * @returns The exit code of the build
+ * @returns The configurations that were built or null if there was an error
  */
-export async function build(opts: Options) {
+export async function build(opts: Options): Promise<BuildConfiguration[] | null> {
   if (opts.command.type === "error") {
-    return 1
+    logger.error("The given options are invalid")
+    return null
   }
   if (opts.command.type === "none") {
-    return 0
+    return []
   }
   if (opts.help) {
-    return 0
+    return []
   }
 
   const configFile = await getConfigFile()
   if (configFile instanceof Error) {
     logger.error(configFile)
-    return 1
+    return null
   }
 
   // set the missing options to their default value
   const configsToBuild = await parseBuildConfigs(opts, configFile)
   if (configsToBuild === null) {
     logger.error("No configs to build")
-    return 1
+    return null
   }
 
   for (const config of configsToBuild) {
@@ -43,11 +44,11 @@ export async function build(opts: Options) {
       await buildConfig(config, opts)
     } catch (err) {
       logger.error("Error building config", config.name, err)
-      return 1
+      return null
     }
   }
 
-  return 0
+  return configsToBuild
 }
 
 export async function buildConfig(config: BuildConfiguration, opts: Options) {
@@ -64,7 +65,6 @@ export async function buildConfig(config: BuildConfiguration, opts: Options) {
     logger.debug("[ CLEARED ]")
   }
   await ensureDir(config.stagingDirectory)
-  logger.debug("[ DONE ]")
 
   const dist = new RuntimeDistribution(config)
   logger.debug("---------------- BEGIN CONFIG ----------------")
@@ -72,11 +72,9 @@ export async function buildConfig(config: BuildConfiguration, opts: Options) {
   // Download files
   logger.debug("> Distribution File Download... ")
   await dist.ensureDownloaded()
-  logger.debug("[ DONE ]")
 
   logger.debug("> Determining ABI... ")
   await dist.determineABI()
-  logger.debug("[ DONE ]")
 
   logger.debug("> Building directories... ")
 
@@ -90,48 +88,35 @@ export async function buildConfig(config: BuildConfiguration, opts: Options) {
 
   const stagingDir = resolve(join(config.stagingDirectory, subDirectory))
   const targetDir = resolve(join(config.targetDirectory, subDirectory))
-  logger.debug("[ DONE ]")
 
-  logger.debug("> Applying overrides... ")
-  const appliedOverrides = applyOverrides(config)
-  logger.debug(`[ DONE, ${appliedOverrides} applied ]`)
+  logger.debug("> Applying overrides if needed... ")
+  applyOverrides(config)
+
+  const argBuilder = new ArgumentBuilder(config, dist)
+  const [configureCmd, configureArgs] = await argBuilder.configureCommand()
+  const [buildCmd, buildArgs] = argBuilder.buildCommand(stagingDir)
 
   logger.info(`----------------------------------------------
-${config.name ? `Name: ${config.name}` : ""}
-OS/Arch: ${config.os} ${config.arch}
-Runtime: ${config.runtime} ${config.runtimeVersion}
-Target ABI: ${dist.abi()}
-Target libc: ${config.libc}
-Staging area: ${stagingDir}
+${config.name}
+${config.os} ${config.arch} ${config.libc}
+${config.runtime} ${config.runtimeVersion} runtime with ABI ${dist.abi()}
+${config.generatorToUse} ${config.generatorFlags?.join(" ")} generator with build type ${config.buildType} ${config.toolchainFile !== undefined ? `and toolchain ${config.toolchainFile}` : ""}
+${config.CMakeOptions.join(" ")}
+Staging directory: ${stagingDir}
 Target directory: ${targetDir}
-Build Type: ${config.buildType}
-${config.toolchainFile !== undefined ? `Toolchain File: ${config.toolchainFile}` : ""}
-${config.CMakeOptions.length > 0 ? `Extra CMake options: ${config.CMakeOptions.join(" ")}` : ""}
 ----------------------------------------------`)
 
   // Create target directory
   logger.debug("> Setting up config specific staging directory... ")
   await ensureDir(stagingDir)
-  logger.debug("[ DONE ]")
-
-  // Build CMake command line
-  const argBuilder = new ArgumentBuilder(config, dist)
-  logger.debug("> Building CMake command line... ")
-  const cmdline = await argBuilder.buildCmakeCommandLine()
-  const buildcmdline = argBuilder.buildGeneratorCommandLine(stagingDir)
-  logger.debug(`====> configure: ${cmdline}
-====> build:     ${buildcmdline}`)
 
   // Invoke CMake
-  logger.debug("> Invoking CMake... ")
-  // TODO: Capture stdout/stderr and display only when having an error
-  await run(cmdline, stagingDir, false)
-  logger.debug("[ DONE ]")
+  logger.debug(`> Configure: ${configureCmd} ${configureArgs.map((a) => `"${a}"`).join(" ")}`)
+  await runProgram(configureCmd, configureArgs, stagingDir)
 
   // Actually build the software
-  logger.debug(`> Invoking ${config.generatorBinary}... `)
-  await run(buildcmdline, stagingDir, false)
-  logger.debug("[ DONE ]")
+  logger.debug(`> Build ${config.generatorBinary} ${buildArgs.map((a) => `"${a}"`).join(" ")}`)
+  await runProgram(buildCmd, buildArgs, stagingDir)
 
   // Copy back the previously built binary
   logger.debug(`> Copying ${config.projectName}.node to target directory... `)
@@ -142,8 +127,6 @@ ${config.CMakeOptions.length > 0 ? `Extra CMake options: ${config.CMakeOptions.j
     ? join(stagingDir, config.buildType, `${config.projectName}.node`)
     : join(stagingDir, `${config.projectName}.node`)
   await copy(sourceAddonPath, addonPath)
-
-  logger.debug("[ DONE ]")
 
   logger.debug("Adding the built config to the manifest file...")
 

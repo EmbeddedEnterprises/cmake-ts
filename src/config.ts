@@ -1,7 +1,7 @@
 import { join, resolve } from "path"
 import { readJson } from "fs-extra"
 import which from "which"
-import { getCmakeGenerator } from "./util.js"
+import { getCmakeGenerator } from "./generator.js"
 
 /**
  * The options of cmake-ts that includes the command to run and the global options
@@ -82,6 +82,19 @@ export type BuildCommandOptions = {
    *  The configs can be combined with `,` or multiple `--configs` flags. They will be merged together.
    */
   configs: string[]
+
+  // Path options that override the default values
+
+  /** project name */
+  projectName?: string
+  /** The subdirectory of the package which is being built. */
+  addonSubdirectory?: string
+  /** directory of the package which is being built */
+  packageDirectory?: string
+  /** directory where the binaries will end */
+  targetDirectory?: string
+  /** directory where intermediate files will end up */
+  stagingDirectory?: string
 
   /** Show help */
   help: boolean
@@ -200,7 +213,7 @@ export type BuildConfiguration = {
   /** which cmake instance to use */
   cmakeToUse: string
   /** cmake generator binary. */
-  generatorBinary: string
+  generatorBinary?: string
 
   // Cmake options
 
@@ -214,6 +227,8 @@ export type BuildConfiguration = {
   additionalDefines: string[]
   /** which cmake generator to use */
   generatorToUse: string
+  /** which cmake generator flags to use */
+  generatorFlags?: string[]
 }
 
 export type BuildConfigurations = {
@@ -246,20 +261,21 @@ export async function parseBuildConfigs(
     return null
   }
 
-  const givenConfigNames = new Set(opts.command.options.configs)
+  const buildOptions = opts.command.options
+  const givenConfigNames = new Set(buildOptions.configs)
 
   const configsToBuild: BuildConfiguration[] = []
 
   // if no named configs are provided, build for the current runtime/system
   if (givenConfigNames.size === 0) {
-    configsToBuild.push(await addMissingBuildConfigurationFields({}, configFile))
+    configsToBuild.push(await getBuildConfiguration(buildOptions, {}, configFile))
     return configsToBuild
   }
 
   // check if the given config names are a subset of the config names in the config file
   for (const partialConfig of configFile.configurations ?? []) {
     /* eslint-disable no-await-in-loop */
-    const config = await addMissingBuildConfigurationFields(partialConfig, configFile)
+    const config = await getBuildConfiguration(buildOptions, partialConfig, configFile)
 
     if (
       givenConfigNames.has(config.name) ||
@@ -275,7 +291,7 @@ export async function parseBuildConfigs(
   // parse the remaining config names to extract the runtime, build type, and system
   for (const configName of givenConfigNames) {
     const config = parseBuiltInConfigs(configName)
-    configsToBuild.push(await addMissingBuildConfigurationFields(config, configFile))
+    configsToBuild.push(await getBuildConfiguration(buildOptions, config, configFile))
   }
 
   return configsToBuild
@@ -284,7 +300,8 @@ export async function parseBuildConfigs(
 /**
  * Add the missing fields to the given build configuration.
  */
-async function addMissingBuildConfigurationFields(
+async function getBuildConfiguration(
+  buildOptions: BuildCommandOptions,
   config: Partial<BuildConfiguration>,
   globalConfig: Partial<BuildConfigurations>,
 ) {
@@ -316,11 +333,11 @@ async function addMissingBuildConfigurationFields(
   config.dev ??= globalConfig.dev ?? false
 
   // Paths
-  config.addonSubdirectory ??= globalConfig.addonSubdirectory ?? ""
-  config.packageDirectory ??= globalConfig.packageDirectory ?? process.cwd()
-  config.projectName ??= globalConfig.projectName ?? "addon"
-  config.targetDirectory ??= globalConfig.targetDirectory ?? "build"
-  config.stagingDirectory ??= globalConfig.stagingDirectory ?? "staging"
+  config.addonSubdirectory ??= buildOptions.addonSubdirectory ?? globalConfig.addonSubdirectory ?? ""
+  config.packageDirectory ??= buildOptions.packageDirectory ?? globalConfig.packageDirectory ?? process.cwd()
+  config.projectName ??= buildOptions.projectName ?? globalConfig.projectName ?? "addon"
+  config.targetDirectory ??= buildOptions.targetDirectory ?? globalConfig.targetDirectory ?? "build"
+  config.stagingDirectory ??= buildOptions.stagingDirectory ?? globalConfig.stagingDirectory ?? "staging"
 
   // Cmake options
   config.CMakeOptions = [
@@ -335,8 +352,9 @@ async function addMissingBuildConfigurationFields(
 
   config.cmakeToUse ??= globalConfig.cmakeToUse ?? (await which("cmake", { nothrow: true })) ?? "cmake"
 
-  const { generator, binary } = await getCmakeGenerator(config.cmakeToUse, process.arch)
+  const { generator, generatorFlags, binary } = await getCmakeGenerator(config.cmakeToUse, config.os, config.arch)
   config.generatorToUse ??= globalConfig.generatorToUse ?? generator
+  config.generatorFlags ??= globalConfig.generatorFlags ?? generatorFlags
   config.generatorBinary ??= globalConfig.generatorBinary ?? binary
 
   return config as BuildConfiguration
