@@ -32,8 +32,7 @@
     "resolveJsonModule": true,
     "module": "ESNext",
     "moduleResolution": "node",
-    "importHelpers": false,
-    "outDir": "./build"
+    "importHelpers": false
   },
   "compileOnSave": false,
   "include": ["./src", "./*.mts", "test/**/*.ts", "test/**/*.mts"],

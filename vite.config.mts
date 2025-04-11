@@ -6,15 +6,17 @@ import babelConfig from "./babel.config.mts"
 // Instead of using TARGET env variable, we'll use Vite's mode
 export default defineConfig(async (configEnv) => {
   const isLegacy = configEnv.mode.includes("legacy")
+  const isLibrary = configEnv.mode.includes("library")
 
-  const plugins = isLegacy
-    ? [
-        babel({
-          babelConfig,
-        }),
-      ]
-    : []
+  const plugins = []
 
+  if (isLegacy) {
+    plugins.push(
+      babel({
+        babelConfig,
+      }),
+    )
+  }
   if (process.env.BUILD_ANALYSIS === "true") {
     const visualizer = (await import("rollup-plugin-visualizer")).visualizer
     plugins.push(
@@ -26,7 +28,7 @@ export default defineConfig(async (configEnv) => {
 
   return {
     build: {
-      ssr: "./src/main.ts",
+      ssr: isLibrary ? "./src/lib.ts" : "./src/main.ts",
       outDir: "./build",
       target: isLegacy ? "node12" : "node20",
       minify: process.env.NODE_ENV === "development" ? false : "esbuild",
@@ -34,15 +36,6 @@ export default defineConfig(async (configEnv) => {
       rollupOptions: {
         output: {
           format: isLegacy ? "cjs" : "es",
-          manualChunks: {
-            lib: ["./src/lib.ts"],
-          },
-          chunkFileNames: (chunkInfo) => {
-            if (chunkInfo.name === "lib") {
-              return isLegacy ? "lib.js" : "lib.mjs"
-            }
-            return chunkInfo
-          },
         },
       },
       emptyOutDir: false,

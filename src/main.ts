@@ -3,9 +3,13 @@
 import { parseArgs } from "./args.js"
 import { build, logger } from "./lib.js"
 
-function main(): Promise<number> {
+async function main(): Promise<number> {
   const opts = parseArgs()
-  return build(opts)
+  const configs = await build(opts)
+  if (configs === null) {
+    return 1
+  }
+  return 0
 }
 
 main()

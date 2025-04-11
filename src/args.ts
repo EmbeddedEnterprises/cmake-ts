@@ -106,6 +106,11 @@ export function parseArgs(args?: string[]): Options {
 `,
       [],
     )
+    .option("--project-name <name>", "The name of the built node addon.")
+    .option("--addon-subdirectory <subdirectory>", "The subdirectory of the package which is being built.")
+    .option("--package-directory <directory>", "The directory of the package which is being built.")
+    .option("--target-directory <directory>", "The directory where the binaries will end.")
+    .option("--staging-directory <directory>", "The directory where intermediate files will end up.")
     .action(() => {
       commandOptions.command.type = "build"
     })

@@ -1,21 +1,23 @@
 import { dirname, join } from "path"
 import { fileURLToPath } from "url"
+import { isCI } from "ci-info"
 import { ensureDir, pathExists, readFile, readdir, remove } from "fs-extra"
-import { beforeEach, expect, suite, test } from "vitest"
+import { beforeAll, expect, suite, test } from "vitest"
 import { calculateHash, downloadFile, downloadTgz, downloadToString } from "../src/download.js"
-
 const _dirname = typeof __dirname === "string" ? __dirname : dirname(fileURLToPath(import.meta.url))
 const root = dirname(_dirname)
 const testTmpDir = join(root, "test", ".tmp")
 
-suite("Download Module", { timeout: 20_000, retry: 3 }, () => {
+const suiteFn = isCI ? suite : suite.concurrent
+
+suiteFn("Download Module", { timeout: 20_000, retry: 3 }, () => {
   // Real Node.js distribution URLs for testing
   const nodeBaseUrl = "https://nodejs.org/dist/v23.4.0"
   const nodeHeadersUrl = `${nodeBaseUrl}/node-v23.4.0-headers.tar.gz`
   const nodeDocsUrl = `${nodeBaseUrl}/docs/apilinks.json`
   const nodeShasumUrl = `${nodeBaseUrl}/SHASUMS256.txt`
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     await remove(testTmpDir)
     await ensureDir(testTmpDir)
   })

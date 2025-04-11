@@ -9,7 +9,9 @@
       "**/.*cache/**",
       "**/.turbo/**",
       "coverage/**",
-      "**/coverage/**"
+      "**/coverage/**",
+      "**/stats.html",
+      "**/html/**"
     ],
     "ignoreUnknown": true
   },

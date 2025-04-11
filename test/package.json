@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "zeromq": "6.4.1"
+    "zeromq": "6.4.2"
   },
   "devDependencies": {
     "patch-package": "8.0.0"
