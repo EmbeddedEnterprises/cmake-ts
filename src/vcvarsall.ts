@@ -3,7 +3,7 @@
 import { execSync } from "child_process"
 import { existsSync } from "fs"
 import { delimiter } from "path"
-import { logger } from "./logger.js"
+import { logger } from "./utils/logger.js"
 
 const PROGRAM_FILES_X86 = process.env["ProgramFiles(x86)"]
 const PROGRAM_FILES = [process.env["ProgramFiles(x86)"], process.env.ProgramFiles]

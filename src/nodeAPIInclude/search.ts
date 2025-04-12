@@ -1,6 +1,6 @@
 import { join as joinPath, normalize as normalizePath, sep as pathSeparator } from "path"
-import { logger } from "../logger.js"
-import { stat } from "../util.js"
+import { stat } from "../utils/fs.js"
+import { logger } from "../utils/logger.js"
 
 export async function searchPackage(projectRoot: string, packageName: string): Promise<string | null> {
   const isNode = await isNodeProject(projectRoot)

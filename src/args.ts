@@ -1,8 +1,8 @@
 /* eslint-disable import/no-deprecated */
 import { Command as Commander } from "commander"
 import type { BuildCommandOptions, DeprecatedGlobalOptions, GlobalOptions, Options } from "./config-types.d"
-import { logger } from "./logger.js"
-import { getEnvVar } from "./util.js"
+import { getEnvVar } from "./utils/env.js"
+import { logger } from "./utils/logger.js"
 
 /**
  * Parse the command line arguments and return the options.

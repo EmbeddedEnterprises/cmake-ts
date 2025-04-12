@@ -2,6 +2,7 @@ import fs from "fs"
 import path from "path"
 import type { BuildConfiguration } from "./config-types.d"
 import { detectLibc } from "./libc.js"
+import { errorString, logger } from "./utils/logger.js"
 
 const requireFn = typeof require === "function" ? require : (name: string) => import(name)
 
@@ -59,11 +60,11 @@ export async function loadAddon<Addon>(buildDir: string): Promise<Addon | undefi
         addon = await requireFn(addonPath)
         break
       } catch (err) {
-        warn(`Failed to load addon at ${addonPath}: ${errStr(err)}\nTrying others...`)
+        logger.warn(`Failed to load addon at ${addonPath}: ${errorString(err)}\nTrying others...`)
       }
     }
   } catch (err) {
-    throw new Error(`Failed to load zeromq.js addon.node: ${errStr(err)}`)
+    throw new Error(`Failed to load zeromq.js addon.node: ${errorString(err)}`)
   }
 
   if (addon === undefined) {
@@ -71,16 +72,6 @@ export async function loadAddon<Addon>(buildDir: string): Promise<Addon | undefi
   }
 
   return addon
-}
-
-function errStr(error: unknown) {
-  return error instanceof Error ? `${error.name}: ${error.message}\nStack:\n${error.stack}` : String(error)
-}
-
-function warn(message: string) {
-  if (process.env.NODE_DEBUG !== undefined) {
-    console.warn(message)
-  }
 }
 
 function getPlatform(): Platform {

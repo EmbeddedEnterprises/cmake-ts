@@ -3,10 +3,10 @@ import glob from "fast-glob"
 import { ensureDir, readFile } from "fs-extra"
 import urlJoin from "url-join"
 import type { BuildConfiguration } from "./config-types.d"
-import { downloadFile, downloadTgz, downloadToString } from "./download.js"
 import { detectLibc } from "./libc.js"
 import { HOME_DIRECTORY, getPathsForConfig } from "./urlRegistry.js"
-import { stat } from "./util.js"
+import { downloadFile, downloadTgz, downloadToString } from "./utils/download.js"
+import { stat } from "./utils/fs.js"
 
 export type HashSum = { getPath: string; sum: string }
 function testHashSum(sums: HashSum[], sum: string | undefined, fPath: string) {

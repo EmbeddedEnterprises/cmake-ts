@@ -110,11 +110,10 @@ async function main() {
   // use the addon
 }
 
-main()
-  .catch((err) => {
-    console.error(err);
-    process.exit(1);
-  });
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
 ```
 
 or in CommonJS:
@@ -128,11 +127,10 @@ async function main() {
   // use the addon
 }
 
-main()
-  .catch((err) => {
-    console.error(err);
-    process.exit(1);
-  });
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
 ```
 
 You can pass the types of the addon to the loader to get type safety:

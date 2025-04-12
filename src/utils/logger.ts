@@ -65,3 +65,13 @@ class Logger {
 }
 
 export const logger = new Logger()
+
+/**
+ * Get the error string.
+ *
+ * @param error - The error.
+ * @returns The error string.
+ */
+export function errorString(error: unknown) {
+  return error instanceof Error && error.stack !== undefined ? error.stack : String(error)
+}
