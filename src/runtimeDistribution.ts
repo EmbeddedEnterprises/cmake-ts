@@ -1,9 +1,10 @@
 import { extname, join as joinPath } from "path"
 import glob from "fast-glob"
-import { ensureDir, pathExists, readFile } from "fs-extra"
+import { ensureDir, readFile } from "fs-extra"
 import urlJoin from "url-join"
-import type { BuildConfiguration } from "./config.js"
+import type { BuildConfiguration } from "./config-types.d"
 import { downloadFile, downloadTgz, downloadToString } from "./download.js"
+import { detectLibc } from "./libc.js"
 import { HOME_DIRECTORY, getPathsForConfig } from "./urlRegistry.js"
 import { stat } from "./util.js"
 
@@ -115,7 +116,7 @@ export class RuntimeDistribution {
 
     this.config.abi = version
 
-    this.config.libc = await detectLibc(this.config)
+    this.config.libc = detectLibc(this.config.os)
 
     return Promise.resolve()
   }
@@ -194,21 +195,4 @@ export class RuntimeDistribution {
       throw new Error("Checksum mismatch")
     }
   }
-}
-
-async function detectLibc(config: BuildConfiguration) {
-  if (config.libc !== undefined) {
-    return config.libc
-  }
-  if (config.os === "linux") {
-    if (await pathExists("/etc/alpine-release")) {
-      return "musl"
-    }
-    return "glibc"
-  } else if (config.os === "darwin") {
-    return "libc"
-  } else if (config.os === "win32") {
-    return "msvc"
-  }
-  return "unknown"
 }

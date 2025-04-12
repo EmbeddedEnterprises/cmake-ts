@@ -1,5 +1,6 @@
+/* eslint-disable import/no-deprecated */
 import { Command as Commander } from "commander"
-import type { BuildCommandOptions, DeprecatedGlobalOptions, GlobalOptions, Options } from "./config.js"
+import type { BuildCommandOptions, DeprecatedGlobalOptions, GlobalOptions, Options } from "./config-types.d"
 import { logger } from "./logger.js"
 import { getEnvVar } from "./util.js"
 

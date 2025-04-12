@@ -1,7 +1,7 @@
 import os from "os"
 import gte from "semver/functions/gte"
 import lt from "semver/functions/lt"
-import type { BuildConfiguration } from "./config.js"
+import type { BuildConfiguration } from "./config-types.d"
 import { getEnvVar } from "./util.js"
 
 const NODE_MIRROR = getEnvVar("NVM_NODEJS_ORG_MIRROR") ?? "https://nodejs.org/dist"

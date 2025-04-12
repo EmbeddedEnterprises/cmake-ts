@@ -1,5 +1,5 @@
 import { join, resolve } from "path"
-import type { BuildConfiguration } from "./config.js"
+import type { BuildConfiguration } from "./config-types.d"
 import { logger } from "./logger.js"
 import { getNodeApiInclude } from "./nodeAPIInclude/index.js"
 import type { RuntimeDistribution } from "./runtimeDistribution.js"

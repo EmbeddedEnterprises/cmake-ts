@@ -5,7 +5,8 @@ import { assert, expect } from "vitest"
 import which from "which"
 import { parseArgs } from "../src/args.js"
 import { build } from "../src/build.js"
-import type { BuildConfiguration } from "../src/config.js"
+import type { BuildConfiguration } from "../src/config-types.d"
+import { loadAddon } from "../src/loader.js"
 
 /**
  * The context of the test
@@ -131,6 +132,11 @@ async function testZeromqBuildResults(config: BuildConfiguration, ctx: Ctx) {
     libc: config.libc,
   }
   expect(config).toEqual(expectedConfig)
+
+  if (!cross) {
+    const addon = await loadAddon(join(ctx.zeromqPath, config.targetDirectory))
+    expect(addon).not.toBeNull()
+  }
 }
 
 /**
