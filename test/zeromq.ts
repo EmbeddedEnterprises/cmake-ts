@@ -133,10 +133,21 @@ async function testZeromqBuildResults(config: BuildConfiguration, ctx: Ctx) {
   }
   expect(config).toEqual(expectedConfig)
 
-  if (!cross) {
-    const addon = await loadAddon(join(ctx.zeromqPath, config.targetDirectory))
-    expect(addon).not.toBeNull()
+  if (cross) {
+    // skip loading the addon for cross-compiled builds
+    return
   }
+  const addon = loadAddon(join(ctx.zeromqPath, config.targetDirectory))
+  expect(addon).not.toBeNull()
+  expect(addon).toBeTypeOf("object")
+  expect(addon).toHaveProperty("version")
+  expect(addon).toHaveProperty("capability")
+  expect(addon).toHaveProperty("curveKeyPair")
+  expect(addon).toHaveProperty("context")
+  expect(addon).toHaveProperty("Context")
+  expect(addon).toHaveProperty("Socket")
+  expect(addon).toHaveProperty("Observer")
+  expect(addon).toHaveProperty("Proxy")
 }
 
 /**

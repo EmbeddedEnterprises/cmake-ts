@@ -1,8 +1,8 @@
 import fs from "fs"
 import path from "path"
 import type { BuildConfiguration } from "./config-types.d"
-import { errorString, logger } from "./utils/logger.js"
 import { detectLibc } from "./libc.js"
+import { errorString, logger } from "./utils/logger.js"
 
 /**
  * A class that represents the manifest file.

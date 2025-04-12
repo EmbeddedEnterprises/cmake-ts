@@ -100,37 +100,20 @@ The runtime addon loader allows you to load the addon for the current runtime du
 ```ts
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { loadAddon } from 'cmake-ts/dist/loader.mjs';
+import { loadAddon } from 'cmake-ts/build/loader.mjs';
 
-async function main() {
-  const dirname = typeof __dirname === 'string' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
+// @ts-ignore __dirname polyfill for ESM or CommonJS
+const dirname = typeof __dirname === 'string' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
 
-  const addon = await loadAddon(path.resolve(dirname, '..', 'build'));
-
-  // use the addon
-}
-
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+const addon = loadAddon(path.resolve(dirname, '..', 'build'));
 ```
 
 or in CommonJS:
 
 ```js
-const { loadAddon } = require('cmake-ts/dist/loader.js');
+const { loadAddon } = require('cmake-ts/build/loader.js');
 
-async function main() {
-  const addon = await loadAddon(path.resolve(__dirname, '..', 'build'));
-
-  // use the addon
-}
-
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+const addon = loadAddon(path.resolve(__dirname, '..', 'build'));
 ```
 
 You can pass the types of the addon to the loader to get type safety:
@@ -140,7 +123,7 @@ type MyAddon = {
   myFunction: (name: string) => void;
 };
 
-const addon = await loadAddon<MyAddon>(path.resolve(dirname, '..', 'build'));
+const addon = loadAddon<MyAddon>(path.resolve(dirname, '..', 'build'));
 ```
 
 ## Configuration File
