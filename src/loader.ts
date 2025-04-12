@@ -1,7 +1,4 @@
-import fs from "fs"
-import path from "path"
-import type { BuildConfiguration } from "./config-types.d"
-import { detectLibc } from "./libc.js"
+import { Manifest, getPlatform } from "./manifest.js"
 import { errorString, logger } from "./utils/logger.js"
 
 const requireFn = typeof require === "function" ? require : (name: string) => import(name)
@@ -18,44 +15,16 @@ export async function loadAddon<Addon>(buildDir: string): Promise<Addon | undefi
     // detect the platform of the current runtime
     const platform = getPlatform()
 
-    // parse the manifest file
-    const manifest = JSON.parse(fs.readFileSync(path.resolve(buildDir, "manifest.json"), "utf-8")) as Manifest
-    const configs = Object.keys(manifest)
+    // read the manifest file
+    const manifest = new Manifest(buildDir)
 
-    // find the compatible addons (config -> addon path)
-    const compatibleAddons = new Map<BuildConfiguration, string>()
-    for (const configStr of configs) {
-      // parse the config key
-      const config = JSON.parse(configStr) as BuildConfiguration
-
-      // check if the config is compatible with the current runtime
-      if (config.os !== platform.os || config.arch !== platform.arch || config.libc !== platform.libc) {
-        continue
-      }
-
-      // get the relative path to the addon
-      const addonRelativePath = manifest[configStr]
-
-      // add the addon to the list of compatible addons
-      compatibleAddons.set(config, path.resolve(buildDir, addonRelativePath))
-    }
-
-    if (compatibleAddons.size === 0) {
-      throw new Error(
-        `No compatible zeromq.js addon found for ${platform.os} ${platform.arch} ${platform.libc}. The candidates were:\n${configs.join(
-          "\n",
-        )}`,
-      )
-    }
-
-    // sort the compatible addons by the ABI in descending order
-    const compatibleAddonsSorted = [...compatibleAddons.entries()].sort(([c1, _p1], [c2, _p2]) => {
-      return (c2.abi ?? 0) - (c1.abi ?? 0)
-    })
+    // find the compatible configs for the current runtime
+    const compatibleAddons = manifest.findCompatibleConfigs(platform)
 
     // try loading each available addon in order
-    for (const [_config, addonPath] of compatibleAddonsSorted) {
+    for (const [_config, addonPath] of compatibleAddons) {
       try {
+        logger.debug(`Loading addon at ${addonPath}`)
         // eslint-disable-next-line no-await-in-loop
         addon = await requireFn(addonPath)
         break
@@ -73,19 +42,3 @@ export async function loadAddon<Addon>(buildDir: string): Promise<Addon | undefi
 
   return addon
 }
-
-function getPlatform(): Platform {
-  return {
-    os: process.platform,
-    arch: process.arch,
-    libc: detectLibc(process.platform),
-  }
-}
-
-export type Platform = {
-  os: string
-  arch: string
-  libc: string
-}
-
-export type Manifest = Record<string, string>
