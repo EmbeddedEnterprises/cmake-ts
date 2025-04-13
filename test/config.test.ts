@@ -44,9 +44,9 @@ suite("Config Functions", () => {
 
   beforeEach(async () => {
     // Reset environment variables
-    // biome-ignore lint/performance/noDelete: for testing
+    // biome-ignore lint/performance/noDelete: https://github.com/biomejs/biome/issues/5643
     delete process.env.npm_config_target_arch
-    // biome-ignore lint/performance/noDelete: for testing
+    // biome-ignore lint/performance/noDelete: https://github.com/biomejs/biome/issues/5643
     delete process.env.npm_config_target_os
 
     // Create test package.json
@@ -59,9 +59,9 @@ suite("Config Functions", () => {
 
   afterEach(async () => {
     // Clean up environment variables
-    // biome-ignore lint/performance/noDelete: for testing
+    // biome-ignore lint/performance/noDelete: https://github.com/biomejs/biome/issues/5643
     delete process.env.npm_config_target_arch
-    // biome-ignore lint/performance/noDelete: for testing
+    // biome-ignore lint/performance/noDelete: https://github.com/biomejs/biome/issues/5643
     delete process.env.npm_config_target_os
 
     // Remove test package.json
@@ -135,7 +135,7 @@ suite("Config Functions", () => {
 
     test("should handle cross compilation flags", async () => {
       const partialConfig: Partial<BuildConfiguration> = {
-        os: "win32",
+        os: process.platform === "win32" ? "linux" : "win32",
         arch: "x64",
       }
 
