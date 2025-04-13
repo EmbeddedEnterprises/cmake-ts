@@ -146,19 +146,34 @@ suite("Config Functions", () => {
       expect(result.arch).toBe(process.env.npm_config_target_arch)
     })
 
-    test("should set cross flag when npm_config_target_arch differs from process.arch when no config file is provided", async () => {
+    test("should set cross flag when npm_config_target_arch differs from config.arch even if process.arch matches", async () => {
       // Set npm_config_target_arch to a different architecture than the current one
       process.env.npm_config_target_arch = process.arch === "x64" ? "arm64" : "x64"
 
       const partialConfig: Partial<BuildConfiguration> = {
         os: process.platform,
-        arch: process.env.npm_config_target_arch as NodeJS.Architecture,
+        arch: process.arch, // Match process.arch
       }
 
-      const result = await getBuildConfig(mockBuildOptions, partialConfig, {})
+      const result = await getBuildConfig(mockBuildOptions, partialConfig, mockConfigFile)
 
       expect(result.cross).toBe(true)
-      expect(result.arch).toBe(process.env.npm_config_target_arch)
+      expect(result.arch).toBe(process.arch)
+    })
+
+    test("should set cross flag when npm_config_target_arch differs from config.arch even if process.arch matches", async () => {
+      // Set npm_config_target_arch to a different architecture than the current one
+      process.env.npm_config_target_arch = "arm64"
+
+      const partialConfig: Partial<BuildConfiguration> = {
+        os: process.platform,
+        arch: "x64", // Different from npm_config_target_arch
+      }
+
+      const result = await getBuildConfig(mockBuildOptions, partialConfig, mockConfigFile)
+
+      expect(result.cross).toBe(true)
+      expect(result.arch).toBe("x64")
     })
 
     test("should use default values when no config file is provided", async () => {

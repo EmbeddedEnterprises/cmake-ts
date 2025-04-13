@@ -24,10 +24,16 @@ cmake-ts can build the projects with built-in configurations that are selected d
 cmake-ts build --config debug
 ```
 
-You can cross-compile by specifying the built-in cross configs
+You can cross-compile by specifying the built-in cross configs:
 
 ```bash
 cmake-ts build --config cross-win32-arm64-release
+```
+
+Or by specifying the `npm_config_target_os` and `npm_config_target_arch` environment variables:
+
+```bash
+npm_config_target_os=linux npm_config_target_arch=arm64 cmake-ts build
 ```
 
 ### CLI Arguments
@@ -81,11 +87,11 @@ Options:
          - `darwin-arm64-node-release`
          - `darwin-arm64-electron-relwithdebinfo`
 
-      To explicitly indicate cross-compilation, prefix the config name with \`cross-\`:
+      To explicitly indicate cross-compilation, prefix the config name with `cross-`:
 
-       - \`cross-win32-ia32-node-release\`
-       - \`cross-linux-arm64-node-release\`
-       - \`cross-darwin-x64-electron-relwithdebinfo\`
+       - `cross-win32-ia32-node-release`
+       - `cross-linux-arm64-node-release`
+       - `cross-darwin-x64-electron-relwithdebinfo`
 
       You can also define your own configs in the config file (package.json).
 

@@ -64,13 +64,8 @@ export async function getBuildConfig(
 
   config.os ??= globalConfig.os ?? process.platform
   config.arch ??= globalConfig.arch ?? process.arch
-  config.cross ??=
-    globalConfig.cross ??
-    (process.platform !== config.os ||
-      (process.env.npm_config_target_os !== undefined && process.env.npm_config_target_os !== config.os) ||
-      process.arch !== config.arch ||
-      (process.env.npm_config_target_arch !== undefined && process.env.npm_config_target_arch !== config.arch))
 
+  config.cross = detectCrossCompilation(globalConfig, config)
   // Runtime
 
   config.runtime ??= globalConfig.runtime ?? "node"
@@ -109,6 +104,20 @@ export async function getBuildConfig(
   config.generatorBinary ??= globalConfig.generatorBinary ?? binary
 
   return config as BuildConfiguration
+}
+
+function detectCrossCompilation(globalConfig: Partial<BuildConfigurations>, config: Partial<BuildConfiguration>) {
+  return (
+    globalConfig.cross === true ||
+    // if the config os is set, check if the current os is different from the config os
+    (config.os !== undefined && process.platform !== config.os) ||
+    // if the config arch is set, check if the current arch is different from the config arch
+    (config.arch !== undefined && process.arch !== config.arch) ||
+    // if the target os is set via npm_config_target_os, check if it is different from the config os
+    (process.env.npm_config_target_os !== undefined && process.env.npm_config_target_os !== config.os) ||
+    // if the target arch is set via npm_config_target_arch, check if it is different from the config arch
+    (process.env.npm_config_target_arch !== undefined && process.env.npm_config_target_arch !== config.arch)
+  )
 }
 
 export function parseBuiltInConfigs(configName: string) {
