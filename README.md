@@ -18,6 +18,18 @@ Create your `CMakeLists.txt` file based on [the example](/example/CMakeLists.txt
 cmake-ts build
 ```
 
+cmake-ts can build the projects with built-in configurations that are selected depending on the arguments and the environment. This includes cross-compilation for different architectures, including Windows arm64, Linux arm64, etc.
+
+```bash
+cmake-ts build --config debug
+```
+
+You can cross-compile by specifying the built-in cross configs
+
+```bash
+cmake-ts build --config cross-win32-arm64-release
+```
+
 ### CLI Arguments
 
 `build` command:
