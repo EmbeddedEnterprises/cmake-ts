@@ -6,6 +6,7 @@ import { DownloaderHelper } from "node-downloader-helper"
 import type { ExtractOptions as TarExtractOptions } from "tar"
 import extractTar from "tar/lib/extract.js"
 import { logger } from "./logger.js"
+import { retry } from "./retry.js"
 
 export type HashType = "sha256" | "sha512" | "sha1" | "md5" | "sha384" | "sha224"
 
@@ -47,6 +48,10 @@ async function download(url: string, opts: DownloadOptions) {
       fileName,
       timeout: opts.timeout ?? -1,
       override: true,
+      retry: {
+        maxRetries: 3,
+        delay: 1000,
+      },
     })
 
     // Create a promise that will reject if an error occurs
@@ -92,8 +97,9 @@ export async function downloadToString(url: string, options: DownloadCoreOptions
   try {
     return await readFile(filePath, "utf8")
   } finally {
-    await remove(filePath).catch(() => {
+    await remove(filePath).catch((err) => {
       // Ignore errors
+      logger.debug("Ignoring error removing temporary file", filePath, err)
     })
   }
 }
@@ -121,16 +127,19 @@ export async function downloadTgz(url: string, options: DownloadTgzOptions): Pro
     }
 
     // Extract the tgz file
-    await extractTar({
-      file: filePath,
-      ...options.extractOptions,
-    })
+    await retry(() =>
+      extractTar({
+        file: filePath,
+        ...options.extractOptions,
+      }),
+    )
 
     return hash
   } finally {
     if (options.removeAfterExtract ?? true) {
-      await remove(filePath).catch(() => {
+      await remove(filePath).catch((err) => {
         // Ignore errors
+        logger.debug("Ignoring error removing temporary file", filePath, err)
       })
     }
   }
