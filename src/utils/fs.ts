@@ -19,7 +19,7 @@ export type FunctionalStats = Pick<
 >
 
 /* eslint-disable class-methods-use-this */
-class NoStats implements FunctionalStats {
+export class NoStats implements FunctionalStats {
   isFile = () => false
   isDirectory = () => false
   isBlockDevice = () => false
