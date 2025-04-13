@@ -1,8 +1,11 @@
 import { afterEach, beforeEach, expect, suite, test, vi } from "vitest"
 import { parseArgs } from "../src/args.js"
 import type { BuildCommand } from "../src/config-types.d"
+import { logger } from "../src/utils/logger.js"
 
 suite("parseArgs", () => {
+  logger.setLevel("debug")
+
   const originalArgv = process.argv
 
   const commonArgs = ["node", "./node_modules/cmake-ts/build/main.js"]

@@ -4,6 +4,8 @@ import { isCI } from "ci-info"
 import { ensureDir, pathExists, readFile, readdir, remove } from "fs-extra"
 import { beforeAll, expect, suite, test } from "vitest"
 import { calculateHash, downloadFile, downloadTgz, downloadToString } from "../src/utils/download.js"
+import { logger } from "../src/utils/logger.js"
+
 const _dirname = typeof __dirname === "string" ? __dirname : dirname(fileURLToPath(import.meta.url))
 const root = dirname(_dirname)
 const testTmpDir = join(root, "test", ".tmp")
@@ -11,9 +13,11 @@ const testTmpDir = join(root, "test", ".tmp")
 const suiteFn = isCI ? suite : suite.concurrent
 
 suiteFn("Download Module", { timeout: 20_000, retry: 3 }, () => {
+  logger.setLevel("debug")
+
   // Real Node.js distribution URLs for testing
-  const nodeBaseUrl = "https://nodejs.org/dist/v23.4.0"
-  const nodeHeadersUrl = `${nodeBaseUrl}/node-v23.4.0-headers.tar.gz`
+  const nodeBaseUrl = "https://nodejs.org/dist/v16.0.0"
+  const nodeHeadersUrl = `${nodeBaseUrl}/node-v16.0.0-headers.tar.gz`
   const nodeDocsUrl = `${nodeBaseUrl}/docs/apilinks.json`
   const nodeShasumUrl = `${nodeBaseUrl}/SHASUMS256.txt`
 
@@ -26,7 +30,7 @@ suiteFn("Download Module", { timeout: 20_000, retry: 3 }, () => {
     test("should download Node.js SHASUMS as a string", async () => {
       const content = await downloadToString(nodeShasumUrl)
       expect(content).toBeTruthy()
-      expect(content).toContain("node-v23.4.0")
+      expect(content).toContain("node-v16.0.0")
     })
 
     test("should download Node.js API docs as a string", async () => {
@@ -45,7 +49,7 @@ suiteFn("Download Module", { timeout: 20_000, retry: 3 }, () => {
       expect(exists).toBe(true)
 
       const content = await readFile(targetPath, "utf8")
-      expect(content).toContain("node-v23.4.0")
+      expect(content).toContain("node-v16.0.0")
     })
 
     test("should download Node.js API docs to a file", async () => {
@@ -106,7 +110,7 @@ suiteFn("Download Module", { timeout: 20_000, retry: 3 }, () => {
       expect(files.length).toBeGreaterThan(0)
 
       // Verify specific files that should be in the Node.js headers package
-      const nodeDir = join(extractPath, "node-v23.4.0")
+      const nodeDir = join(extractPath, "node-v16.0.0")
       expect(await pathExists(nodeDir)).toBe(true)
 
       // Check for include directory
@@ -129,7 +133,7 @@ suiteFn("Download Module", { timeout: 20_000, retry: 3 }, () => {
         },
       })
 
-      // With strip=1, the node-v23.4.0 directory should be stripped
+      // With strip=1, the node-v16.0.0 directory should be stripped
       // and the contents should be directly in the extract path
       const includeDir = join(extractPath, "include")
       expect(await pathExists(includeDir)).toBe(true)
@@ -145,7 +149,7 @@ suiteFn("Download Module", { timeout: 20_000, retry: 3 }, () => {
 
       const shasum = await downloadToString(nodeShasumUrl)
       const hashSums = parseSHASUM(shasum)
-      const nodeHeadersHash = hashSums.find((h) => h.file === "node-v23.4.0-headers.tar.gz")?.hash
+      const nodeHeadersHash = hashSums.find((h) => h.file === "node-v16.0.0-headers.tar.gz")?.hash
       expect(nodeHeadersHash).toBeDefined()
 
       const downloadPath = join(testTmpDir, "node-headers.tar.gz")
@@ -157,7 +161,7 @@ suiteFn("Download Module", { timeout: 20_000, retry: 3 }, () => {
       })
 
       expect(await pathExists(downloadPath)).toBe(true)
-      expect(await pathExists(join(extractPath, "node-v23.4.0"))).toBe(true)
+      expect(await pathExists(join(extractPath, "node-v16.0.0"))).toBe(true)
 
       const hash = await calculateHash(downloadPath, "sha256")
       expect(hash).toBe(nodeHeadersHash)

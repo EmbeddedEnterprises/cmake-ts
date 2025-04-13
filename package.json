@@ -63,9 +63,8 @@
     "build.modern-loader": "vite build --mode modern-loader",
     "build.legacy-loader": "vite build --mode legacy-loader",
     "build": "turbo run build.tsc build.tsc.lib build.legacy-main build.modern-main build.legacy-library build.modern-library build.modern-loader build.legacy-loader",
-    "test.install": "cd test && npm i && cd ..",
-    "test": "run-s test.install && cross-env NODE_OPTIONS=--enable-source-maps pnpx vitest --watch false",
-    "coverage": "run-s test.install && cross-env NODE_OPTIONS=--enable-source-maps pnpx vitest --coverage --watch false"
+    "test": "cross-env NODE_OPTIONS=--enable-source-maps pnpx vitest --watch false",
+    "coverage": "cross-env NODE_OPTIONS=--enable-source-maps pnpx vitest --coverage --watch false"
   },
   "files": ["build/**/*", "src/**/*", "./*.mts", "./tsconfig.json"],
   "repository": {

@@ -15,14 +15,27 @@ const suiteFn = isCI ? suite : suite.concurrent
 
 suiteFn("zeromq", { timeout: 20 * 60 * 1000 }, () => {
   beforeAll(async () => {
-    await execa("pnpm", ["build"], {
-      stdio: "inherit",
-      env: {
-        ...process.env,
-        NODE_ENV: "development",
-      },
-      shell: true,
-    })
+    await Promise.all([
+      // build cmake-ts bundles
+      execa("pnpm", ["build"], {
+        stdio: "inherit",
+        env: {
+          ...process.env,
+          NODE_ENV: "development",
+        },
+        shell: true,
+        cwd: root,
+      }),
+      // install zeromq
+      execa("npm", ["install"], {
+        stdio: "inherit",
+        cwd: join(root, "test"),
+        env: {
+          ...process.env,
+          NODE_ENV: "development",
+        },
+      }),
+    ])
     console.log("Build completed")
 
     await Promise.all([

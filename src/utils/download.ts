@@ -5,6 +5,7 @@ import { ensureDir, readFile, remove } from "fs-extra"
 import { DownloaderHelper } from "node-downloader-helper"
 import type { ExtractOptions as TarExtractOptions } from "tar"
 import extractTar from "tar/lib/extract.js"
+import { logger } from "./logger.js"
 
 export type HashType = "sha256" | "sha512" | "sha1" | "md5" | "sha384" | "sha224"
 
@@ -35,14 +36,17 @@ type DownloadResult = {
 /** Downloads a file to a temporary location and returns the file path and hash */
 async function download(url: string, opts: DownloadOptions) {
   try {
-    const filePath = opts.path ?? join(tmpdir(), basename(url))
+    const filePath = opts.path ?? join(tmpdir(), "cmake-ts", basename(url))
     const fileName = basename(filePath)
     const fileDir = dirname(filePath)
+
+    logger.debug(`Downloading ${url} to ${filePath}`)
 
     await ensureDir(fileDir)
     const downloader = new DownloaderHelper(url, fileDir, {
       fileName,
       timeout: opts.timeout ?? -1,
+      override: true,
     })
 
     // Create a promise that will reject if an error occurs
