@@ -1,10 +1,19 @@
 import { join } from "path"
 import { writeJson } from "fs-extra"
-import { afterEach, beforeEach, expect, suite, test } from "vitest"
+import { afterEach, beforeEach, expect, suite, test, vi } from "vitest"
 import type { BuildCommandOptions, BuildConfiguration, BuildConfigurations, Options } from "../src/config-types.d.js"
-import { getBuildConfig, getConfigFile, parseBuildConfigs, parseBuiltInConfigs } from "../src/config.js"
+import {
+  detectCrossCompilation,
+  getBuildConfig,
+  getConfigFile,
+  parseBuildConfigs,
+  parseBuiltInConfigs,
+} from "../src/config.js"
+import { logger } from "../src/lib.js"
 
 suite("Config Functions", () => {
+  logger.setLevel("debug")
+
   const mockBuildOptions: BuildCommandOptions = {
     configs: [],
     addonSubdirectory: "",
@@ -35,8 +44,10 @@ suite("Config Functions", () => {
 
   beforeEach(async () => {
     // Reset environment variables
-    process.env.npm_config_target_arch = undefined
-    process.env.npm_config_target_os = undefined
+    // biome-ignore lint/performance/noDelete: https://github.com/biomejs/biome/issues/5643
+    delete process.env.npm_config_target_arch
+    // biome-ignore lint/performance/noDelete: https://github.com/biomejs/biome/issues/5643
+    delete process.env.npm_config_target_os
 
     // Create test package.json
     await writeJson(testPackageJsonPath, {
@@ -48,8 +59,10 @@ suite("Config Functions", () => {
 
   afterEach(async () => {
     // Clean up environment variables
-    process.env.npm_config_target_arch = undefined
-    process.env.npm_config_target_os = undefined
+    // biome-ignore lint/performance/noDelete: https://github.com/biomejs/biome/issues/5643
+    delete process.env.npm_config_target_arch
+    // biome-ignore lint/performance/noDelete: https://github.com/biomejs/biome/issues/5643
+    delete process.env.npm_config_target_os
 
     // Remove test package.json
     try {
@@ -122,7 +135,7 @@ suite("Config Functions", () => {
 
     test("should handle cross compilation flags", async () => {
       const partialConfig: Partial<BuildConfiguration> = {
-        os: "win32",
+        os: process.platform === "win32" ? "linux" : "win32",
         arch: "x64",
       }
 
@@ -131,7 +144,7 @@ suite("Config Functions", () => {
       expect(result.cross).toBe(true)
     })
 
-    test("should set cross flag when npm_config_target_arch differs from process.arch", async () => {
+    test("should respect npm_config_target_arch when it matches config.arch", async () => {
       // Set npm_config_target_arch to a different architecture than the current one
       process.env.npm_config_target_arch = process.arch === "x64" ? "arm64" : "x64"
 
@@ -146,19 +159,55 @@ suite("Config Functions", () => {
       expect(result.arch).toBe(process.env.npm_config_target_arch)
     })
 
-    test("should set cross flag when npm_config_target_arch differs from process.arch when no config file is provided", async () => {
+    test("should respect config.arch when it matches process.arch", async () => {
+      // Mock process.arch
+      vi.spyOn(process, "arch", "get").mockReturnValue("arm64")
+
+      const partialConfig: Partial<BuildConfiguration> = {
+        os: process.platform,
+        arch: process.arch,
+      }
+
+      console.log(process.arch, detectCrossCompilation(mockConfigFile, partialConfig))
+
+      const result = await getBuildConfig(mockBuildOptions, partialConfig, mockConfigFile)
+
+      expect(result.cross).toBe(false)
+      expect(result.arch).toBe(process.arch)
+
+      vi.restoreAllMocks()
+    })
+
+    test("should respect config.arch when it differs from process.arch", async () => {
+      // Mock process.arch
+      vi.spyOn(process, "arch", "get").mockReturnValue("arm64")
+
+      const partialConfig: Partial<BuildConfiguration> = {
+        os: process.platform,
+        arch: "x64", // Different from process.arch
+      }
+
+      const result = await getBuildConfig(mockBuildOptions, partialConfig, mockConfigFile)
+
+      expect(result.cross).toBe(true)
+      expect(result.arch).toBe("x64")
+
+      vi.restoreAllMocks()
+    })
+
+    test("should respect npm_config_target_arch when it differs from process.arch", async () => {
       // Set npm_config_target_arch to a different architecture than the current one
       process.env.npm_config_target_arch = process.arch === "x64" ? "arm64" : "x64"
 
       const partialConfig: Partial<BuildConfiguration> = {
         os: process.platform,
-        arch: process.env.npm_config_target_arch as NodeJS.Architecture,
+        arch: process.arch,
       }
 
-      const result = await getBuildConfig(mockBuildOptions, partialConfig, {})
+      const result = await getBuildConfig(mockBuildOptions, partialConfig, mockConfigFile)
 
       expect(result.cross).toBe(true)
-      expect(result.arch).toBe(process.env.npm_config_target_arch)
+      expect(result.arch).toBe(process.arch)
     })
 
     test("should use default values when no config file is provided", async () => {

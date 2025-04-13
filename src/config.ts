@@ -62,14 +62,10 @@ export async function getBuildConfig(
 
   // Platform
 
+  config.cross = detectCrossCompilation(globalConfig, config)
+
   config.os ??= globalConfig.os ?? process.platform
   config.arch ??= globalConfig.arch ?? process.arch
-  config.cross ??=
-    globalConfig.cross ??
-    (process.platform !== config.os ||
-      (process.env.npm_config_target_os !== undefined && process.env.npm_config_target_os !== config.os) ||
-      process.arch !== config.arch ||
-      (process.env.npm_config_target_arch !== undefined && process.env.npm_config_target_arch !== config.arch))
 
   // Runtime
 
@@ -109,6 +105,55 @@ export async function getBuildConfig(
   config.generatorBinary ??= globalConfig.generatorBinary ?? binary
 
   return config as BuildConfiguration
+}
+
+export function detectCrossCompilation(
+  globalConfig: Partial<BuildConfigurations>,
+  config: Partial<BuildConfiguration>,
+) {
+  if (globalConfig.cross === true) {
+    logger.debug("Cross compilation detected: globalConfig.cross is true")
+    return true
+  }
+  if (config.os !== undefined && platforms.has(config.os as NodeJS.Platform) && config.os !== process.platform) {
+    // if the config os is set, check if the current os is different from the config os
+    logger.debug(
+      `Cross compilation detected: config.os (${config.os}) differs from process.platform (${process.platform})`,
+    )
+    return true
+  }
+  if (
+    config.arch !== undefined &&
+    architectures.has(config.arch as NodeJS.Architecture) &&
+    config.arch !== process.arch
+  ) {
+    // if the config arch is set, check if the current arch is different from the config arch
+    logger.debug(`Cross compilation detected: config.arch (${config.arch}) differs from process.arch (${process.arch})`)
+    return true
+  }
+  if (
+    process.env.npm_config_target_os !== undefined &&
+    platforms.has(process.env.npm_config_target_os as NodeJS.Platform) &&
+    process.env.npm_config_target_os !== process.platform
+  ) {
+    // if the target os is set via npm_config_target_os, check if it is different from the config os
+    logger.debug(
+      `Cross compilation detected: npm_config_target_os (${process.env.npm_config_target_os}) differs from process.platform (${process.platform})`,
+    )
+    return true
+  }
+  if (
+    process.env.npm_config_target_arch !== undefined &&
+    architectures.has(process.env.npm_config_target_arch as NodeJS.Architecture) &&
+    process.env.npm_config_target_arch !== process.arch
+  ) {
+    // if the target arch is set via npm_config_target_arch, check if it is different from the config arch
+    logger.debug(
+      `Cross compilation detected: npm_config_target_arch (${process.env.npm_config_target_arch}) differs from process.arch (${process.arch})`,
+    )
+    return true
+  }
+  return false
 }
 
 export function parseBuiltInConfigs(configName: string) {
