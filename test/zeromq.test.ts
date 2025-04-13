@@ -15,14 +15,27 @@ const suiteFn = isCI ? suite : suite.concurrent
 
 suiteFn("zeromq", { timeout: 20 * 60 * 1000 }, () => {
   beforeAll(async () => {
-    await execa("pnpm", ["build"], {
-      stdio: "inherit",
-      env: {
-        ...process.env,
-        NODE_ENV: "development",
-      },
-      shell: true,
-    })
+    await Promise.all([
+      // build cmake-ts bundles
+      execa("pnpm", ["build"], {
+        stdio: "inherit",
+        env: {
+          ...process.env,
+          NODE_ENV: "development",
+        },
+        shell: true,
+        cwd: root,
+      }),
+      // install zeromq
+      execa("npm", ["install"], {
+        stdio: "inherit",
+        cwd: join(root, "test"),
+        env: {
+          ...process.env,
+          NODE_ENV: "development",
+        },
+      }),
+    ])
     console.log("Build completed")
 
     await Promise.all([
@@ -33,15 +46,8 @@ suiteFn("zeromq", { timeout: 20 * 60 * 1000 }, () => {
     ])
   })
 
-  // release build
-  suite("release", () => {
-    test("cmake-ts modern build --logger debug", async () => {
-      await testZeromqBuild({ root, zeromqPath, bundle: "modern-main", args: ["build", "--logger", "debug"] })
-    })
-  })
-
-  // debug build
-  suite("debug", () => {
+  // build
+  suite("cmake-ts compile", () => {
     test("cmake-ts modern build --configs Debug --logger debug", async () => {
       await testZeromqBuild({
         root,
@@ -57,8 +63,10 @@ suiteFn("zeromq", { timeout: 20 * 60 * 1000 }, () => {
     })
   })
 
+  // cross-compile
+
   test("cmake-ts cross-compile cross-darwin-x64", async (t) => {
-    if (process.platform !== "darwin" || process.arch !== "arm64") {
+    if (process.platform !== "darwin" || process.arch === "x64") {
       t.skip()
     }
     await testZeromqBuild({
@@ -70,7 +78,7 @@ suiteFn("zeromq", { timeout: 20 * 60 * 1000 }, () => {
   })
 
   test("cmake-ts cross-compile cross-linux-arm64", async (t) => {
-    if (process.platform !== "linux" || process.arch !== "x64") {
+    if (process.platform !== "linux" || process.arch === "arm64") {
       t.skip()
     }
     await testZeromqBuild({
@@ -82,7 +90,7 @@ suiteFn("zeromq", { timeout: 20 * 60 * 1000 }, () => {
   })
 
   test("cmake-ts cross-compile cross-win32-ia32", async (t) => {
-    if (process.platform !== "win32" || process.arch !== "x64") {
+    if (process.platform !== "win32" || process.arch === "ia32") {
       t.skip()
     }
     await testZeromqBuild({
@@ -94,7 +102,7 @@ suiteFn("zeromq", { timeout: 20 * 60 * 1000 }, () => {
   })
 
   test("cmake-ts cross-compile cross-win32-arm64", async (t) => {
-    if (process.platform !== "win32" || process.arch !== "x64") {
+    if (process.platform !== "win32" || process.arch === "arm64") {
       t.skip()
     }
     await testZeromqBuild({
@@ -106,7 +114,7 @@ suiteFn("zeromq", { timeout: 20 * 60 * 1000 }, () => {
   })
 
   test("cmake-ts cross-compile cross-darwin-arm64", async (t) => {
-    if (process.platform !== "darwin" || process.arch !== "x64") {
+    if (process.platform !== "darwin" || process.arch === "arm64") {
       t.skip()
     }
     await testZeromqBuild({

@@ -7,6 +7,7 @@ import { applyOverrides } from "./override.js"
 import { RuntimeDistribution } from "./runtimeDistribution.js"
 import { runProgram } from "./utils/exec.js"
 import { logger } from "./utils/logger.js"
+import { retry } from "./utils/retry.js"
 
 /**
  * Build the project via cmake-ts
@@ -62,13 +63,11 @@ export async function buildConfig(config: BuildConfiguration, opts: Options) {
   config.stagingDirectory = resolve(join(config.packageDirectory, config.stagingDirectory))
   const stagingExists = await pathExists(config.stagingDirectory)
   if (stagingExists) {
-    await remove(config.stagingDirectory)
-    logger.debug("[ CLEARED ]")
+    await retry(() => remove(config.stagingDirectory))
   }
   await ensureDir(config.stagingDirectory)
 
   const dist = new RuntimeDistribution(config)
-  logger.debug("---------------- BEGIN CONFIG ----------------")
 
   // Download files
   logger.debug("> Distribution File Download... ")
@@ -90,44 +89,34 @@ export async function buildConfig(config: BuildConfiguration, opts: Options) {
   const stagingDir = resolve(join(config.stagingDirectory, subDirectory))
   const targetDir = resolve(join(config.targetDirectory, subDirectory))
 
-  logger.debug("> Applying overrides if needed... ")
   applyOverrides(config)
 
   const argBuilder = new ArgumentBuilder(config, dist)
   const [configureCmd, configureArgs] = await argBuilder.configureCommand()
   const [buildCmd, buildArgs] = argBuilder.buildCommand(stagingDir)
 
-  logger.info(`----------------------------------------------
-${config.name}
-${config.os} ${config.arch} ${config.libc}
-${config.runtime} ${config.runtimeVersion} runtime with ABI ${dist.abi()}
-${config.generatorToUse} ${config.generatorFlags?.join(" ")} generator with build type ${config.buildType} ${config.toolchainFile !== undefined ? `and toolchain ${config.toolchainFile}` : ""}
-${config.CMakeOptions.join(" ")}
-Staging directory: ${stagingDir}
-Target directory: ${targetDir}
-----------------------------------------------`)
-
-  // Create target directory
-  logger.debug("> Setting up config specific staging directory... ")
-  await ensureDir(stagingDir)
+  logger.info(getConfigInfo(config, dist))
 
   // Invoke CMake
-  logger.debug(`> Configure: ${configureCmd} ${configureArgs.map((a) => `"${a}"`).join(" ")}`)
+  logger.debug(`> Configure: ${configureCmd} ${configureArgs.map((a) => `"${a}"`).join(" ")} in ${stagingDir}`)
+
+  await ensureDir(stagingDir)
   await runProgram(configureCmd, configureArgs, stagingDir)
 
   // Actually build the software
-  logger.debug(`> Build ${config.generatorBinary} ${buildArgs.map((a) => `"${a}"`).join(" ")}`)
+  logger.debug(`> Build ${config.generatorBinary} ${buildArgs.map((a) => `"${a}"`).join(" ")} in ${stagingDir}`)
+
   await runProgram(buildCmd, buildArgs, stagingDir)
 
   // Copy back the previously built binary
-  logger.debug(`> Copying ${config.projectName}.node to target directory... `)
-  await ensureDir(targetDir)
+  logger.debug(`> Copying ${config.projectName}.node to ${targetDir}`)
 
   const addonPath = join(targetDir, `${config.projectName}.node`)
   const sourceAddonPath = config.generatorToUse.includes("Visual Studio")
     ? join(stagingDir, config.buildType, `${config.projectName}.node`)
     : join(stagingDir, `${config.projectName}.node`)
-  await copy(sourceAddonPath, addonPath)
+  await ensureDir(targetDir)
+  await retry(() => copy(sourceAddonPath, addonPath))
 
   logger.debug("Adding the built config to the manifest file...")
 
@@ -140,17 +129,25 @@ Target directory: ${targetDir}
   }
   // add the new entry to the manifest
   manifest[serializeConfig(config, config.packageDirectory)] = relative(config.targetDirectory, addonPath)
-  await writeFile(manifestPath, JSON.stringify(manifest, null, 2))
+  const manifestSerialized = JSON.stringify(manifest, null, 2)
+  await retry(() => writeFile(manifestPath, manifestSerialized))
+}
+
+function getConfigInfo(config: BuildConfiguration, dist: RuntimeDistribution): string {
+  return `${config.name} ${config.os} ${config.arch} ${config.libc} ${config.runtime} ${config.runtimeVersion} ABI ${dist.abi()}
+${config.generatorToUse} ${config.generatorFlags?.join(" ") ?? ""} ${config.buildType} ${config.toolchainFile !== undefined ? `toolchain ${config.toolchainFile}` : ""}
+  ${config.CMakeOptions.join(" ")}`
 }
 
 function serializeConfig(config: BuildConfiguration, rootDir: string) {
-  // replace absolute paths with relative paths
-  const serialized = JSON.stringify(config, (_key, value) => {
-    if (typeof value === "string" && value.startsWith(rootDir)) {
-      return relative(rootDir, value)
-    }
-    return value
-  })
-
-  return serialized
+  return JSON.stringify(
+    config,
+    // replace absolute paths with relative paths in the values
+    (_key, value) => {
+      if (typeof value === "string" && value.startsWith(rootDir)) {
+        return relative(rootDir, value)
+      }
+      return value
+    },
+  )
 }
