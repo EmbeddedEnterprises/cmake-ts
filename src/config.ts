@@ -1,4 +1,3 @@
-import { join, resolve } from "path"
 import { readJson } from "fs-extra"
 import which from "which"
 import type { BuildCommandOptions, BuildConfiguration, BuildConfigurations, Options } from "./config-types.d"
@@ -182,11 +181,9 @@ const buildTypes = new Map<string, BuildConfiguration["buildType"]>([
 
 const runtimes = new Set<BuildConfiguration["runtime"]>(["node", "electron", "iojs"])
 
-export async function getConfigFile() {
+export async function getConfigFile(packageJsonPath: string) {
   let packJson: { "cmake-ts": Partial<BuildConfigurations> | undefined } & Record<string, unknown>
-  const packageJsonPath = resolve(join(process.cwd(), "package.json"))
   try {
-    // TODO getting the path from the CLI
     packJson = await readJson(packageJsonPath)
   } catch (err) {
     logger.warn(`Failed to load package.json at ${packageJsonPath}: ${err}. Using defaults.`)
