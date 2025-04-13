@@ -3,7 +3,7 @@ import { fileURLToPath } from "url"
 import { isCI } from "ci-info"
 import { ensureDir, pathExists, readFile, readdir, remove } from "fs-extra"
 import { beforeAll, expect, suite, test } from "vitest"
-import { calculateHash, downloadFile, downloadTgz, downloadToString } from "../src/download.js"
+import { calculateHash, downloadFile, downloadTgz, downloadToString } from "../src/utils/download.js"
 const _dirname = typeof __dirname === "string" ? __dirname : dirname(fileURLToPath(import.meta.url))
 const root = dirname(_dirname)
 const testTmpDir = join(root, "test", ".tmp")

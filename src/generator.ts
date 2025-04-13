@@ -1,8 +1,8 @@
 import memoizee from "memoizee"
 import which from "which"
 import { getCMakeArchitecture } from "./argumentBuilder.js"
-import { logger } from "./logger.js"
-import { execCapture } from "./util.js"
+import { execCapture } from "./utils/exec.js"
+import { logger } from "./utils/logger.js"
 
 export const getCmakeGenerator = memoizee(
   async (

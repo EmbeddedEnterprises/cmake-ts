@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, expect, suite, test, vi } from "vitest"
 import { parseArgs } from "../src/args.js"
-import type { BuildCommand } from "../src/config.js"
+import type { BuildCommand } from "../src/config-types.d"
 
 suite("parseArgs", () => {
   const originalArgv = process.argv

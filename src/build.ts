@@ -1,11 +1,12 @@
 import { join, relative, resolve } from "path"
 import { copy, ensureDir, pathExists, readFile, remove, writeFile } from "fs-extra"
 import { ArgumentBuilder } from "./argumentBuilder.js"
-import { type BuildConfiguration, type Options, getConfigFile, parseBuildConfigs } from "./config.js"
-import { logger } from "./logger.js"
+import type { BuildConfiguration, Options } from "./config-types.d"
+import { getConfigFile, parseBuildConfigs } from "./config.js"
 import { applyOverrides } from "./override.js"
 import { RuntimeDistribution } from "./runtimeDistribution.js"
-import { runProgram } from "./util.js"
+import { runProgram } from "./utils/exec.js"
+import { logger } from "./utils/logger.js"
 
 /**
  * Build the project via cmake-ts

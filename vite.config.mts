@@ -7,6 +7,7 @@ import babelConfig from "./babel.config.mts"
 export default defineConfig(async (configEnv) => {
   const isLegacy = configEnv.mode.includes("legacy")
   const isLibrary = configEnv.mode.includes("library")
+  const isLoader = configEnv.mode.includes("loader")
 
   const plugins = []
 
@@ -28,7 +29,7 @@ export default defineConfig(async (configEnv) => {
 
   return {
     build: {
-      ssr: isLibrary ? "./src/lib.ts" : "./src/main.ts",
+      ssr: isLoader ? "./src/loader.ts" : isLibrary ? "./src/lib.ts" : "./src/main.ts",
       outDir: "./build",
       target: isLegacy ? "node12" : "node20",
       minify: process.env.NODE_ENV === "development" ? false : "esbuild",

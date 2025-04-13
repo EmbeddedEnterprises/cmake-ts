@@ -1,9 +1,9 @@
 import { join, resolve } from "path"
-import type { BuildConfiguration } from "./config.js"
-import { logger } from "./logger.js"
+import type { BuildConfiguration } from "./config-types.d"
 import { getNodeApiInclude } from "./nodeAPIInclude/index.js"
 import type { RuntimeDistribution } from "./runtimeDistribution.js"
 import { getPathsForConfig } from "./urlRegistry.js"
+import { logger } from "./utils/logger.js"
 import { setupMSVCDevCmd } from "./vcvarsall.js"
 
 export class ArgumentBuilder {
