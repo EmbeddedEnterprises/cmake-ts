@@ -97,15 +97,16 @@ Options:
 
 The runtime addon loader allows you to load the addon for the current runtime during runtime.
 
+In ES modules:
+
 ```ts
+import { loadAddon } from 'cmake-ts/build/loader.mjs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { loadAddon } from 'cmake-ts/build/loader.mjs';
 
-// @ts-ignore __dirname polyfill for ESM or CommonJS
-const dirname = typeof __dirname === 'string' ? __dirname : path.dirname(fileURLToPath(import.meta.url));
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const addon = loadAddon(path.resolve(dirname, '..', 'build'));
+const addon = loadAddon(path.resolve(__dirname, '..', 'build'));
 ```
 
 or in CommonJS:
@@ -123,7 +124,7 @@ type MyAddon = {
   myFunction: (name: string) => void;
 };
 
-const addon = loadAddon<MyAddon>(path.resolve(dirname, '..', 'build'));
+const addon = loadAddon<MyAddon>(path.resolve(__dirname, '..', 'build'));
 ```
 
 ## Configuration File
