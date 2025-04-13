@@ -27,7 +27,8 @@ export async function build(opts: Options): Promise<BuildConfiguration[] | null>
     return []
   }
 
-  const configFile = await getConfigFile()
+  const packageJsonPath = resolve(join(process.cwd(), "package.json"))
+  const configFile = await getConfigFile(packageJsonPath)
   if (configFile instanceof Error) {
     logger.error(configFile)
     return null

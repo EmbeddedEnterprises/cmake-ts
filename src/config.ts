@@ -1,8 +1,8 @@
-import { join, resolve } from "path"
 import { readJson } from "fs-extra"
 import which from "which"
 import type { BuildCommandOptions, BuildConfiguration, BuildConfigurations, Options } from "./config-types.d"
 import { getCmakeGenerator } from "./generator.js"
+import { logger } from "./lib.js"
 
 export async function parseBuildConfigs(
   opts: Options,
@@ -51,7 +51,7 @@ export async function parseBuildConfigs(
 /**
  * Add the missing fields to the given build configuration.
  */
-async function getBuildConfig(
+export async function getBuildConfig(
   buildOptions: BuildCommandOptions,
   config: Partial<BuildConfiguration>,
   globalConfig: Partial<BuildConfigurations>,
@@ -111,7 +111,7 @@ async function getBuildConfig(
   return config as BuildConfiguration
 }
 
-function parseBuiltInConfigs(configName: string) {
+export function parseBuiltInConfigs(configName: string) {
   const parts = configName.split("-")
 
   let cross = false
@@ -181,19 +181,19 @@ const buildTypes = new Map<string, BuildConfiguration["buildType"]>([
 
 const runtimes = new Set<BuildConfiguration["runtime"]>(["node", "electron", "iojs"])
 
-export async function getConfigFile() {
+export async function getConfigFile(packageJsonPath: string) {
   let packJson: { "cmake-ts": Partial<BuildConfigurations> | undefined } & Record<string, unknown>
   try {
-    // TODO getting the path from the CLI
-    const packageJsonPath = resolve(join(process.cwd(), "package.json"))
     packJson = await readJson(packageJsonPath)
   } catch (err) {
-    return new Error(`Failed to load package.json, maybe your cwd is wrong ${err}`)
+    logger.warn(`Failed to load package.json at ${packageJsonPath}: ${err}. Using defaults.`)
+    return {}
   }
 
   const configFile = packJson["cmake-ts"]
   if (configFile === undefined) {
-    return new Error("Package.json does not have cmake-ts key defined!")
+    logger.debug("Package.json does not have cmake-ts key defined. Using defaults.")
+    return {}
   }
 
   return configFile
