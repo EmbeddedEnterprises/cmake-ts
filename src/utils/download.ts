@@ -37,7 +37,7 @@ type DownloadResult = {
 /** Downloads a file to a temporary location and returns the file path and hash */
 async function download(url: string, opts: DownloadOptions) {
   try {
-    const filePath = opts.path ?? join(tmpdir(), "cmake-ts", basename(url))
+    const filePath = opts.path ?? join(tmpdir(), "cmake-ts", `${Math.random()}`, basename(url))
     const fileName = basename(filePath)
     const fileDir = dirname(filePath)
 
