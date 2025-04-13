@@ -13,8 +13,10 @@ class Logger {
    * warn - 1
    * error - 0
    * off - -1
+   *
+   * @default "info"
    */
-  setLevel(level: "trace" | "debug" | "info" | "warn" | "error" | "off") {
+  setLevel(level: "trace" | "debug" | "info" | "warn" | "error" | "off" = "info") {
     this.level =
       level === "trace"
         ? 4

@@ -6,7 +6,7 @@
  */
 export function getEnvVar(name: string) {
   const value = process.env[name]
-  if (typeof value === "string" && value.length > 0) {
+  if (typeof value === "string" && value.length > 0 && value !== "undefined" && value !== "null") {
     return value
   }
   return undefined
