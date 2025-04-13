@@ -132,6 +132,7 @@ export function detectCrossCompilation(
     return true
   }
   if (
+    config.os === undefined &&
     process.env.npm_config_target_os !== undefined &&
     platforms.has(process.env.npm_config_target_os as NodeJS.Platform) &&
     process.env.npm_config_target_os !== process.platform
@@ -140,9 +141,11 @@ export function detectCrossCompilation(
     logger.debug(
       `Cross compilation detected: npm_config_target_os (${process.env.npm_config_target_os}) differs from process.platform (${process.platform})`,
     )
+    config.os = process.env.npm_config_target_os as NodeJS.Platform
     return true
   }
   if (
+    config.arch === undefined &&
     process.env.npm_config_target_arch !== undefined &&
     architectures.has(process.env.npm_config_target_arch as NodeJS.Architecture) &&
     process.env.npm_config_target_arch !== process.arch
@@ -151,6 +154,7 @@ export function detectCrossCompilation(
     logger.debug(
       `Cross compilation detected: npm_config_target_arch (${process.env.npm_config_target_arch}) differs from process.arch (${process.arch})`,
     )
+    config.arch = process.env.npm_config_target_arch as NodeJS.Architecture
     return true
   }
   return false

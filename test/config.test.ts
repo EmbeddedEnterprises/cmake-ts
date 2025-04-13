@@ -133,7 +133,7 @@ suite("Config Functions", () => {
       expect(result.buildType).toBe("Release")
     })
 
-    test("should handle cross compilation flags", async () => {
+    test("should detect os cross compilation", async () => {
       const partialConfig: Partial<BuildConfiguration> = {
         os: process.platform === "win32" ? "linux" : "win32",
         arch: "x64",
@@ -142,6 +142,7 @@ suite("Config Functions", () => {
       const result = await getBuildConfig(mockBuildOptions, partialConfig, mockConfigFile)
 
       expect(result.cross).toBe(true)
+      expect(result.os).toBe(process.platform === "win32" ? "linux" : "win32")
     })
 
     test("should respect npm_config_target_arch when it matches config.arch", async () => {
@@ -195,7 +196,7 @@ suite("Config Functions", () => {
       vi.restoreAllMocks()
     })
 
-    test("should respect npm_config_target_arch when it differs from process.arch", async () => {
+    test("should respect config.arch when it differs from process.arch even if npm_config_target_arch is set", async () => {
       // Set npm_config_target_arch to a different architecture than the current one
       process.env.npm_config_target_arch = process.arch === "x64" ? "arm64" : "x64"
 
@@ -206,7 +207,29 @@ suite("Config Functions", () => {
 
       const result = await getBuildConfig(mockBuildOptions, partialConfig, mockConfigFile)
 
+      expect(result.cross).toBe(false)
+      expect(result.arch).toBe(process.arch)
+    })
+
+    test("should respect npm_config_target_arch when it differs from process.arch with default config", async () => {
+      // Set npm_config_target_arch to a different architecture than the current one
+      process.env.npm_config_target_arch = process.arch === "x64" ? "arm64" : "x64"
+
+      const result = await getBuildConfig(mockBuildOptions, {}, mockConfigFile)
+
       expect(result.cross).toBe(true)
+      expect(result.arch).toBe(process.env.npm_config_target_arch)
+      expect(result.os).toBe(process.platform)
+    })
+
+    test("should respect npm_config_target_os when it differs from process.platform with default config", async () => {
+      // Set npm_config_target_os to a different platform than the current one
+      process.env.npm_config_target_os = process.platform === "win32" ? "linux" : "win32"
+
+      const result = await getBuildConfig(mockBuildOptions, {}, mockConfigFile)
+
+      expect(result.cross).toBe(true)
+      expect(result.os).toBe(process.env.npm_config_target_os)
       expect(result.arch).toBe(process.arch)
     })
 
