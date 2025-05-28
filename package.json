@@ -1,9 +1,12 @@
 {
   "name": "cmake-ts",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "cmake-js rewrite in typescript to support advanced build configurations",
   "main": "build/lib.js",
   "module": "build/lib.mjs",
+  "engines": {
+    "node": ">= 18"
+  },
   "exports": {
     ".": {
       "require": "./build/lib.js",
@@ -116,7 +119,7 @@
     "semver": "^7.7.1",
     "tar": "^6",
     "url-join": "^4.0.1",
-    "which": "^2",
+    "which": "3.0.1",
     "node-downloader-helper": "^2.1.9",
     "escape-quotes": "^1.0.2",
     "commander": "^13.1.0",
