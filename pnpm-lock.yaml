@@ -132,7 +132,7 @@ importers:
         specifier: 3.1.1
         version: 3.1.1(@types/debug@4.1.12)(@types/node@22.14.0)(@vitest/ui@3.1.1)(terser@5.39.0)(yaml@2.7.0)
       which:
-        specifier: ^3.0.1
+        specifier: 3.0.1
         version: 3.0.1
 
 packages:
