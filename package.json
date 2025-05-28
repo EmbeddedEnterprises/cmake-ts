@@ -69,14 +69,30 @@
     "test": "cross-env NODE_OPTIONS=--enable-source-maps pnpx vitest --watch false",
     "coverage": "cross-env NODE_OPTIONS=--enable-source-maps pnpx vitest --coverage --watch false"
   },
-  "files": ["build/**/*", "src/**/*", "./*.mts", "./tsconfig.json"],
+  "files": [
+    "build/**/*",
+    "src/**/*",
+    "./*.mts",
+    "./tsconfig.json"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/EmbeddedEnterprises/cmake-ts.git"
   },
-  "keywords": ["cmake", "nan", "node", "native", "addon", "build", "cmake-js"],
+  "keywords": [
+    "cmake",
+    "nan",
+    "node",
+    "native",
+    "addon",
+    "build",
+    "cmake-js"
+  ],
   "author": "Amin Yahyaabadi <aminyahyaabadi74@gmail.com>",
-  "contributors": ["Amin Yahyaabadi <aminyahyaabadi74@gmail.com>", "Martin Koppehel <martin@mko.dev>"],
+  "contributors": [
+    "Amin Yahyaabadi <aminyahyaabadi74@gmail.com>",
+    "Martin Koppehel <martin@mko.dev>"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/EmbeddedEnterprises/cmake-ts/issues"
@@ -84,51 +100,55 @@
   "homepage": "https://github.com/EmbeddedEnterprises/cmake-ts#readme",
   "devDependencies": {
     "@babel/core": "7.26.10",
+    "@biomejs/biome": "1.9.4",
     "@types/babel__core": "7.20.5",
+    "@types/escape-quotes": "1.0.0",
     "@types/fs-extra": "11.0.4",
+    "@types/memoizee": "0.4.7",
     "@types/node": "22.14.0",
     "@types/resolve": "1.20.6",
     "@types/semver": "7.7.0",
     "@types/tar": "6.1.13",
     "@types/url-join": "4.0.3",
     "@types/which": "3.0.4",
-    "@types/escape-quotes": "1.0.0",
     "@upleveled/babel-plugin-remove-node-prefix": "1.0.5",
-    "@types/memoizee": "0.4.7",
-    "turbo": "2.5.0",
-    "cross-env": "7.0.3",
-    "eslint": "^8",
-    "eslint-config-atomic": "1.22.1",
-    "npm-run-all2": "7.0.2",
-    "rollup-plugin-visualizer": "5.14.0",
-    "shx": "0.4.0",
-    "typescript": "5.8.3",
-    "vite": "6.2.7",
-    "vitest": "3.1.1",
-    "vite-plugin-babel": "1.3.0",
     "@vitest/coverage-v8": "3.1.1",
     "@vitest/ui": "3.1.1",
-    "@biomejs/biome": "1.9.4",
-    "prettier": "3.5.3",
-    "prettier-config-atomic": "4.0.0",
-    "execa": "9.5.2",
     "ci-info": "4.2.0",
+    "commander": "^13.1.0",
+    "cross-env": "7.0.3",
+    "escape-quotes": "^1.0.2",
+    "eslint": "^8",
+    "eslint-config-atomic": "1.22.1",
+    "execa": "9.5.2",
     "fast-glob": "3.3.3",
     "fs-extra": "^10",
-    "resolve": "^1.22.10",
-    "semver": "^7.7.1",
-    "tar": "^6",
-    "url-join": "^4.0.1",
-    "which": "^2",
-    "node-downloader-helper": "^2.1.9",
-    "escape-quotes": "^1.0.2",
-    "commander": "^13.1.0",
+    "memoizee": "0.4.17",
     "msvc-dev-cmd": "github:aminya/msvc-dev-cmd#c01f519bd995460228ed3dec4df51df92dc290fd",
-    "memoizee": "0.4.17"
+    "node-downloader-helper": "^2.1.9",
+    "npm-run-all2": "7.0.2",
+    "prettier": "3.5.3",
+    "prettier-config-atomic": "4.0.0",
+    "resolve": "^1.22.10",
+    "rollup-plugin-visualizer": "5.14.0",
+    "semver": "^7.7.1",
+    "shx": "0.4.0",
+    "tar": "^6",
+    "turbo": "2.5.0",
+    "typescript": "5.8.3",
+    "url-join": "^4.0.1",
+    "vite": "6.2.7",
+    "vite-plugin-babel": "1.3.0",
+    "vitest": "3.1.1",
+    "which": "^3.0.1"
   },
   "packageManager": "pnpm@10.8.0",
   "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/package.json",
   "pnpm": {
-    "onlyBuiltDependencies": ["@biomejs/biome", "core-js", "esbuild"]
+    "onlyBuiltDependencies": [
+      "@biomejs/biome",
+      "core-js",
+      "esbuild"
+    ]
   }
 }
