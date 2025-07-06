@@ -110,12 +110,13 @@ export async function buildConfig(config: BuildConfiguration, opts: Options) {
   await runProgram(buildCmd, buildArgs, stagingDir)
 
   // Copy back the previously built binary
-  logger.debug(`> Copying ${config.projectName}.node to ${targetDir}`)
+  const extension = config.os === "wasm32" ? ".wasm" : ".node"
+  logger.debug(`> Copying ${config.projectName}${extension} to ${targetDir}`)
 
-  const addonPath = join(targetDir, `${config.projectName}.node`)
+  const addonPath = join(targetDir, `${config.projectName}${extension}`)
   const sourceAddonPath = config.generatorToUse.includes("Visual Studio")
-    ? join(stagingDir, config.buildType, `${config.projectName}.node`)
-    : join(stagingDir, `${config.projectName}.node`)
+    ? join(stagingDir, config.buildType, `${config.projectName}${extension}`)
+    : join(stagingDir, `${config.projectName}${extension}`)
   await ensureDir(targetDir)
   await retry(() => copy(sourceAddonPath, addonPath))
 

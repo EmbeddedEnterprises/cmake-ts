@@ -154,6 +154,9 @@ export type DeprecatedGlobalOptions = {
 
 export type ArrayOrSingle<T> = T | T[]
 
+type Platform = typeof process.platform | "wasm32"
+type Architecture = typeof process.arch | "unknown"
+
 export type BuildConfiguration = {
   /** The name of the build configuration. */
   name: string
@@ -161,9 +164,9 @@ export type BuildConfiguration = {
   // Platform
 
   /** The operating system that is used by the runtime (e.g. win32, darwin, linux, etc.) */
-  os: typeof process.platform
+  os: Platform
   /** The architecture that is used by the runtime (e.g. x64, arm64, etc.) */
-  arch: typeof process.arch
+  arch: Architecture
   /** Whether the build is cross-compiling. */
   cross?: boolean
 

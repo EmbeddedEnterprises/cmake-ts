@@ -3,12 +3,13 @@ import which from "which"
 import { getCMakeArchitecture } from "./argumentBuilder.js"
 import { execCapture } from "./utils/exec.js"
 import { logger } from "./utils/logger.js"
+import type { Platform, Architecture } from "./config-types.js"
 
 export const getCmakeGenerator = memoizee(
   async (
     cmake: string,
-    os: NodeJS.Platform,
-    arch: NodeJS.Architecture,
+    os: Platform,
+    arch: Architecture,
   ): Promise<{
     generator?: string
     generatorFlags?: string[]

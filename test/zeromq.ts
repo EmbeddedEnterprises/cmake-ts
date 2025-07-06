@@ -102,7 +102,8 @@ async function testZeromqBuildResults(config: BuildConfiguration, ctx: Ctx) {
   const addonPath = manifest[manifestKey]
 
   // check if the addon.node file exists
-  const expectedAddonPath = join(os, arch, "node", `${config.libc}-${config.abi}-${buildType}`, "addon.node")
+  const extension = config.os === "wasm32" ? ".wasm" : ".node"
+  const expectedAddonPath = join(os, arch, "node", `${config.libc}-${config.abi}-${buildType}`, `addon${extension}`)
   expect(addonPath).toEqual(expectedAddonPath)
   const addonNodePath = join(ctx.zeromqPath, config.targetDirectory, addonPath)
   expect(existsSync(addonNodePath), `Addon node file ${addonNodePath} does not exist`).toBe(true)

@@ -1,6 +1,6 @@
 import { readJson } from "fs-extra"
 import which from "which"
-import type { BuildCommandOptions, BuildConfiguration, BuildConfigurations, Options } from "./config-types.d"
+import type { Architecture, BuildCommandOptions, BuildConfiguration, BuildConfigurations, Options, Platform } from "./config-types.d"
 import { getCmakeGenerator } from "./generator.js"
 import { logger } from "./lib.js"
 
@@ -188,7 +188,7 @@ export function parseBuiltInConfigs(configName: string) {
   return { os, arch, runtime, buildType, cross }
 }
 
-const platforms = new Set<NodeJS.Platform>([
+const platforms = new Set<Platform>([
   "aix",
   "android",
   "darwin",
@@ -200,9 +200,10 @@ const platforms = new Set<NodeJS.Platform>([
   "win32",
   "cygwin",
   "netbsd",
+  "wasm32"
 ])
 
-const architectures = new Set<NodeJS.Architecture>([
+const architectures = new Set<Architecture>([
   "arm",
   "arm64",
   "ia32",
@@ -215,6 +216,7 @@ const architectures = new Set<NodeJS.Architecture>([
   "s390",
   "s390x",
   "x64",
+  "unknown"
 ])
 
 const buildTypes = new Map<string, BuildConfiguration["buildType"]>([
