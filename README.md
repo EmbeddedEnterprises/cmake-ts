@@ -147,7 +147,7 @@ const addon = loadAddon<MyAddon>(path.resolve(__dirname, '..', 'build'));
 
 ## Configuration File
 
-Configuration is done entirely via `package.json`. You can specify multiple build configurations under the `cmake-ts` key:
+If not using the named configs in the CLI, you can configure cmake-ts via  `package.json`. This will be more verbose compared to using the CLI directly. You can specify multiple build configurations under the `cmake-ts` key:
 
 ```js
 "cmake-ts": {
@@ -191,24 +191,3 @@ Configuration is done entirely via `package.json`. You can specify multiple buil
   }]
 }
 ```
-
-## Workflow
-
-While it is desirable to perform a full build (all configurations) within a CI environment, long build times hinder local package development. Therefore cmake-ts knows multiple build modes:
-
-- **TODO** `nativeonly` -> Builds the native code **only** for the runtime cmake-ts is currently running on, ignoring all previously specified configurations. This is useful if you'd like to run some unit tests against the compiled code. When running `cmake-ts nativeonly`, cmake-ts will determine the runtime, ABI, and platform from the environment, and build only the configuration required to run on this platform.
-  - _Example using the configuration above_
-  - You run `cmake-ts nativeonly` on **NodeJS 11.7 on MacOS**, `cmake-ts` will **ignore** all specified configurations above and build the native addon for **NodeJS 11.7 on MacOS**
-- **TODO** `osonly` -> Builds the native code for all configurations which match the current operating system. This is useful for those developing for example an electron addon and want to test their code in electron. In such a case, you would specify electron and NodeJS runtimes for several platforms in your configuration and you can use `cmake-ts osonly` to build a local package you can install in your application.
-  - _Example using the configuration above_
-  - You run `cmake-ts osonly` on **NodeJS 11.7 on Linux**, `cmake-ts` will **ignore** all configurations above where `os != linux` and build the native addon for **all** remaining configurations, in this case it will build for **NodeJS 10.3 on Linux**.
-- **TODO** **HINT**: For both `osonly` and `nativeonly`, the specified CMake Toolchain files are ignored since I assume you got your toolchain set up correctly for your **own** operating system.
-- None / Omitted: Builds all configs
-- `dev-os-only` builds the first config that has `dev == true` and `os` matches the current OS
-- `named-configs arg1 arg2 ...` builds all configs for which `name` is one of the args
-
-## Cross Compilation
-
-This module supports cross-compilation from Linux to macOS and Windows, given a correct toolchain setup. There is a docker container that has a cross-toolchain based on CLang 7 setup for Windows and macOS which might be used in a CI.
-
-[Docker Image](https://hub.docker.com/r/martin31821/crossdev)
