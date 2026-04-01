@@ -100,8 +100,12 @@ export async function getBuildConfig(
   config.cmakeToUse ??= globalConfig.cmakeToUse ?? (await whichNoThrow("cmake", { nothrow: true })) ?? "cmake"
 
   const { generator, generatorFlags, binary } = await getCmakeGenerator(config.cmakeToUse, config.os, config.arch)
+  // If this build configuration specifies a generator, use that.
+  // If not, use the globally defined generator.
+  // If that isn't found, use the detected generator from getCmakeGenerator.
   config.generatorToUse ??= globalConfig.generatorToUse ?? generator
   config.generatorFlags ??= globalConfig.generatorFlags ?? generatorFlags
+  logger.debug(`Using generator: ${ config.generatorToUse} ${config.generatorFlags} for ${config.os} ${config.arch}`)
   config.generatorBinary ??= globalConfig.generatorBinary ?? binary
 
   return config as BuildConfiguration
