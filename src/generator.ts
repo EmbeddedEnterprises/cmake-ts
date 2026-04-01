@@ -1,8 +1,8 @@
 import memoizee from "memoizee"
-import which from "which"
 import { getCMakeArchitecture } from "./argumentBuilder.js"
 import { execCapture } from "./utils/exec.js"
 import { logger } from "./utils/logger.js"
+import { whichNoThrow } from "./whichNoThrow.js"
 
 export const getCmakeGenerator = memoizee(
   async (
@@ -15,7 +15,7 @@ export const getCmakeGenerator = memoizee(
     binary?: string
   }> => {
     // use ninja if available
-    const ninja = await which("ninja", { nothrow: true })
+    const ninja = await whichNoThrow("ninja");
     if (ninja !== null) {
       logger.debug(`Using generator: Ninja for ${os} ${arch}`)
       return {
