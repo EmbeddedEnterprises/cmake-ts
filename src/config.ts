@@ -1,8 +1,8 @@
 import { readJson } from "fs-extra"
-import which from "which"
 import type { BuildCommandOptions, BuildConfiguration, BuildConfigurations, Options } from "./config-types.d"
 import { getCmakeGenerator } from "./generator.js"
 import { logger } from "./lib.js"
+import { whichNoThrow } from "./whichNoThrow.js"
 
 export async function parseBuildConfigs(
   opts: Options,
@@ -97,11 +97,15 @@ export async function getBuildConfig(
 
   config.additionalDefines ??= globalConfig.additionalDefines ?? []
 
-  config.cmakeToUse ??= globalConfig.cmakeToUse ?? (await which("cmake", { nothrow: true })) ?? "cmake"
+  config.cmakeToUse ??= globalConfig.cmakeToUse ?? (await whichNoThrow("cmake", { nothrow: true })) ?? "cmake"
 
   const { generator, generatorFlags, binary } = await getCmakeGenerator(config.cmakeToUse, config.os, config.arch)
+  // If this build configuration specifies a generator, use that.
+  // If not, use the globally defined generator.
+  // If that isn't found, use the detected generator from getCmakeGenerator.
   config.generatorToUse ??= globalConfig.generatorToUse ?? generator
   config.generatorFlags ??= globalConfig.generatorFlags ?? generatorFlags
+  logger.debug(`Using generator: ${ config.generatorToUse} ${config.generatorFlags} for ${config.os} ${config.arch}`)
   config.generatorBinary ??= globalConfig.generatorBinary ?? binary
 
   return config as BuildConfiguration

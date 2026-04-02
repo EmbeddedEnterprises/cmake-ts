@@ -1,8 +1,8 @@
 import memoizee from "memoizee"
-import which from "which"
 import { getCMakeArchitecture } from "./argumentBuilder.js"
 import { execCapture } from "./utils/exec.js"
 import { logger } from "./utils/logger.js"
+import { whichNoThrow } from "./whichNoThrow.js"
 
 export const getCmakeGenerator = memoizee(
   async (
@@ -15,9 +15,9 @@ export const getCmakeGenerator = memoizee(
     binary?: string
   }> => {
     // use ninja if available
-    const ninja = await which("ninja", { nothrow: true })
+    const ninja = await whichNoThrow("ninja");
     if (ninja !== null) {
-      logger.debug(`Using generator: Ninja for ${os} ${arch}`)
+      logger.debug(`Found generator: Ninja for ${os} ${arch}`)
       return {
         generator: "Ninja",
         binary: ninja,
@@ -54,7 +54,7 @@ export const getCmakeGenerator = memoizee(
           const generator = useArchSwitch ? parsedGenerator : `${parsedGenerator}${archString}`
           const generatorFlags = useArchSwitch ? ["-A", getCMakeArchitecture(arch, os)] : undefined
 
-          logger.debug(`Using generator: ${generator} ${generatorFlags} for ${os} ${arch}`)
+          logger.debug(`Found generator: ${generator} ${generatorFlags} for ${os} ${arch}`)
           return {
             generator,
             generatorFlags,
@@ -68,7 +68,7 @@ export const getCmakeGenerator = memoizee(
     }
 
     // use native generator
-    logger.debug(`Using generator: native for ${os} ${arch}`)
+    logger.debug(`Found generator: native for ${os} ${arch}`)
     return {
       generator: "native",
       binary: undefined,
