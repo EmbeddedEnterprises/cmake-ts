@@ -157,9 +157,9 @@ export function getCMakeArchitecture(arch: NodeJS.Architecture, os: NodeJS.Platf
 
 const cmakeArchMap: Record<string, Record<string, string>> = {
   win32: {
-    arm64: "arm64",
-    x64: "AMD64",
-    ia32: "X86",
+    arm64: "ARM64",
+    x64: "x64",
+    ia32: "Win32",
   },
   darwin: {
     arm64: "arm64",
