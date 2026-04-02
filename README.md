@@ -157,6 +157,8 @@ Configuration is done entirely via `package.json`. You can specify multiple buil
       "name": "win-x64", // name for named-configs mode
       "os": "win32", // win32, linux and darwin are supported
       "arch": "x64", // x64, x86 should work
+      "generatorToUse": "Visual Studio 15 2017", // optional CMake generator override for this configuration
+      "generatorFlags": ["-A", "x64"], // optional extra flags passed to the generator
       "runtime": "electron", // node or electron
       "runtimeVersion": "4.0.1", // Version of the runtime which it is built
       "toolchainFile": "/windows.cmake", // CMake Toolchain file to use for crosscompiling
@@ -177,6 +179,8 @@ Configuration is done entirely via `package.json`. You can specify multiple buil
     } // more build configurations ...
   ],
   "targetDirectory": "build", // where to build your project
+  "generatorToUse": "Ninja", // optional default CMake generator for all configurations
+  "generatorFlags": ["-A", "ARM64"], // optional default generator flags for all configurations
   "buildType": "Release", // Debug or Release build, most likely set it to Release
   "projectName": "addon" // The name of your CMake project.
   "globalCMakeOptions": [{ // this might be omitted of no further options should be passed to CMake
