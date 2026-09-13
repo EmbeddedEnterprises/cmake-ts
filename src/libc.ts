@@ -1,6 +1,6 @@
 import fs from "fs"
-
-export function detectLibc(os: typeof process.platform) {
+import type { Platform } from "./config-types.d"
+export function detectLibc(os: Platform) {
   if (os === "linux") {
     if (fs.existsSync("/etc/alpine-release")) {
       return "musl"

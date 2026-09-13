@@ -1,5 +1,5 @@
 import { join, resolve } from "path"
-import type { BuildConfiguration } from "./config-types.d"
+import type { Architecture, BuildConfiguration, Platform } from "./config-types.d"
 import { getNodeApiInclude } from "./nodeAPIInclude/index.js"
 import type { RuntimeDistribution } from "./runtimeDistribution.js"
 import { getPathsForConfig } from "./urlRegistry.js"
@@ -147,7 +147,7 @@ export class ArgumentBuilder {
  *
  * @note Based on https://stackoverflow.com/a/70498851/7910299
  */
-export function getCMakeArchitecture(arch: NodeJS.Architecture, os: NodeJS.Platform) {
+export function getCMakeArchitecture(arch: Architecture, os: Platform) {
   return os in cmakeArchMap && arch in cmakeArchMap[os]
     ? cmakeArchMap[os][arch]
     : os === "win32"
@@ -202,4 +202,5 @@ const cmakeSystemNameMap = {
   aix: "AIX",
   sunos: "SunOS",
   haiku: "Haiku",
+  wasm32: "Emscripten"
 } as const

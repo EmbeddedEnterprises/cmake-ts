@@ -34,7 +34,7 @@ export function loadAddon<Addon>(buildDir: string): Addon | undefined {
       }
     }
   } catch (err) {
-    throw new Error(`Failed to load zeromq.js addon.node: ${errorString(err)}`)
+    throw new Error(`Failed to load zeromq.js addon: ${errorString(err)}`)
   }
 
   if (addon === undefined) {
